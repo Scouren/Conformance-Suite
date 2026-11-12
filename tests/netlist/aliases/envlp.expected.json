@@ -1,53 +1,14 @@
 {
   "schema_version": 1,
   "analysis": "envelope",
-  "purpose": "Analysis directive alias envlp",
+  "purpose": "`.envlp` is no ESPice card: UnsupportedCard naming the line; `.envelope` is the one spelling.",
   "oracle": {
-    "kind": "analytic",
-    "derivation": "Alias must have exactly the same numerical semantics as its canonical analysis."
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.envelope) is deleted, and SpiceRack translates it."
   },
   "expect": {
-    "status": "success",
-    "plots": [
-      {
-        "name": "Envelope Analysis",
-        "match": "samples",
-        "columns": {
-          "peak(v(out))": {
-            "unit": "V",
-            "rtol": 2e-05,
-            "atol": 1e-09,
-            "values": [
-              2,
-              2,
-              2
-            ]
-          },
-          "rms(v(out))": {
-            "unit": "V",
-            "rtol": 2e-05,
-            "atol": 1e-09,
-            "values": [
-              2,
-              2,
-              2
-            ]
-          }
-        },
-        "axis": {
-          "name": "time",
-          "values": [
-            0.001,
-            0.002,
-            0.003
-          ],
-          "rtol": 1e-09,
-          "atol": 1e-15
-        }
-      }
-    ],
-    "finite_values_required": true,
-    "all_requested_analyses_must_complete": true
+    "status": "error",
+    "category": "unsupported_input"
   },
-  "netlist_sha256": "7a1fd58044c2d3056d846c64924da0a36e306786183a7508b8b31531b02b5e42"
+  "netlist_sha256": "71580ed42a19ea2ee938fe3ac26f147ce8a37f20f4668ed6cbcef5c9ddededfa"
 }

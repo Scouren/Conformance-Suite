@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "W card with no flag: mid starts off and neg/zero start on, as with ON and OFF (cswload.c:65-88). SpiceRack P8-045.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Stock ngspice-44.2 batch run of this deck, binary raw, columns by name; stock ngspice-45 writes the same bytes for every column. Analytic check: each output is 1 V divided between 1k and the switch, on = 1/1001 V (ron=1) and off = 1meg/1.001meg V (roff=1meg); ngspice is within 1 ulp of both. On and off differ by 1000x, so rtol 1e-9 sees any wrong state.",
+    "command": "ngspice -n -b -r reference.raw switch_w_none.sp",
+    "source_sha256": "2f7127e3c97804b7359a4832aef6b278e2ea2ea0a27ea23d7aada7fe5f58aec2"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(olo)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999
+            ]
+          },
+          "v(omid)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999
+            ]
+          },
+          "v(ohi)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(oneg)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(ozero)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "2f7127e3c97804b7359a4832aef6b278e2ea2ea0a27ea23d7aada7fe5f58aec2"
+}

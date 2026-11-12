@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "analysis": "op",
-  "purpose": "Static RG classification recomputes dependent localparams and honors the instance length alias.",
+  "purpose": "Static RG classification recomputes dependent localparams from the model's len=; the O card carries no length (ngspice 44.2 refuses a card length=, and so does ESPice). ngspice 44.2 -b on this deck: v(out) 1.353353e-01, vin#branch -1.00000e+00.",
   "oracle": {
     "kind": "analytic",
     "derivation": "For R=G=1 and length=2, the exact static two-port has A=cosh(2), B=sinh(2)*(1+gmin). With Vin=1 and RL=1, Vout=1/(A+B), Iin=(A-Vout)/B. gmin=1e-12 matches the documented host default."
@@ -41,5 +41,5 @@
     "finite_values_required": true,
     "all_requested_analyses_must_complete": true
   },
-  "netlist_sha256": "8f9de0fab5081b03d375a25457ead82f2797454bdf5d9a5a8b71dd4f15890768"
+  "netlist_sha256": "cd4fe29c062e3b6b4e53a5dd658dcb78d30e11c5fa3f786fe792ff3c03243cee"
 }

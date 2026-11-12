@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "S card with ON after the model: inside the band (vt=0.5, vh=0.2) the .op starts on, as swload.c:43-60 seeds HYST_ON from SWzero_stateGiven at MODEINITJCT/INITFIX and :69-75 keeps state0 in the band at INITFLOAT. Below and above the band the flag does not matter. With a negative band (neg) or vh=0 and the control at vt (zero), ngspice is on whatever the flag: :76-88 read CKTstate1, which no .op iteration writes (0 = REALLY_OFF), and step it to HYST_ON. SpiceRack P8-045: ESPice dropped the ON word and gave v(omid) = 0.999 V (off); it also started neg and zero off.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Stock ngspice-44.2 batch run of this deck, binary raw, columns by name; stock ngspice-45 writes the same bytes for every column. Analytic check: each output is 1 V divided between 1k and the switch, on = 1/1001 V (ron=1) and off = 1meg/1.001meg V (roff=1meg); ngspice is within 1 ulp of both. On and off differ by 1000x, so rtol 1e-9 sees any wrong state.",
+    "command": "ngspice -n -b -r reference.raw switch_s_on.sp",
+    "source_sha256": "24d5e28cf6a04b0ebbe4f46f19ab8030dd403654f694f80a243d7b566ff42e75"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(olo)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999
+            ]
+          },
+          "v(omid)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(ohi)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(oneg)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(ozero)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "24d5e28cf6a04b0ebbe4f46f19ab8030dd403654f694f80a243d7b566ff42e75"
+}

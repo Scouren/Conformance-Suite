@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": ".data MER: external files stacked, columns inherited from the previous file, missing values 0.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "v(b) = v1 rl / (1k + rl) for each row the files give."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "row_count": 5,
+        "columns": {
+          "rl": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 0,
+            "values": [
+              1000,
+              3000,
+              9000,
+              1000,
+              2000
+            ]
+          },
+          "v(b)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              0.5,
+              1.5,
+              0.45,
+              2.0,
+              0.0
+            ]
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "twin_of": "variants/data_mer.sp",
+  "netlist_sha256": "ff298113eb824bd2cb92b2f141e6e9e051788b674161388899a8672ba7ad5df8"
+}

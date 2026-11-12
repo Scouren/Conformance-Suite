@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "analysis": "noise",
+  "purpose": "VDMOS channel thermal noise reads gm with THETA's mobility term (vdmosload.c:367-387), against ngspice 45, whose THETA law vdmos.va follows.",
+  "oracle": {
+    "kind": "ngspice-45",
+    "derivation": "Independent ngspice-45 run of this deck with M2 (m=2) written as two m=1 instances on the same nodes, which is what m means here: m parallel copies, as ngspice master has it for the gate capacitances (2bc63e \"VDMOS scaling fixed\", 6bd5c2), and the copies' flicker sum KF*|cd|^AF*m^(1-AF), which is m^(1-AF) times master's KF*|cd|^AF and m^(2-AF) times 45's KF*|cd|^AF/m; 45 also leaves the gate caps unscaled). The deck's own .options tighten ngspice to reltol=1e-6, so rtol=1e-3, and 1e-4 on the noise densities, sits above the oracle's accuracy. Values read from its ASCII raw.",
+    "command": "sed -E 's/^([^ *.]+)(.*) m=2$/\\1_1\\2\\n\\1_2\\2/' ngspice_vdmos_theta.sp > ngspice_vdmos_theta_x.sp && SPICE_ASCIIRAWFILE=1 ngspice -n -b -r reference.raw ngspice_vdmos_theta_x.sp"
+  },
+  "origin": "tests/conformance/tests/netlist/noise/ngspice_vdmos_theta.sp (written for the VDMOS noise sources)",
+  "netlist_sha256": "c6029b719714453232dcc9ab7df7cc1d54c803539ff3817caf13a77d648accf4",
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Noise Spectral Density Curves",
+        "match": "exact",
+        "row_count": 22,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            10.0,
+            21.54434690031884,
+            46.41588833612779,
+            100.0,
+            215.4434690031884,
+            464.158883361278,
+            1000.0,
+            2154.434690031885,
+            4641.588833612781,
+            10000.00000000001,
+            21544.34690031885,
+            46415.88833612782,
+            100000.0000000001,
+            215443.4690031885,
+            464158.8833612783,
+            1000000.000000001,
+            2154434.690031886,
+            4641588.833612783,
+            10000000.00000001,
+            21544346.90031886,
+            46415888.33612783,
+            100000000.0000001
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "onoise_spectrum": {
+            "values": [
+              9.545767291114066e-08,
+              6.506133075663759e-08,
+              4.436504388295388e-08,
+              3.028312036152138e-08,
+              2.071589540857576e-08,
+              1.423644469050067e-08,
+              9.877114004800655e-09,
+              6.983227747200009e-09,
+              5.110602551251715e-09,
+              3.950483109447033e-09,
+              3.275206069663587e-09,
+              2.90889470843142e-09,
+              2.721765344609066e-09,
+              2.628530750615855e-09,
+              2.575589271449519e-09,
+              2.512497368742486e-09,
+              2.330305288133072e-09,
+              1.829241977405238e-09,
+              1.09931418050189e-09,
+              5.552433528007259e-10,
+              2.700787577414052e-10,
+              1.409452486006127e-10
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          },
+          "inoise_spectrum": {
+            "values": [
+              2.176681112294124e-08,
+              1.483566123918207e-08,
+              1.011637410827418e-08,
+              6.905332395640571e-09,
+              4.723758384086739e-09,
+              3.246276528978334e-09,
+              2.252236722827936e-09,
+              1.592356061481209e-09,
+              1.165349342170423e-09,
+              9.008126222223003e-10,
+              7.468337425816533e-10,
+              6.633124809846715e-10,
+              6.206739220898801e-10,
+              5.995596471933942e-10,
+              5.881916026346094e-10,
+              5.776788016562678e-10,
+              5.59710439766132e-10,
+              5.398550356147972e-10,
+              5.283820107161855e-10,
+              5.146516883280112e-10,
+              4.724838866273725e-10,
+              3.794505708376602e-10
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          }
+        }
+      },
+      {
+        "name": "Integrated Noise",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(onoise_total)": {
+            "values": [
+              6.904661395811812e-06
+            ],
+            "unit": "V_rms",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          },
+          "v(inoise_total)": {
+            "values": [
+              5.970174640733836e-06
+            ],
+            "unit": "V_rms",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  }
+}

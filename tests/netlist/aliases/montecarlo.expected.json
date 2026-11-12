@@ -1,46 +1,14 @@
 {
   "schema_version": 1,
   "analysis": "mc",
-  "purpose": "Analysis directive alias montecarlo",
+  "purpose": "`.montecarlo` is no ESPice card: UnsupportedCard naming the line; `.mc` is the one spelling.",
   "oracle": {
-    "kind": "analytic",
-    "derivation": "Alias must have exactly the same numerical semantics as its canonical analysis."
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.mc) is deleted, and SpiceRack translates it."
   },
   "expect": {
-    "status": "success",
-    "plots": [
-      {
-        "name": "Monte Carlo",
-        "match": "exact",
-        "columns": {
-          "v(out)": {
-            "unit": "V",
-            "rtol": 2e-05,
-            "atol": 1e-09,
-            "values": [
-              7.5,
-              7.5,
-              7.5,
-              7.5
-            ]
-          }
-        },
-        "axis": {
-          "name": "run",
-          "values": [
-            0,
-            1,
-            2,
-            3
-          ],
-          "rtol": 1e-09,
-          "atol": 1e-15
-        },
-        "row_count": 4
-      }
-    ],
-    "finite_values_required": true,
-    "all_requested_analyses_must_complete": true
+    "status": "error",
+    "category": "unsupported_input"
   },
-  "netlist_sha256": "d97de8515ff959942cda1cc7afd7d7de2d8dda115b21d7b823a9eb14ee0f572e"
+  "netlist_sha256": "8abaed7a59504c4a79cb57d6c486385f5fa05810f218b17b16b47322f63b017e"
 }

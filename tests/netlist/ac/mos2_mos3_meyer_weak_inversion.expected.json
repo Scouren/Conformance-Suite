@@ -1,0 +1,111 @@
+{
+ "schema_version": 1,
+ "analysis": "ac",
+ "purpose": "MOS2/MOS3 Meyer Cgd and Cgs in weak inversion (-phi/2 < vgst <= 0) follow DEVqmeyer's vds/vdsat split.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 and 45 write identical values. The deck's closed form with ngspice's von (0.7861055 V) and vdsat (0.1068236 V level 2, 0.1271265 V level 3) gives w*Cgd = 9.18701e-9 and 9.24107e-9 A, w*Cgs = 9.80938e-9 and 9.75998e-9 A at 1 MHz, within 2e-6 of these values. Before the fix espice read Cgd = 0 and Cgs = 2*cb (1.267446e-8 A at 1 MHz).",
+  "command": "SPICE_ASCIIRAWFILE=1 /nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b -r reference.raw mos2_mos3_meyer_weak_inversion.sp (ngspice-44.2; ngspice-45 writes the same values)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [
+   {
+    "name": "AC Analysis",
+    "match": "exact",
+    "row_count": 3,
+    "axis": {
+     "name": "frequency",
+     "values": [
+      1000000.0,
+      2000000.0,
+      3000000.0
+     ],
+     "atol": 1e-15,
+     "rtol": 1e-08
+    },
+    "columns": {
+     "i(vg2d)": {
+      "values": [
+       [
+        0.0,
+        9.187018651635324e-09
+       ],
+       [
+        0.0,
+        1.837403730327065e-08
+       ],
+       [
+        0.0,
+        2.756105595490598e-08
+       ]
+      ],
+      "unit": "A",
+      "rtol": 0.0001,
+      "atol": 1e-18
+     },
+     "i(vg2s)": {
+      "values": [
+       [
+        0.0,
+        9.809392047450236e-09
+       ],
+       [
+        0.0,
+        1.961878409490047e-08
+       ],
+       [
+        0.0,
+        2.942817614235071e-08
+       ]
+      ],
+      "unit": "A",
+      "rtol": 0.0001,
+      "atol": 1e-18
+     },
+     "i(vg3d)": {
+      "values": [
+       [
+        0.0,
+        9.241081012539678e-09
+       ],
+       [
+        0.0,
+        1.848216202507936e-08
+       ],
+       [
+        0.0,
+        2.772324303761903e-08
+       ]
+      ],
+      "unit": "A",
+      "rtol": 0.0001,
+      "atol": 1e-18
+     },
+     "i(vg3s)": {
+      "values": [
+       [
+        0.0,
+        9.759988036327424e-09
+       ],
+       [
+        0.0,
+        1.951997607265485e-08
+       ],
+       [
+        0.0,
+        2.927996410898227e-08
+       ]
+      ],
+      "unit": "A",
+      "rtol": 0.0001,
+      "atol": 1e-18
+     }
+    }
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "4c79fb1ec8f7183d2dc07bc4078a0d8bf82a02c5f192be89e82af042175741ad"
+}

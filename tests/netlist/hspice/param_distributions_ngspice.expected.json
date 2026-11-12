@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "agauss/limit/unif/aunif parameters take their nominal value.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "1 V across 1k || 2k || (1k + 1k): i = -(1 + 0.5 + 0.5) mA; v(b) = 0.5 V."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.002
+            ]
+          },
+          "v(b)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              0.5
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "twin_of": "hspice/param_distributions.sp",
+  "netlist_sha256": "738dc10b838fa143ba81574b3f56554314b5376ebe87c770969cd8508b4a0bdf"
+}

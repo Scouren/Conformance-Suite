@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A D, J, Q or M card's model word names the model even where it reads as a number (1N4148, 2SK170, 2N2222, 2N7000), as ngspice looks it up as a model first.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "ngspice 44.2 on this deck; binary raw doubles, selected by column name. ngspice reads each model word through INPlookMod/INPgetMod (inp2d.c:47-51, inp2j.c:47-49, inp2q.c:56-60, inp2m.c:76-84).",
+    "corroboration": "By hand: m1 saturates, Id = kp/2 (vgs - vto)^2 = 0.5m * 4 = 2 mA (i(vm) = -2.000e-3); j1 saturates, Id = beta (vgs - vto)^2 = 59.86m * 0.3024^2 = 5.4739 mA (i(vd)); q1 ic = bf ib with ib = (5 - v(bq)) / 1meg, so i(vc) = 101 ib = 4.410e-4.",
+    "command": "ngspice -n -b -r reference.raw model_name_digit.sp (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice, sha256 dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f)",
+    "tolerance": "rtol 1e-3 follows ngspice's reltol = 1e-3"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "values": [
+              1.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(b)": {
+            "values": [
+              0.5481728273976362
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(d)": {
+            "values": [
+              5.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(g)": {
+            "values": [
+              -0.2
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(dj)": {
+            "values": [
+              4.452605680173739
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(c)": {
+            "values": [
+              5.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(cq)": {
+            "values": [
+              4.563368118800288
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(bq)": {
+            "values": [
+              0.633684579132382
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(dm)": {
+            "values": [
+              5.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(gm)": {
+            "values": [
+              3.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(dmm)": {
+            "values": [
+              2.99999999699
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "i(vgm)": {
+            "values": [
+              0.0
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(vm)": {
+            "values": [
+              -0.00200000000301
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(vc)": {
+            "values": [
+              -0.0004409981966205798
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(vg)": {
+            "values": [
+              4.872576602604729e-12
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(vd)": {
+            "values": [
+              -0.005473943198262617
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(v1)": {
+            "values": [
+              -0.00045182717260236385
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "7532c0d2858e007ebd8abc94ef6fd948dcbc54a57de5f43eafdaee9918730d0c"
+}

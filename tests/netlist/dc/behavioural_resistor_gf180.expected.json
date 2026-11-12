@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "gf180's behavioural poly resistor: subcircuit parameters, temper in a .param, and X-card m=2 on the lowered B",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "r_n = 10u/(1u+2*50n), r_temp = 1+1.36e-3*50+6.5e-7*50^2, R(V) = r_temp*r_n*(7+0.01|V|/r_n+0.002V^2/r_n^2). v(b) solves (Vs-x)/R(Vs-x) = x/100 and v(c) solves 2(Vs-y)/R(Vs-y) = y/100, each by float bisection to the last bit; i(v1) = -(v(b)+v(c))/100.",
+    "corroboration": "ngspice-45 on this deck agrees to 1e-9 (SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw behavioural_resistor_gf180.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "columns": {
+          "v(b)": {
+            "values": [
+              0.0,
+              0.5949851691845882,
+              1.1899388446477217,
+              1.7848602050852214,
+              2.379748428975149,
+              2.974602694570521
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "v(c)": {
+            "values": [
+              0.0,
+              0.7460744082294846,
+              1.492133444035873,
+              2.238176853063202,
+              2.9842043808827006,
+              3.73021577299138
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "i(v1)": {
+            "values": [
+              0.0,
+              -0.013410595774140728,
+              -0.026820722886835947,
+              -0.04023037058148424,
+              -0.0536395280985785,
+              -0.06704818467561902
+            ],
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12
+          }
+        },
+        "row_count": 6,
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "d5a9bc70d2a9b2ca2709d1c8454f40f7ceb85bd93299f303e135aba914af8523"
+}

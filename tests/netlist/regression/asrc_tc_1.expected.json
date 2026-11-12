@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "analysis": [
+    "op",
+    "ac"
+  ],
+  "purpose": "B sources with tc1= after an unbraced expression: both outputs scale by 1 + tc1 dT at .temp 127",
+  "oracle": {
+    "kind": "ngspice-45",
+    "executable_sha256": "8fb8a06f1657913fc3649db67924d1e8df125b9fa27d0bf6e9bb1fb73d8ca441",
+    "derivation": "ngspice-45 run of this deck, values read from its ASCII raw; they equal the closed form 1 + 1e-3 * (400.15 - 300.15) = 1.1 times v(1): 110 at the operating point, 1.1 in AC.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw asrc_tc_1.sp",
+    "origin": "ngspice tests/regression/misc/asrc-tc-1.sp"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(3)": {
+            "values": [
+              110.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "i(v2)": {
+            "values": [
+              110.0
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          }
+        }
+      },
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "v(3)": {
+            "values": [
+              [
+                1.1,
+                0.0
+              ]
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "i(v2)": {
+            "values": [
+              [
+                1.1,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "09cddc690ad84a174447460f863f37bcc7b4e5c4af49ce8153d02ef58307f3be"
+}

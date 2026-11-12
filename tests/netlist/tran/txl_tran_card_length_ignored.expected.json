@@ -1,0 +1,40 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "#TBD: a Y card's length= is ignored as ngspice ignores it (inp2y.c reads only len=); the line keeps its TXL model's length.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits, so up to 5e-8 relative rounding); ngspice-45 prints the same lines. A lossless line between matched 50 ohm ends is a pure delay of len*sqrt(L C), the closed form in the deck header: the model's 1 m arrives at 5 ns, so v(o) reads 0.5 V at 8 ns, where the card's 2 m would still read ngspice's 0.1 gmin port stamp (-1.25e-12 V). Every sample sits on a flat plateau: rtol 1e-6, atol 1e-9 V. The build that read the card's length= reads o_8 = -1.25e-12.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b txl_tran_card_length_ignored.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "o_3",
+    "value": -1.25e-12,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o_8",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o_12",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "6d1b417eea05448bf14c126a9a873834acbbbcb5804d80565b589c213414ae3b"
+}

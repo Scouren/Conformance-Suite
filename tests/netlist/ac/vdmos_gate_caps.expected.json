@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "analysis": "ac",
+  "purpose": "ngspice's VDMOS gate capacitances: CGS, CGDMIN, CGDMAX default to 1.4n, 20p and 2n when their keys are absent (vdmosset.c:70-80), Cgd follows devsup.c:654-665's atan/tanh law, and the instance m makes m parallel copies of both, as ngspice master does (2bc63e, 6bd5c2) where 44.2 and 45 leave them unscaled (vdmosload.c:71-74). ESPice gave the default card no gate capacitance and used a tanh-only law (5.04e-11 F for 9.87e-11 F at vgd = -7 V on card GIVEN).",
+  "oracle": {
+    "kind": "ngspice",
+    "executable_sha256": "dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f",
+    "derivation": "ngspice 44.2 batch run of this deck with each m=2 instance (MD13, MG5, MS2, MF1, MF2) written as two m=1 instances on the same nodes, which is what m means in ngspice master (2bc63e \"VDMOS scaling fixed\", 6bd5c2) and what 44.2 computes correctly; values read from its ASCII raw, and ngspice 45 gives every one of these gate currents to the last bit on that netlist. Corroborated by the closed form: every imaginary part equals 2 pi 1e6 m Cgd(vgd), Cgd = s atan(A vgd) + y for vgd <= 0 and s tanh(A vgd) + y above, s = (CGDMAX - CGDMIN)/(1 + pi/2), y = CGDMAX - s, to 1e-15 relative, and i(vgs) = -2 pi 1e6 (CGS + Cgd(0)) = -j 16.52359 mA, i(vgs2) twice that; card FLAT's i(vgf0..2) are 2 pi 1e6 times 300p, 600p and -1.6n. The real parts are 0.",
+    "command": "sed -E 's/^([^ *.]+)(.*) m=2$/\\1_1\\2\\n\\1_2\\2/' vdmos_gate_caps.sp > vdmos_gate_caps_x.sp && SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw vdmos_gate_caps_x.sp",
+    "version": "44.2",
+    "tolerance": "rtol 1e-3, ngspice's reltol; the currents are linear in the capacitances at a pinned bias, so the oracle carries no Newton error. atol 1e-12 A."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000000.0
+          ],
+          "atol": 1e-12,
+          "rtol": 1e-12
+        },
+        "columns": {
+          "i(vgd0)": {
+            "values": [
+              [
+                0.0,
+                0.0006079844877067204
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd1)": {
+            "values": [
+              [
+                0.0,
+                0.0008123379669825767
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd2)": {
+            "values": [
+              [
+                0.0,
+                0.001080908693651859
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd3)": {
+            "values": [
+              [
+                0.0,
+                0.001682692671481712
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd4)": {
+            "values": [
+              [
+                0.0,
+                0.002369366932320698
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd5)": {
+            "values": [
+              [
+                0.0,
+                0.003926395897658819
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd6)": {
+            "values": [
+              [
+                0.0,
+                0.005483424862996939
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd7)": {
+            "values": [
+              [
+                0.0,
+                0.007727128089174046
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd8)": {
+            "values": [
+              [
+                0.0,
+                0.009963425088204348
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd9)": {
+            "values": [
+              [
+                0.0,
+                0.01141266691560766
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd10)": {
+            "values": [
+              [
+                0.0,
+                0.01239229135012825
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd11)": {
+            "values": [
+              [
+                0.0,
+                0.01254243936810248
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd12)": {
+            "values": [
+              [
+                0.0,
+                0.01256593123176562
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgd13)": {
+            "values": [
+              [
+                0.0,
+                0.001624675933965153
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg0)": {
+            "values": [
+              [
+                0.0,
+                0.0006202409800412638
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg1)": {
+            "values": [
+              [
+                0.0,
+                0.001531832255552922
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg2)": {
+            "values": [
+              [
+                0.0,
+                0.00204176480695681
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg3)": {
+            "values": [
+              [
+                0.0,
+                0.002550014124918242
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg4)": {
+            "values": [
+              [
+                0.0,
+                0.003037272061646649
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgg5)": {
+            "values": [
+              [
+                0.0,
+                0.003063664511105844
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgf0)": {
+            "values": [
+              [
+                0.0,
+                0.001884955592153876
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgf1)": {
+            "values": [
+              [
+                0.0,
+                0.003769911184307752
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgf2)": {
+            "values": [
+              [
+                0.0,
+                -0.01005309649148734
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgs)": {
+            "values": [
+              [
+                0.0,
+                -0.01652358751922547
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vgs2)": {
+            "values": [
+              [
+                0.0,
+                -0.03304717503845093
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "1ca850d62f5e8fa6ca41c0d170fe4c2ebf3698b6a1a1e8e4fdf8335649a526b2"
+}

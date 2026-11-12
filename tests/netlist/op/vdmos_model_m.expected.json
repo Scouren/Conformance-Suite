@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A VDMOS .model card's m is the body diode grading coefficient (ngspice vdmos.c:121); only the instance card's m multiplies. ESPice bound the model card's m=0.5 to the multiplicity and halved M1's current.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Saturation with LAMBDA = 0 and KSUBTHRES at its 0.1 default (vdmosload.c:356-379): id = KP/2 * (0.1*ln(1+exp((4.5-4)/0.1)))^2 = 0.739482358133497 A for M1; m=2 on M2's instance card doubles it to 1.478964716266994 A. The grading coefficient of M1's reverse-biased body diode moves no DC current.",
+    "corroboration": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice, sha256 dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f) -n -b with op and print all: vd1#branch = -7.39482e-01, vd2#branch = -1.47896e+00",
+    "tolerance": "rtol 1e-9: the gate and drain are pinned by sources, so the current is the closed form to rounding; atol 1e-12 covers the 1e-15 S drain-source leak and the body diode's -IS"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "i(vg)": {
+            "values": [
+              0.0
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "i(vd1)": {
+            "values": [
+              -0.739482358133497
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "i(vd2)": {
+            "values": [
+              -1.478964716266994
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "v(g)": {
+            "values": [
+              4.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "v(d1)": {
+            "values": [
+              5.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          },
+          "v(d2)": {
+            "values": [
+              5.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "82b7f6086e00c3607d4e1d05f81a30344a873a8c7857a50b9ffbb9ae6116df2e"
+}

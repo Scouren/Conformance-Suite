@@ -1,0 +1,89 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "A lossless TXL shorter than ngspice's step stays an exact delay line: ESPice's 0.9 tau step bound, not ngspice's ratio path.",
+ "oracle": {
+  "kind": "analytic",
+  "derivation": "Z0 = sqrt(l/c) = 50 ohm, tau = sqrt(l c) length = 0.5 ns, 50 ohm at both ends, so v(out)(t) = 0.5 vs(t - tau) exactly (no reflection). vs = PULSE(0 1 0 2n 2n 10n 20n) gives the values at the sample times in the deck header. Each sample is at least 0.5 ns from a corner of v(out), so any grid with steps under 0.45 ns interpolates it exactly; what remains is ngspice-compatible 0.1 gmin port stamping (5e-12 V). atol 1e-5 V: the ratio path ngspice takes past tau (txlload.c:221-228) is 1.3e-4 V off at 13 ns and 6.4e-5 V at 13.5 ns.",
+  "cross_check": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b txl_tran_lossless_step_bound.sp (ngspice-45 prints the same lines): every sample equal to the closed form to 7 digits except o13 = 0.3751345 and o13_5 = 0.2500637, which this oracle rejects. The prebuilt espice of 2026-11-10, at r=0.01 (the same lossless branch; r enters only the operating point, which is 0 V), is within 5e-12 V of every value."
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "o1_5",
+    "value": 0.25,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o7",
+    "value": 0.5,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o13",
+    "value": 0.375,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o13_5",
+    "value": 0.25,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o17",
+    "value": 0,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o21_5",
+    "value": 0.25,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o27",
+    "value": 0.5,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o33",
+    "value": 0.375,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o33_5",
+    "value": 0.25,
+    "rtol": 0,
+    "atol": 1e-05
+   },
+   {
+    "kind": "measure",
+    "name": "o37",
+    "value": 0,
+    "rtol": 0,
+    "atol": 1e-05
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "f33111ef4262b9f04f400ff48b68bcf0cc36343a50bd71cf756d8a414bdf1924"
+}

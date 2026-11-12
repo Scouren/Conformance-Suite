@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "ngspice .save forms beyond v() and i(): a bare node, x#branch, vdb(n) and the vector of v(b)/10, which ESPice dropped, narrowing the output to v(b) alone.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "3 V over three equal resistors: v(in) = 3, v(b) = 2, v(c) = 1, i(vcc) = -1 mA. The saved set is ngspice's (manual 11.6.1).",
+    "corroboration": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice, sha256 dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f) -n -b -r on this deck writes exactly v(in), i(vcc), v(c), v(b): v(in) = 3.0, i(vcc) = -0.001, v(c) = 1.0, v(b) = 2.0",
+    "tolerance": "rtol 1e-9: a linear divider solves to rounding"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(in)": {
+            "values": [
+              3.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          },
+          "v(b)": {
+            "values": [
+              2.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          },
+          "v(c)": {
+            "values": [
+              1.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          },
+          "i(vcc)": {
+            "values": [
+              -0.001
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "d48178364230358e3bbe9afcd7091796f0eceb3dd52a9e6b8d4adfd7827510c2"
+}

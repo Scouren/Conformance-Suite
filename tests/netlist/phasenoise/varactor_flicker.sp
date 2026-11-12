@@ -16,7 +16,7 @@
 * under 0.001 dB at these offsets.
 * Expected results: varactor_flicker.expected.json
 L1 t 0 25.330296u
-Bc t 0 Q=1n*(1+0.05*V(ctl))*V(t)
+Cc t 0 q={1n*(1+0.05*V(ctl))*V(t)}
 R1 t 0 10k
 Bneg t 0 I=-7e-4*V(t)+8e-4*V(t)*V(t)*V(t)
 vdd dd 0 10

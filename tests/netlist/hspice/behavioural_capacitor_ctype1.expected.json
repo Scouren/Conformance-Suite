@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "tokenizer": "hspice",
+  "purpose": "HSPICE C='equation' under CTYPE=1: the charge q = C v(n1,n2) (ngspice's q= network), with M, TC1 and DTEMP from TNOM, and the charge's sign following the card's node order",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "A current ramp i = k t (k = 1e3 A/s) puts Q = k t^2/2 on each node from v = 0. C = C0 v(ctl), C0 = 1n, v(ctl) = 1 + r t, r = 1e6/s; CTYPE=1 holds q = C v (User Guide E-2010.12 pp. 986-988, C Vm = A C Vm'). ca: v = Q/C. cb: v = Q/(2 * 1.06 C), M = 2 and 1 + 1e-3 (75 + 10 - 25) = 1.06 (Elements and Device Models E-2010.12 p. 35). cc, from e (0.5 V) to c: v(c) = 0.5 + Q/C.",
+    "corroboration": "ngspice-45 (sha256 8fb8a06f1657913fc3649db67924d1e8df125b9fa27d0bf6e9bb1fb73d8ca441) .meas on this circuit written as ngspice cards (q={C*v(n1,n2)} for each C; M, TC1 and DTEMP folded into the constant), .tran 1n 2u 0 2n, agrees to 1e-05: ngspice -n -b ctype1_ng.sp",
+    "tolerance": "rtol 1e-4: the transient's own discretization error, at most 3e-6 in the ngspice-45 twin with a 2 ns step cap"
+  },
+  "expect": {
+    "status": "success",
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "va1",
+        "value": 0.25,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb1",
+        "value": 0.1179245283018868,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc1",
+        "value": 0.75,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "va2",
+        "value": 0.45000000000000007,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb2",
+        "value": 0.21226415094339623,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc2",
+        "value": 0.9500000000000001,
+        "rtol": 0.0001,
+        "atol": 0
+      }
+    ]
+  },
+  "netlist_sha256": "8ebf6ceff6e2a7ece878da7e43cfce329f198e61e6733429b135fe40a03538ab"
+}

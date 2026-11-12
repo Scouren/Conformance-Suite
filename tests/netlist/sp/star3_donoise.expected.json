@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "analysis": "sp",
+  "purpose": "ngspice .sp donoise=1 over three ports (z0 50, 50, 75 ohm): Cy of a resistive star whose centre carries a capacitor, so Y is complex and Cy is not.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "With g = (1/50, 1/100, 1/25) S into centre c and jwC from c to ground, Y_ij = delta_ij g_i - g_i g_j / (g1 + g2 + g3 + jwC), independent of the port z0. A reciprocal passive network at one temperature has Cy = 2kT (Y + Y^H) = 4kT Re Y_ij (Twiss), k = 1.38064852e-23 J/K, T = 300.15 K. Three ports publish no NF, SOpt, NFmin or Rn (cktspdum.c:219). ngspice-44.2 (ngspice -b -r, stock nix build) writes the same Cy to 1.3e-15 relative."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "SP Analysis",
+        "match": "exact",
+        "columns": {
+          "v(Cy_1_1)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                2.7906447899452497e-22,
+                0.0
+              ],
+              [
+                2.9784637222933007e-22,
+                0.0
+              ],
+              [
+                3.0909023574761688e-22,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_1_2)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -2.6228421813937495e-23,
+                0.0
+              ],
+              [
+                -1.683747519653494e-23,
+                0.0
+              ],
+              [
+                -1.1215543437391539e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_1_3)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -1.0491368725574998e-22,
+                0.0
+              ],
+              [
+                -6.734990078613976e-23,
+                0.0
+              ],
+              [
+                -4.4862173749566155e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_2_1)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -2.6228421813937495e-23,
+                0.0
+              ],
+              [
+                -1.683747519653494e-23,
+                0.0
+              ],
+              [
+                -1.1215543437391539e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_2_2)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                1.5264645040423123e-22,
+                0.0
+              ],
+              [
+                1.5734192371293253e-22,
+                0.0
+              ],
+              [
+                1.601528895925042e-22,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_2_3)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -5.245684362787499e-23,
+                0.0
+              ],
+              [
+                -3.367495039306988e-23,
+                0.0
+              ],
+              [
+                -2.2431086874783077e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_3_1)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -1.0491368725574998e-22,
+                0.0
+              ],
+              [
+                -6.734990078613976e-23,
+                0.0
+              ],
+              [
+                -4.4862173749566155e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_3_2)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                -5.245684362787499e-23,
+                0.0
+              ],
+              [
+                -3.367495039306988e-23,
+                0.0
+              ],
+              [
+                -2.2431086874783077e-23,
+                0.0
+              ]
+            ]
+          },
+          "v(Cy_3_3)": {
+            "unit": "A^2/Hz",
+            "rtol": 1e-09,
+            "atol": 1e-33,
+            "values": [
+              [
+                4.532152707333001e-22,
+                0.0
+              ],
+              [
+                5.283428436725205e-22,
+                0.0
+              ],
+              [
+                5.733182977456676e-22,
+                0.0
+              ]
+            ]
+          }
+        },
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000000.0,
+            1500000.0,
+            2000000.0
+          ],
+          "rtol": 1e-12,
+          "atol": 0
+        },
+        "row_count": 3
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "58c213f963a92a48c0cb172b20f825b20f44651a10d96e276e70833a0be0e3de"
+}

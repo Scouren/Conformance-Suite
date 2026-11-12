@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "analysis": "temp",
+  "analysis": "dc",
   "purpose": "Temperature sweep step cannot be zero.",
   "oracle": {
     "kind": "input_contract",
@@ -12,5 +12,5 @@
     "diagnostic_required": true,
     "successful_analysis_for_invalid_request": false
   },
-  "netlist_sha256": "7a67284b74956d5a00c0584c8c5a3f79175885bea7783eb596edef322e14bb1b"
+  "netlist_sha256": "f1a759ac8e9aae14f1b5f763df351a4452c983d30a5f90488885631f9dc9413b"
 }

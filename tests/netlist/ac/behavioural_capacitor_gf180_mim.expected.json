@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "analysis": [
+    "op",
+    "ac"
+  ],
+  "purpose": "gf180 mim_1p0fF: a c='...v(1, 2)...' capacitor lowered to ngspice's c= network at a DC bias, temper in a subcircuit .param, X card m=2",
+  "oracle": {
+    "kind": "ngspice-45",
+    "executable_sha256": "8fb8a06f1657913fc3649db67924d1e8df125b9fa27d0bf6e9bb1fb73d8ca441",
+    "derivation": "ngspice-45 run of this deck, values read from its ASCII raw. They equal the closed form i = -j 2 pi f m C(V0), C(V) = c_c0(1 + c_vcr1 V + c_vcr2 V^2), to 1e-15 relative. ngspice-45 builds c= as E/C/B (the #if branch); ESPice builds ngspice a9da7bc's G/R/C/V/B, whose 1e15 ohm shunt adds 1e-15 A, inside atol.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw behavioural_capacitor_gf180_mim.sp",
+    "origin": "lambdapdk gf180 sm141064.ngspice, subckt mim_1p0fF"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(a)": {
+            "values": [
+              3.0
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-12
+          },
+          "v(b)": {
+            "values": [
+              -2.0
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-12
+          },
+          "i(vin)": {
+            "values": [
+              0.0
+            ],
+            "unit": "A",
+            "rtol": 0,
+            "atol": 1e-13
+          },
+          "i(vin2)": {
+            "values": [
+              0.0
+            ],
+            "unit": "A",
+            "rtol": 0,
+            "atol": 1e-13
+          }
+        }
+      },
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000000.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "i(vin)": {
+            "values": [
+              [
+                0.0,
+                -7.035583400629477e-07
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-14
+          },
+          "i(vin2)": {
+            "values": [
+              [
+                0.0,
+                -1.448560205445671e-06
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-14
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "ec53be6c9a09c1d4b2db4193bc949c5940bd247a92ac32d40d013645226c6ee0"
+}

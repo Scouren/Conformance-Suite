@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "analysis": "noise",
+  "purpose": "A self-heated diode's noise below its thermal corner: RS noise of the heated conductance at the instance ambient (dionoise.c:88-95), shot noise of the heated current, and the thermal feedback, against ngspice 44.2.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Independent ngspice-44.2 run of this deck (the deck's own .options tighten ngspice to reltol=1e-6, so rtol=1e-3, and 1e-4 on the noise densities, sits above the oracle's accuracy). Stored binary raw doubles, selected by column name.",
+    "command": "ngspice -n -b -r reference.raw diode_self_heating_noise.sp"
+  },
+  "origin": "tests/conformance/tests/netlist/noise/diode_self_heating_noise.sp (written for diode_t)",
+  "netlist_sha256": "e8caa97c991245fc89e06781a6fefb48a339367341da98039554fb5e7ef30cfd",
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Noise Spectral Density Curves",
+        "match": "exact",
+        "row_count": 10,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1.0,
+            2.154434690031884,
+            4.641588833612779,
+            10.000000000000002,
+            21.544346900318843,
+            46.4158883361278,
+            100.00000000000003,
+            215.44346900318845,
+            464.1588833612781,
+            1000.0000000000005
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "onoise_spectrum": {
+            "values": [
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10,
+              1.2881098123423494e-10
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          },
+          "inoise_spectrum": {
+            "values": [
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10,
+              8.330522177348242e-10
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          }
+        }
+      },
+      {
+        "name": "Integrated Noise",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(onoise_total)": {
+            "values": [
+              4.071323693547334e-09
+            ],
+            "unit": "V_rms",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          },
+          "v(inoise_total)": {
+            "values": [
+              2.6330249172300598e-08
+            ],
+            "unit": "V_rms",
+            "rtol": 0.0001,
+            "atol": 1e-18
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  }
+}

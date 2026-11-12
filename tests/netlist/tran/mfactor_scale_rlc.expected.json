@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "m= and scale= on C and L cards were dropped (C1 1u m=2 ran as 1u); R, C and L with m=2 in series and parallel, and scale=, against closed forms.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "A 1 V step into first- and second-order RC, RL and RLC branches, the instance factors as ngspice applies them: C_eff = m*scale*C (captemp.c:94, capload.c:74-79), L_eff = scale*L/m (indtemp.c:79, indload.c:111-113), R_eff = scale*R/m. o1: tau = 1k*2u, 1 - e^-1 at 2 ms. o2: R_total = 1k + 500, C = 2u, tau = 3 ms, v = 1 - (2/3) e^-1 at 3 ms. o3: Thevenin 0.5 V behind 500 ohm into 2u, 0.5 (1 - e^-1) at 1 ms. o4: C = 2u + 1u, 1 - e^-1 at 3 ms. o5: series R = 1k, L = 50m, C = 2u, overdamped: s1,2 = -a +- sqrt(a^2 - w0^2), a = R/(2L), w0^2 = 1/(LC), i(t) = (e^(s1 t) - e^(s2 t)) / (L (s1 - s2)), v(o5) = 1 - R i(1 ms). o7: L = 10m behind 10 ohm, e^-0.5 at 0.5 ms. o8: R = 1k, C = 0.5u*2*2 = 2u, 1 - e^-1 at 2 ms. o9: L = 10m*2/4 = 5m behind 10 ohm, e^-1 at 0.5 ms. Cross-check: ngspice-45 (ngspice -b) reads every value within 1e-5 relative. rtol 2e-4 covers the 1 ns edge, the 10 us step and find-at interpolation (under 6e-5 on the 0.5 ms time constant), and stays under the 0.1% perturbation."
+  },
+  "expect": {
+    "status": "success",
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "o1",
+        "value": 0.6321205588285577,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o2",
+        "value": 0.7547470392190385,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o3",
+        "value": 0.31606027941427883,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o4",
+        "value": 0.6321205588285577,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o5",
+        "value": 0.36902356802654535,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o7",
+        "value": 0.6065306597126334,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o8",
+        "value": 0.6321205588285577,
+        "rtol": 0.0002,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "o9",
+        "value": 0.36787944117144233,
+        "rtol": 0.0002,
+        "atol": 0
+      }
+    ]
+  },
+  "netlist_sha256": "83fada06bcc375acb42cf57928be4b81623b6ca890d3e81be77c2263cae75bf5"
+}

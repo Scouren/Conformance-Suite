@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "An ngspice R whose value reads v() is a B source (inpcom.c:6832-6905): self-controlled, controlled by a third net, and with tc1/tc2/m (reciproctc=1, reciprocm=0)",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Over vin = Vs: r1 = 1k(1+|v(a)|) under 1k gives (Vs-x)(1+|x|) = x, so v(a) = sign(Vs)((|Vs|-2)+sqrt(Vs^2+4))/2; r2 = 1k(1+|v(in)|) under 1k gives v(b) = Vs(1+|Vs|)/(2+|Vs|); r3 = 500(1+1.2) times the tc factor 1+1m*100+10u*100^2 = 1.2, m = 2 in parallel, so i(vc) = -2*1.2/(1100*1.2) = -1/550.",
+    "corroboration": "ngspice-45 on this deck agrees to 1e-6 (SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw behavioural_resistor.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "columns": {
+          "v(in)": {
+            "values": [
+              -2.0,
+              -1.0,
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "v(a)": {
+            "values": [
+              -1.4142135623730951,
+              -0.6180339887498949,
+              0.0,
+              0.6180339887498949,
+              1.4142135623730951,
+              2.302775637731995,
+              3.23606797749979
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "v(b)": {
+            "values": [
+              -1.5,
+              -0.6666666666666666,
+              0.0,
+              0.6666666666666666,
+              1.5,
+              2.4,
+              3.3333333333333335
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "i(vc)": {
+            "values": [
+              -0.0018181818181818182,
+              -0.0018181818181818182,
+              -0.0018181818181818182,
+              -0.0018181818181818182,
+              -0.0018181818181818182,
+              -0.0018181818181818182,
+              -0.0018181818181818182
+            ],
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12
+          }
+        },
+        "row_count": 7,
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [
+            -2.0,
+            -1.0,
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "17762af2d4c0f629554a0d1b33a275e65f40ab9a0773871407eaa1f355f5261d"
+}

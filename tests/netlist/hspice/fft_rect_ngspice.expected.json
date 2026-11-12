@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "analysis": "fft",
+  "purpose": ".fft publishes every bin from DC to NP/2 as amplitude and sine phase.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Ten whole periods of a 1 V, 1 kHz sine: bin 10 holds 1 at phase 0; DC and bin 30 hold 0."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "FFT Analysis v(out)",
+        "match": "selected_rows",
+        "row_count": 513,
+        "row_indices": [
+          0,
+          10,
+          30
+        ],
+        "columns": {
+          "frequency": {
+            "rtol": 1e-12,
+            "atol": 1e-09,
+            "values": [
+              0,
+              1000,
+              3000
+            ]
+          },
+          "v(out)": {
+            "rtol": 0.0001,
+            "atol": 0.0001,
+            "values": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "twin_of": "hspice/fft_rect.sp",
+  "netlist_sha256": "69479470c68f2c7042d46f2100ebb1ba192e471602292051a992238167864013"
+}
