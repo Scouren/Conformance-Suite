@@ -3,8 +3,8 @@
   "analysis": "op",
   "purpose": ".nodeset selects the operating point of a bistable circuit.",
   "oracle": {
-    "kind": "ngspice-45",
-    "derivation": "ngspice -b of the same deck."
+    "kind": "ngspice-44.2",
+    "derivation": "ngspice-44.2 batch run of this deck at its reltol=1e-7 abstol=1e-15 vntol=1e-12 (ngspice-45 prints the same bits), ASCII raw doubles by column name. v(qb) is within 7.9e-08 of ngspice's reltol=1e-9 run, which keeps the nodeset's state (v(q) 4.62 V, v(qb) 0.0736 V); at the default reltol=1e-3 v(qb) sat 2.4e-4 from it."
   },
   "expect": {
     "status": "success",
@@ -18,7 +18,7 @@
             "rtol": 1e-05,
             "atol": 1e-09,
             "values": [
-              4.619881064311253
+              4.619879494850828
             ]
           },
           "v(qb)": {
@@ -26,7 +26,7 @@
             "rtol": 1e-05,
             "atol": 1e-09,
             "values": [
-              0.07358231091307293
+              0.07356493840524853
             ]
           },
           "i(vcc)": {
@@ -34,7 +34,7 @@
             "rtol": 1e-05,
             "atol": 1e-12,
             "values": [
-              -0.0053065366247756745
+              -0.005306555566743924
             ]
           }
         },
@@ -44,5 +44,5 @@
     "finite_values_required": true,
     "all_requested_analyses_must_complete": true
   },
-  "netlist_sha256": "3cefd41d8401eea398a4003ddf7c1581efe89d9a6ba50a69d3246dff3ef1effb"
+  "netlist_sha256": "5582e0b8e7bddf8c1e664cf9bdeed86b66056f5e09f524357b86291cbc7e4990"
 }

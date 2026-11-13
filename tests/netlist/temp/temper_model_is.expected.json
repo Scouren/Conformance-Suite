@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A model parameter over temper (ngspice temper-1.cir) takes its value at the nominal 27 C",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "is = temper + 1000 = 1027 at 27 C; the 1 mA source sets v(1) = Vt ln(1 + 1e-3/1027), Vt = k/q*300.15 with ngspice's k = 1.38064852e-23 and q = 1.6021766208e-19; gmin*v(1) is 2.5e-20 A.",
+    "corroboration": "ngspice-44.2 agrees to 8.9e-11 relative (SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw temper_model_is.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(1)": {
+            "values": [
+              2.518491179620605e-08
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "769460517a052d52be8210a18405c91a8fe79892d1947a491c1c6542e28a2824"
+}

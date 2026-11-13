@@ -1,0 +1,31 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "#TBD: under .tran uic an O card's v1, v2, i1 and i2 (or ic=v1,i1,v2,i2) are the line's state at t <= 0, as ngspice keeps them (ltraload.c:289-300), on the LC (tline.va), RLC and RC (ltra.va) paths. ESPice refuses them under uic (KNOWN GAP: the models cannot tell a uic start from the transient's .op); the build before ran them as zero, every value below 0.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits); ngspice-45 prints the same lines. LC line: analytic too, a pure 5 ns delay between matched 50 ohm ends, so v(lo) = (v1 + Z0 i1)/2 = 0.75 V before 5 ns and 0 after, v(li) = 0 (v2 = i2 = 0): rtol 1e-6, atol 1e-9 V. RLC and RC lines: ngspice's convolution on its own grid (tmax = tstep = 0.1 ns). Rerun at tstep = tmax = 0.01 ns, the RLC values move at most 3.1e-5 relative (ro_7, ri_12): rtol 1e-3, ngspice's reltol, atol 1e-5 V. The RC values move up to 0.86% (co_1 0.1251945 -> 0.1262698, ci_1 0.6524887 -> 0.6509848): rtol 2e-2, atol 1e-4 V. Leaving the initial conditions out reads 0 V on every row but lo_7 and li_3.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b ltra_tran_uic_initial_conditions.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {"kind": "measure", "name": "lo_1", "value": 0.75, "rtol": 1e-06, "atol": 1e-09},
+   {"kind": "measure", "name": "lo_3", "value": 0.75, "rtol": 1e-06, "atol": 1e-09},
+   {"kind": "measure", "name": "lo_7", "value": 0.0, "rtol": 1e-06, "atol": 1e-09},
+   {"kind": "measure", "name": "li_3", "value": 0.0, "rtol": 1e-06, "atol": 1e-09},
+   {"kind": "measure", "name": "ri_1", "value": 0.4997502, "rtol": 1e-03, "atol": 1e-05},
+   {"kind": "measure", "name": "ro_1", "value": 0.2501249, "rtol": 1e-03, "atol": 1e-05},
+   {"kind": "measure", "name": "ro_7", "value": -0.4956226, "rtol": 1e-03, "atol": 1e-05},
+   {"kind": "measure", "name": "ri_12", "value": 0.4968738, "rtol": 1e-03, "atol": 1e-05},
+   {"kind": "measure", "name": "ci_1", "value": 0.6524887, "rtol": 2e-02, "atol": 1e-04},
+   {"kind": "measure", "name": "co_1", "value": 0.1251945, "rtol": 2e-02, "atol": 1e-04},
+   {"kind": "measure", "name": "co_7", "value": -0.1348009, "rtol": 2e-02, "atol": 1e-04},
+   {"kind": "measure", "name": "ci_12", "value": 0.3118722, "rtol": 2e-02, "atol": 1e-04}
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "ad731b0a95e48defb0b95c4e849d93caf9dd400e3509694ca3b3c80c0e2c0320"
+}

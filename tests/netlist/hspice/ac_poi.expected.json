@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "H = 1/(1 + j*2*pi*f*R*C), R*C = 1 ms."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

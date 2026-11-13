@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "analysis": [
+    "ac",
+    "op"
+  ],
+  "purpose": "A diode's tunnelling currents at 75 degC: XTITUN and KEG scale them on both TLEV arms, and the small signal carries their conductance.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Independent ngspice-44.2 run of this deck (the deck's own .options tighten ngspice to reltol=1e-6, so rtol=1e-3 sits above the oracle's accuracy). Stored binary raw doubles, selected by column name.",
+    "command": "ngspice -n -b -r reference.raw diode_tunnelling_temp_ac.sp"
+  },
+  "origin": "diode_tunnelling.sp's gf180 np_3p3 card (commit 9f992d5a) with KEG = 0.8 on TLEV 0 and TLEV 2",
+  "netlist_sha256": "fcfac4dc4b9434a47c2f17007e829207d225060f293ec845d71f8f85579744cb",
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "v(a)": {
+            "values": [
+              [
+                1.0,
+                0.0
+              ]
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(b)": {
+            "values": [
+              [
+                1.0,
+                0.0
+              ]
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "i(v2)": {
+            "values": [
+              [
+                -3.2920058595909284e-09,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(v1)": {
+            "values": [
+              [
+                -3.1629883541245615e-09,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      },
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "v(a)": {
+            "values": [
+              4.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(b)": {
+            "values": [
+              4.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "i(v2)": {
+            "values": [
+              -9.913796328127848e-10
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(v1)": {
+            "values": [
+              -9.526576642982631e-10
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  }
+}

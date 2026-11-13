@@ -7,6 +7,7 @@
 * S(g) sinc^2(pi g BETA / FS), g = |f + k FS|, 0 < g <= MAXFLD * FS, with
 * S(g) = 4kTR / (1 + (g / fc)^2) at 25 degC.
 * Expected results: sample_rc_beta.expected.json
+* KNOWN GAP: spice2rack does not translate .sample with .noise v(out) src (W0015) (Scouren/SpiceRack#24)
 vs in 0 dc 0 ac 1
 r1 in out 1k
 c1 out 0 1n

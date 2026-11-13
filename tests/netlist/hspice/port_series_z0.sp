@@ -4,6 +4,7 @@
 * v(b) = 1 - exp(-t / 1 us).
 * Oracle: analytic (see the expected.json derivation).
 * Expected results: port_series_z0.expected.json
+* KNOWN GAP: spice2rack writes no portnum V for HSPICE's P card (R0001, W0001) (Scouren/SpiceRack#24)
 P1 a 0 port=1 z0=50 dc=1
 R1 a 0 150
 P2 b 0 port=2 z0=1k pulse(0 1 0 1p 1p 1 2)

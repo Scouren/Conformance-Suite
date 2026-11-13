@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "ngspice's behavioural L network (F/L/B, v = L(i) di/dt / m) reading its own current, with m, tc1 and an X card's m",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "A current ramp i = k t (k = 1e3 A/s) through L(i) = 1m(1 + 500 i) gives v = L(i) k / s; s = 1 for la, 2/1.1 for lb (m = 2 divides, 1 + tc1*100 = 1.1 multiplies, reciproctc=0), 2 for xc (the X card's m=2 in the divisor).",
+    "corroboration": "ngspice-45 .meas on this deck agrees to 1e-6 (ngspice -b behavioural_inductor.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "va1",
+        "value": 1.25,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "va2",
+        "value": 1.75,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb1",
+        "value": 0.6875,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb2",
+        "value": 0.9625,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc1",
+        "value": 0.625,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc2",
+        "value": 0.875,
+        "rtol": 0.0001,
+        "atol": 0
+      }
+    ]
+  },
+  "netlist_sha256": "fd567d758702a99e3234f84d1a792d5c3c301cbedd9f4453bd2902d9f95b6636"
+}

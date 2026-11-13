@@ -1,0 +1,75 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "MOS2/MOS3 Meyer caps split by vds in weak inversion; a vds ~ 0 FET under a gate ramp completes.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 and 45 print the same eight values. Their spread over reltol 1e-3, 1e-4, 1e-5, trtol 1 and a 1 ps step cap is 0.26% at 0.1 ns and 0.11% at 1 ns, so rtol is 5e-3 and 3e-3. Before the fix espice stopped at t = 11 ps with TimestepTooSmall (Newton 2-cycling on the vg branch current).",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b mos2_mos3_meyer_weak_inversion.sp (ngspice-44.2; ngspice-45 prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "vd2_mid",
+    "value": 0.7272091,
+    "rtol": 0.005,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vs2_mid",
+    "value": 0.7272091,
+    "rtol": 0.005,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vd2_end",
+    "value": 1.603361,
+    "rtol": 0.003,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vs2_end",
+    "value": 1.603361,
+    "rtol": 0.003,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vd3_mid",
+    "value": 0.7272091,
+    "rtol": 0.005,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vs3_mid",
+    "value": 0.7272091,
+    "rtol": 0.005,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vd3_end",
+    "value": 1.603361,
+    "rtol": 0.003,
+    "atol": 0
+   },
+   {
+    "kind": "measure",
+    "name": "vs3_end",
+    "value": 1.603361,
+    "rtol": 0.003,
+    "atol": 0
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "c2946d28ab7b4e4155c775b25bd91a2bd6069a96b328673bd59e2d8b4c266564"
+}

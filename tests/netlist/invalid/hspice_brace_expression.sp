@@ -3,6 +3,7 @@
 * (dev/research/hspice-syntax.md T2). So `{rv*2}` and `{rv}` are names, and a
 * resistor whose value is an unknown name is refused (UnresolvedParameter),
 * as HSPICE refuses it. The legal neighbour is `R1 a 0 'rv*2'`.
+* KNOWN GAP: spice2rack accepts a braced value (R1 a 0 {rv*2}) HSPICE refuses (SpiceRack row P4-133) (Scouren/SpiceRack#24)
 .param rv=1k
 V1 a 0 1
 R1 a 0 {rv*2}

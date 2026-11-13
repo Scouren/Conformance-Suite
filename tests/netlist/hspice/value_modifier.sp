@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack keeps an E card's SCALE= and MAX= as HSPICE text (W0001) and writes no kit (Scouren/SpiceRack#24)
 * An E-element VALUE={...} followed by HSPICE modifiers: the braced field is
 * the whole expression, and SCALE applies to it.
 * Expected results: value_modifier.expected.json

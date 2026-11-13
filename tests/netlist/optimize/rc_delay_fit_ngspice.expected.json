@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "SWEEP OPTIMIZE= on a transient fits R (an OPTRANGE parameter) to a measured delay.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "R C ln 2 = 1 us with C = 1 nF: R = 1e-6 / (1e-9 ln 2)."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [],
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "rv",
+        "value": 1442.6950408889634,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "tdel",
+        "value": 1e-06,
+        "rtol": 0.0001,
+        "atol": 0
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "notes": [
+    "The tolerance covers the transient step: the delay is interpolated between timepoints."
+  ],
+  "twin_of": "optimize/rc_delay_fit.sp",
+  "netlist_sha256": "b60aabfa94df65c6de18969b01201b05b59f54828cb200b38caecdb5a0be0f2a"
+}

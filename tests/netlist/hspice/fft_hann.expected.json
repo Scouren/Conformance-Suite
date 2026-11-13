@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Exact DFT of the windowed samples of 0.5 sin(2 pi 2k t) on [1 ms, 5 ms), 2/sum(w) scaling, sine phase, normalized to the peak bin."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

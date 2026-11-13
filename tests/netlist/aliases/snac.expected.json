@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "pac",
+  "purpose": "`.snac` is no ESPice card: UnsupportedCard naming the line; `.pac` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.pac) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "aa20781285f6cc5c8aff5d66094df1d9f1ef0e71ed2ca910fbbd478140a4189d"
+}

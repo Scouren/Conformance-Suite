@@ -27,7 +27,7 @@
     ],
     "checks": [
       {
-        "kind": "measure",
+        "kind": "display",
         "name": "n1 vdrop",
         "value": 0.35,
         "rtol": 1e-05,

@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "analysis": "op",
-  "purpose": "VALUE={...} followed by SCALE= or MAX= keeps the braced field as the whole expression and applies the modifier.",
+  "tokenizer": "hspice",
+  "purpose": "HSPICE's VALUE={...} followed by SCALE= or MAX=, through SpiceRack's ngspice translation: the braced field is the whole expression and the modifier applies to it.",
   "oracle": {
     "kind": "analytic",
     "derivation": "v(a) = 0.5: v(o1) = 3 (2 v(a)) = 3; v(o2) = min(2 v(a), 0.4) = 0.4."
@@ -34,5 +35,5 @@
       }
     ]
   },
-  "netlist_sha256": "22bb38f22c46cc09b2d3944050dae3b3d071abd92637dd20d934107095b07647"
+  "netlist_sha256": "f881b071ea46a12f8c13589f32a1ca808fc8d27fac422ef007dd55ac0f805988"
 }

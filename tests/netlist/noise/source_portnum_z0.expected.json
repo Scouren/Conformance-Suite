@@ -1,0 +1,74 @@
+{
+ "schema_version": 1,
+ "analysis": "noise",
+ "purpose": "A portnum V's z0 is in the circuit in .noise and adds no noise of its own, as in ngspice.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "command": "ngspice -n -b -r reference.raw source_portnum_z0.sp",
+  "derivation": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice) run of this deck. It equals the closed form in the deck header to the last digit: onoise = sqrt(4kT * 12.5) = 4.5519317507954793e-10 V/sqrt(Hz) with k = 1.38064852e-23 and T = 300.15 K, inoise = 2 onoise, and the totals sqrt(S * 99 kHz) of a flat spectrum. An ideal port source gives onoise = 0; a noisy z0 gives sqrt(4kT * 25) = 6.4374e-10."
+ },
+ "expect": {
+  "status": "success",
+  "plots": [
+   {
+    "name": "Noise Spectral Density Curves",
+    "match": "exact",
+    "row_count": 3,
+    "axis": {
+     "name": "frequency",
+     "values": [
+      1000.0,
+      10000.000000000002,
+      100000.00000000003
+     ],
+     "rtol": 1e-09,
+     "atol": 1e-15
+    },
+    "columns": {
+     "onoise_spectrum": {
+      "rtol": 1e-06,
+      "atol": 1e-20,
+      "values": [
+       4.5519317507954793e-10,
+       4.5519317507954793e-10,
+       4.5519317507954793e-10
+      ]
+     },
+     "inoise_spectrum": {
+      "rtol": 1e-06,
+      "atol": 1e-20,
+      "values": [
+       9.103863501590959e-10,
+       9.103863501590959e-10,
+       9.103863501590959e-10
+      ]
+     }
+    }
+   },
+   {
+    "name": "Integrated Noise",
+    "match": "exact",
+    "row_count": 1,
+    "columns": {
+     "v(onoise_total)": {
+      "rtol": 1e-06,
+      "atol": 1e-20,
+      "values": [
+       1.4322318889502846e-07
+      ]
+     },
+     "v(inoise_total)": {
+      "rtol": 1e-06,
+      "atol": 1e-20,
+      "values": [
+       2.864463777900569e-07
+      ]
+     }
+    }
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "99b64eee2d17293af0369d35a6bbf41174dd6b7c3c52465f279a945e489a37b4"
+}

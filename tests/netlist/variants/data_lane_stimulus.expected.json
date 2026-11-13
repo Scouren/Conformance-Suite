@@ -6,7 +6,6 @@
     "kind": "ngspice",
     "derivation": "ngspice 44.2, ngspice -b on each row run alone (the .data block removed, sel and pol set on the .param line): v(y) at the listed times from .meas find, and the first row's tpd, tpd2 and slew."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

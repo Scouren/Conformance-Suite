@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "tokenizer": "hspice",
+  "purpose": "HSPICE C='equation' under CTYPE=0, the default: i = C dv/dt (ngspice's c= network), of its own and of another node's voltage, with M, TC1 and DTEMP from TNOM",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "A current ramp i = k t (k = 1e3 A/s) puts Q = k t^2/2 on each node from v = 0. ca: C = C0(1 + v/2) gives C0(v + v^2/4) = Q, v = 2(sqrt(1 + Q/C0) - 1). cb (CTYPE=0) and cd (default): C = C0 v(ctl), v(ctl) = 1 + r t, r = 1e6/s, so dv/dt = k t/C, v = (k/(C0 r^2))(r t - ln(1 + r t)). cc: ca's C times M = 2 and 1 + TC1 (T + DTEMP - TNOM) = 1 + 1e-3 (75 + 10 - 25) = 1.06 (Elements and Device Models E-2010.12 p. 35). C0 = 1n. CTYPE semantics: User Guide E-2010.12 pp. 176-183, 986-988.",
+    "corroboration": "ngspice-45 (sha256 8fb8a06f1657913fc3649db67924d1e8df125b9fa27d0bf6e9bb1fb73d8ca441) .meas on this circuit written as ngspice cards (c={...} for each C; M, TC1 and DTEMP folded into the constant), .tran 1n 2u 0 2n, agrees to 1e-05: ngspice -n -b ctype0_ng.sp",
+    "tolerance": "rtol 1e-4: the transient's own discretization error, at most 3e-6 in the ngspice-45 twin with a 2 ns step cap"
+  },
+  "expect": {
+    "status": "success",
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "va1",
+        "value": 0.4494897427831779,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb1",
+        "value": 0.3068528194400547,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc1",
+        "value": 0.22337496307192728,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vd1",
+        "value": 0.3068528194400547,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "va2",
+        "value": 0.9154759474226504,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb2",
+        "value": 0.5837092681258449,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc2",
+        "value": 0.474397201225778,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vd2",
+        "value": 0.5837092681258449,
+        "rtol": 0.0001,
+        "atol": 0
+      }
+    ]
+  },
+  "netlist_sha256": "91b3099597890e9f5b3e39cd312080f177a87dadff31009919f6bb1493cfbd15"
+}

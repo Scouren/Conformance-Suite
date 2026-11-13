@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "B and E expressions past one bsource tape (64 ops, 32 constants, stack depth 16, 8 control ports) split into chained bsources and keep their values (SpiceRack #7, cases from espice-issues/5-7/bound.py)",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Over v1 = x = -0.5..9.5 step 1: s1 = s2 = 33x; s3 = x*sum(i^2, i=1..33) = 12529x; s4 the piecewise-linear interpolant through (0,1) (1,3) (2,2) (3,5) (4,4) (5,7) (6,6), 1 below 0 and 6 from 6 on; s5 = the least i in 1..8 with x <= i, else 0; s6 = s7 = (k^2+(k+1)^2)/2 = x^2+1/4 at x = k+1/2 on the table (k, k^2), k = -1..19; i(vx) = -1/(1000+sum(i*i, i=1..8)) = -1/1204.",
+    "corroboration": "ngspice-44.2 on this deck agrees to 2e-16 relative (SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw bsource_split.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "columns": {
+          "v(s1)": {
+            "values": [
+              -16.5,
+              16.5,
+              49.5,
+              82.5,
+              115.5,
+              148.5,
+              181.5,
+              214.5,
+              247.5,
+              280.5,
+              313.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s2)": {
+            "values": [
+              -16.5,
+              16.5,
+              49.5,
+              82.5,
+              115.5,
+              148.5,
+              181.5,
+              214.5,
+              247.5,
+              280.5,
+              313.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s3)": {
+            "values": [
+              -6264.5,
+              6264.5,
+              18793.5,
+              31322.5,
+              43851.5,
+              56380.5,
+              68909.5,
+              81438.5,
+              93967.5,
+              106496.5,
+              119025.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s4)": {
+            "values": [
+              1.0,
+              2.0,
+              2.5,
+              3.5,
+              4.5,
+              5.5,
+              6.5,
+              6.0,
+              6.0,
+              6.0,
+              6.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s5)": {
+            "values": [
+              1.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0,
+              8.0,
+              0.0,
+              0.0
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s6)": {
+            "values": [
+              0.5,
+              0.5,
+              2.5,
+              6.5,
+              12.5,
+              20.5,
+              30.5,
+              42.5,
+              56.5,
+              72.5,
+              90.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "v(s7)": {
+            "values": [
+              0.5,
+              0.5,
+              2.5,
+              6.5,
+              12.5,
+              20.5,
+              30.5,
+              42.5,
+              56.5,
+              72.5,
+              90.5
+            ],
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-09
+          },
+          "i(vx)": {
+            "values": [
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562,
+              -0.0008305647840531562
+            ],
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-15
+          }
+        },
+        "row_count": 11,
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [
+            -0.5,
+            0.5,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.5,
+            8.5,
+            9.5
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "c615db46581fcdd2e9a6769d25f8390d906b16e3159da9185a3326f6d7eed697"
+}

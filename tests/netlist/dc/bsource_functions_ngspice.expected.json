@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "B-source sgn, cosh, pwr, sinh, asin, acos, asinh, acosh and atanh of a probe (their own tape opcodes, models/bsource.va) on CPU and GPU, against ngspice-44.2",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Each column is the C library's function of the swept x (ptfuncs.c PTsgn, PTcosh, PTpwr = sign(x)|x|^y, PTsinh, PTasin, PTacos, PTasinh, PTacosh of x + 1.75, PTatanh); Python's math on the same glibc agrees with ngspice to 4e-16 V at every point.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -b -r ref.raw bsource_functions_ngspice.sp (ngspice-44.2)"
+  },
+  "netlist_sha256": "f94e05473ee0142247f7893e54a887c30e2a3e521fa234bcb0ab1d0eee8f1fed",
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "row_count": 7,
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [-0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75],
+          "rtol": 1e-12,
+          "atol": 1e-15
+        },
+        "columns": {
+          "v(o1)": {
+            "values": [
+              -1.0,
+              -1.0,
+              -1.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o2)": {
+            "values": [
+              1.294683284676845,
+              1.127625965206381,
+              1.031413099879573,
+              1.0,
+              1.031413099879573,
+              1.127625965206381,
+              1.294683284676845
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o3)": {
+            "values": [
+              -0.649519052838329,
+              -0.3535533905932738,
+              -0.125,
+              0.0,
+              0.125,
+              0.3535533905932738,
+              0.649519052838329
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o4)": {
+            "values": [
+              -0.82231673193583,
+              -0.5210953054937474,
+              -0.2526123168081683,
+              0.0,
+              0.2526123168081683,
+              0.5210953054937474,
+              0.82231673193583
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o5)": {
+            "values": [
+              -0.848062078981481,
+              -0.5235987755982989,
+              -0.2526802551420786,
+              0.0,
+              0.2526802551420786,
+              0.5235987755982989,
+              0.848062078981481
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o6)": {
+            "values": [
+              2.418858405776378,
+              2.094395102393196,
+              1.823476581936975,
+              1.570796326794897,
+              1.318116071652818,
+              1.047197551196598,
+              0.7227342478134156
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o7)": {
+            "values": [
+              -0.6931471805599453,
+              -0.4812118250596035,
+              -0.2474664615472635,
+              0.0,
+              0.2474664615472635,
+              0.4812118250596035,
+              0.6931471805599453
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o8)": {
+            "values": [
+              0.0,
+              0.6931471805599453,
+              0.9624236501192069,
+              1.158810360429947,
+              1.316957896924817,
+              1.45057451382258,
+              1.566799236972411
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          },
+          "v(o9)": {
+            "values": [
+              -0.9729550745276566,
+              -0.5493061443340548,
+              -0.2554128118829954,
+              0.0,
+              0.2554128118829954,
+              0.5493061443340548,
+              0.9729550745276566
+            ],
+            "unit": "V",
+            "rtol": 1e-12,
+            "atol": 1e-14
+          }
+        }
+      }
+    ]
+  }
+}

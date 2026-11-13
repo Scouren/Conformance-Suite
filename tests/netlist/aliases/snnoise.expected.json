@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "pnoise",
+  "purpose": "`.snnoise` is no ESPice card: UnsupportedCard naming the line; `.pnoise` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.pnoise) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "8fe677fbdb601251df8e709881975a2df40ecf2899ffd3d0dd5fb8bfc81aceda"
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "A .dc names V1, which is both a V card and a .param (v1=5): the sweep is the V card's, as ngspice's DCtrCurv looks a name up among the resistors, then the V and I sources, then temp and @inst[param], and never among the parameters (dctrcurv.c:156-247). The .param stays 5, so V2 = {v1} holds v(b) at 5. SpiceRack P3-056: ESPice swept the parameter, giving v(a) = 1 1 1 and v(b) = 1 2 3.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Stock ngspice-44.2 batch run of this deck, binary raw, columns by name; stock ngspice-45 writes the same bytes for every column. Analytic check: v(a) = V1, i(v1) = -V1/1k, v(b) = v1 = 5, i(v2) = -5/1k, all exact in both.",
+    "command": "ngspice -n -b -r reference.raw param_source_collision.sp",
+    "source_sha256": "9697d91d29b997795f82e2934b14c116865a82c5a304f92acbcd02c28c02d0be"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "rtol": 1e-09,
+          "atol": 1e-15
+        },
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              1.0,
+              2.0,
+              3.0
+            ]
+          },
+          "v(b)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              5.0,
+              5.0,
+              5.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              -0.001,
+              -0.002,
+              -0.003
+            ]
+          },
+          "i(v2)": {
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              -0.005,
+              -0.005,
+              -0.005
+            ]
+          }
+        },
+        "row_count": 3
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "9697d91d29b997795f82e2934b14c116865a82c5a304f92acbcd02c28c02d0be"
+}

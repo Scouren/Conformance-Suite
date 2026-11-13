@@ -7,7 +7,6 @@
   "kind": "analytic",
   "derivation": "Z = 30 + 1/(j 2 pi f 10n); Y = 1/Z; S11 = (Z - 50)/(Z + 50)."
  },
- "tokenizer": "hspice",
  "expect": {
   "status": "success",
   "plots": [

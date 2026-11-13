@@ -1,0 +1,16 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "#72: LFSR is refused naming the card.",
+ "oracle": {
+  "kind": "diagnostic",
+  "derivation": "#72: LFSR is refused naming the card."
+ },
+ "origin": "tests/fixtures/invalid/source_lfsr_refused.sp",
+ "expect": {
+  "status": "error",
+  "category": "unsupported_input"
+ },
+ "twin_of": "invalid/source_lfsr_refused.sp",
+ "netlist_sha256": "8b10fd9952cffab3b7e503f045921bbb08d5e089eefaf3ae15ff9c50029d9029"
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "METHOD=BISECTION over more than one parameter is refused.",
+  "oracle": {
+    "kind": "input_contract",
+    "derivation": "Bisection searches one parameter with one RESULTS card; more is not specified by the manual."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input",
+    "diagnostic_required": true,
+    "successful_analysis_for_invalid_request": false
+  },
+  "twin_of": "invalid/optimize_bisection.sp",
+  "netlist_sha256": "70abd6a0672c80ca05acfd7ca200de22d4d8b14e267b677d9fee7bb5f904bca5"
+}

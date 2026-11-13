@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A VDMOS instance's m is m parallel copies down to the body diode's breakdown: IBV scales with m as IS does and as the diode's does (diotemp.c:211-213), so x_bv is one copy's and the m=2 breakdown current is twice the m=1 one. ngspice 44.2, 45 and master take IBV unscaled (45's vdmostemp.c:136), which halves it; ESPice did the same.",
+  "oracle": {
+    "kind": "ngspice",
+    "executable_sha256": "dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f",
+    "derivation": "ngspice 44.2 batch run of this deck with each m=2 instance (MD, ME, MF) written as two m=1 instances on the same nodes, values read from its ASCII raw; ngspice 45 gives the same currents on that netlist. Corroborated by the closed form: -m IS exp(-(x_bv - vds)/Vt) + GMIN (-vds), x_bv = BV - Vt ln(IBV/IS + 1 - x_bv/Vt) solved to convergence at Vt = kT/q, 300.15 K, agrees with every column to 1.3e-06; with IBV left unscaled the m=2 columns come out at half (-2.0937e-5, -1.0000e-3, -4.7762e-2 A).",
+    "command": "sed -E 's/^([^ *.]+)(.*) m=2$/\\1_1\\2\\n\\1_2\\2/' vdmos_breakdown_m.sp > vdmos_breakdown_m_x.sp && SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw vdmos_breakdown_m_x.sp",
+    "version": "44.2",
+    "tolerance": "rtol 1e-3, atol 1e-12 A. The deck sets RELTOL 1e-6, so ngspice's x_bv, matched to RELTOL*IBV (vdmostemp.c:148-156), and its Newton solution sit far inside it; the m=2 parallel netlist carries two GMIN shunts where an m=2 instance carries one, 5e-11 A against 2.1e-5 A at the smallest current."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "i(vda)": {
+            "values": [
+              -2.093693561736748e-05
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdb)": {
+            "values": [
+              -0.0009999981386528134
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdc)": {
+            "values": [
+              -0.04776241290812777
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdd)": {
+            "values": [
+              -4.187387123473496e-05
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vde)": {
+            "values": [
+              -0.001999996277305627
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdf)": {
+            "values": [
+              -0.09552482581625554
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "9f5b4d7327f26b24f60d465a0d615a0bc6d79066197c430e27034dd3fa501cb6"
+}

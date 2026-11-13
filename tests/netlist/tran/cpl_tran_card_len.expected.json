@@ -1,0 +1,61 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "A P (CPL) card's LEN= is the line's length, over the model's length= (SpiceRack P8-049: ESPice kept the model's).",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits, so up to 2e-7 relative rounding); ngspice-45 prints the same lines. They match the deck header's two-mode closed form (odd 0.2495310 V at 5.519181 ns/m, even 0.2396393 V at 6.169803 ns/m, both times LEN=10) to every printed digit: 0 before the odd arrival at 55.19 ns, +-0.2495310 V between the arrivals, 0.4891703 and -0.0098917 V after the even one at 61.70 ns. Every sample sits on a flat plateau, so the 0.1 ns grid's interpolation adds nothing: rtol 1e-6, atol 1e-9 V. The model's 1 m reads about 0.5 and 0 V at every sample.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b cpl_tran_card_len.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "b1_50",
+    "value": -1.585685e-12,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "b2_50",
+    "value": -2.250566e-13,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "b1_58",
+    "value": 0.249531,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "b2_58",
+    "value": -0.249531,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "b1_70",
+    "value": 0.4891703,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "b2_70",
+    "value": -0.009891703,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "8a363756bd1cf64897fca91322b2a3ff9f1cf9cccde189fae1383ca7ee1d564a"
+}

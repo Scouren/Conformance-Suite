@@ -15,15 +15,16 @@
 * noise at f0 + fm over the carrier power) adds the amplitude noise,
 * under 0.001 dB at these offsets.
 * Expected results: varactor_flicker.expected.json
+* Respelled from `.hbosc v(t) 877k 7`, same job.
 L1 t 0 25.330296u
-Bc t 0 Q=1n*(1+0.05*V(ctl))*V(t)
+Cc t 0 q={1n*(1+0.05*V(ctl))*V(t)}
 R1 t 0 10k
 Bneg t 0 I=-7e-4*V(t)+8e-4*V(t)*V(t)*V(t)
 vdd dd 0 10
 rc dd ctl 1k noisy=0
 j1 ctl 0 0 jm
 .model jm njf vto=-2 beta=1e-3 kf=1e-18 af=1
-.hbosc v(t) 877k 7
+.hb v(t) 877k 7
 .phasenoise v(t) dec 1 10 10k
 .phasenoise v(t) dec 1 10 10k method=1
 .end

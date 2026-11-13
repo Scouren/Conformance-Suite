@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "analysis": "ac",
+  "purpose": "K coupling L cards with tc1/tc2, dtemp, temp= and model tnom at .temp 60: M follows both windings' temperature, with an L's scale and without its m",
+  "oracle": {
+    "kind": "ngspice",
+    "derivation": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice), batch run of this deck with `.control set filetype=ascii run write ref.raw .endc` inserted before `.end`; values read from the ascii raw. rtol 1e-7: ngspice solves this linear deck to rounding, the bound leaves room for a 1e-12 S gmin on a 1 kOhm node (1e-9) and sits four or more decades under every wrong value a dropped factor gave here (2% or more).",
+    "command": "ngspice -b deck.sp",
+    "version": "44.2"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            100000.0
+          ],
+          "rtol": 1e-12,
+          "atol": 0
+        },
+        "columns": {
+          "v(b)": {
+            "values": [
+              [
+                0.5089667498498929,
+                0.2821702852264737
+              ]
+            ],
+            "unit": "V",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "v(d)": {
+            "values": [
+              [
+                -0.3920452504014164,
+                -0.2015083109301586
+              ]
+            ],
+            "unit": "V",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v1)": {
+            "values": [
+              [
+                -0.06567352068081053,
+                0.03971153868629493
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v2)": {
+            "values": [
+              [
+                -0.04221592227126313,
+                0.04528573703099589
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "24775b432ae2ea1e8ac643cc21397b1ba3545f329b3fcc8bc648d02553fb3eee"
+}

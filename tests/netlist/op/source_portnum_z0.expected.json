@@ -1,0 +1,264 @@
+{
+ "schema_version": 1,
+ "analysis": [
+  "op",
+  "ac",
+  "tran"
+ ],
+ "purpose": "A portnum V carries its z0 in series in .op, .ac and .tran, as ngspice does, not only inside .sp.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "command": "ngspice -n -b -r reference.raw source_portnum_z0.sp",
+  "derivation": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice) run of this deck; the transient columns are its raw file linearly interpolated at the axis times (its step is at most 10 ns). The values match the closed forms in the deck header: v(a) = 0.5, i(v1) = -0.01 in .op and .ac; v(b) = 1 - exp(-t/1us) within 3.3e-5 relative, i(v2) = -(1 - v(b))/1k. ngspice 44.2's raw lists each portnum V's internal node as v(<source>#res) (made by CKTmkVolt(ckt, &tmp, VSRCname, \"res\"), ngspice-45 vsrcset.c:54-58): the ideal source's own voltage, 1 V for V1 and V2's pulse level for V2."
+ },
+ "expect": {
+  "status": "success",
+  "plots": [
+   {
+    "name": "Operating Point",
+    "match": "exact",
+    "row_count": 1,
+    "columns": {
+     "v(a)": {
+      "values": [
+       0.5
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     },
+     "v(b)": {
+      "values": [
+       0.0
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     },
+     "i(v1)": {
+      "values": [
+       -0.01
+      ],
+      "unit": "A",
+      "rtol": 1e-09,
+      "atol": 1e-14
+     },
+     "i(v2)": {
+      "values": [
+       0.0
+      ],
+      "unit": "A",
+      "rtol": 1e-09,
+      "atol": 1e-14
+     },
+     "v(v1#res)": {
+      "values": [
+       1.0
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     },
+     "v(v2#res)": {
+      "values": [
+       0.0
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     }
+    }
+   },
+   {
+    "name": "AC Analysis",
+    "match": "exact",
+    "row_count": 1,
+    "axis": {
+     "name": "frequency",
+     "values": [
+      1000.0
+     ],
+     "atol": 1e-15,
+     "rtol": 1e-08
+    },
+    "columns": {
+     "v(a)": {
+      "values": [
+       [
+        0.5,
+        0.0
+       ]
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     },
+     "i(v1)": {
+      "values": [
+       [
+        -0.01,
+        0.0
+       ]
+      ],
+      "unit": "A",
+      "rtol": 1e-09,
+      "atol": 1e-14
+     },
+     "v(v1#res)": {
+      "values": [
+       [
+        1.0,
+        0.0
+       ]
+      ],
+      "unit": "V",
+      "rtol": 1e-09,
+      "atol": 1e-12
+     }
+    }
+   },
+   {
+    "name": "Transient Analysis",
+    "match": "samples",
+    "axis": {
+     "name": "time",
+     "values": [
+      2.5e-07,
+      5e-07,
+      7.5e-07,
+      1e-06,
+      1.2499999999999999e-06,
+      1.5e-06,
+      1.75e-06,
+      2e-06,
+      2.25e-06,
+      2.4999999999999998e-06,
+      2.75e-06,
+      3e-06
+     ],
+     "atol": 1e-15,
+     "rtol": 1e-08
+    },
+    "columns": {
+     "v(a)": {
+      "values": [
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5,
+       0.5
+      ],
+      "unit": "V",
+      "rtol": 0.001,
+      "atol": 1e-06
+     },
+     "v(b)": {
+      "values": [
+       0.22119189115619745,
+       0.393464898605152,
+       0.5276309721913258,
+       0.6321193976741415,
+       0.7134948957270509,
+       0.7768700652997598,
+       0.8262265941625181,
+       0.8646654174083537,
+       0.8946015406846295,
+       0.9179157683622271,
+       0.9360728693063466,
+       0.9502141460639173
+      ],
+      "unit": "V",
+      "rtol": 0.001,
+      "atol": 1e-06
+     },
+     "i(v1)": {
+      "values": [
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01,
+       -0.01
+      ],
+      "unit": "A",
+      "rtol": 0.001,
+      "atol": 1e-09
+     },
+     "i(v2)": {
+      "values": [
+       -0.0007788081088438025,
+       -0.000606535101394848,
+       -0.0004723690278086742,
+       -0.0003678806023258585,
+       -0.0002865051042729491,
+       -0.0002231299347002402,
+       -0.00017377340583748192,
+       -0.00013533458259164637,
+       -0.00010539845931537048,
+       -8.20842316377729e-05,
+       -6.39271306936534e-05,
+       -4.978585393608265e-05
+      ],
+      "unit": "A",
+      "rtol": 0.002,
+      "atol": 1e-07
+     },
+     "v(v1#res)": {
+      "values": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "unit": "V",
+      "rtol": 0.001,
+      "atol": 1e-06
+     },
+     "v(v2#res)": {
+      "values": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "unit": "V",
+      "rtol": 0.001,
+      "atol": 1e-06
+     }
+    }
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "a448105de938e68f9ea8864d148ae9c1cf9df4d881a3156aa00cb7c237d48a42"
+}

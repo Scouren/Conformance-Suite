@@ -3,6 +3,7 @@
 * the ERR family; all were dropped with a warning. Oracle: analytic, RC =
 * 1 us charging to 1 V, and v(out2) = 0.9 v(out) for a 10 % error.
 * Expected results: meas_forms.expected.json
+* KNOWN GAP: spice2rack does not translate .measure ERR1/ERR2 (W0048) (Scouren/SpiceRack#24)
 v1 in 0 pulse(0 1 0 1p 1p 1 2)
 r1 in out 1k
 c1 out 0 1n

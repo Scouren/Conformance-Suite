@@ -1,0 +1,14 @@
+{
+ "schema_version": 1,
+ "analysis": "op",
+ "purpose": "#TBD: a len= on an O card is refused by name (UnknownParameter); the line's length is its LTRA model's.",
+ "oracle": {
+  "kind": "diagnostic",
+  "derivation": "ngspice 44.2 -b on this deck: 'Error on line 8 ... unknown parameter (len)', simulation interrupted. ltra.c LTRApTable gives the instance only v1, v2, i1, i2 and ic."
+ },
+ "expect": {
+  "status": "error",
+  "category": "unsupported_input"
+ },
+ "netlist_sha256": "a0ac39f358a0826524f637ed30e47bbe25bf09c99398f36c7f9af635882b837e"
+}

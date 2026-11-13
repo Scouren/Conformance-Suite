@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "An R card valued by its model card takes ngspice's default L and W and its dw, dlr, res, w, l, tc1r and tc2r spellings",
+  "oracle": {
+    "kind": "ngspice",
+    "derivation": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice), batch run of this deck with `.control set filetype=ascii run write ref.raw .endc` inserted before `.end`; values read from the ascii raw. rtol 1e-7: each source drives one resistor alone, so ngspice's answer is 1/R to rounding (the 1e-12 S gmin is 1e-9 of the smallest conductance here), and every wrong reading misses by 10% or more.",
+    "command": "ngspice -b deck.sp",
+    "version": "44.2"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "i(v1)": {
+            "values": [
+              -0.002
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v2)": {
+            "values": [
+              -0.01
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v3)": {
+            "values": [
+              -0.0018
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v4)": {
+            "values": [
+              -0.002222222222222223
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v5)": {
+            "values": [
+              -0.001
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v6)": {
+            "values": [
+              -0.004
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v7)": {
+            "values": [
+              -0.001
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v8)": {
+            "values": [
+              -0.0007794839816041781
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v9)": {
+            "values": [
+              -0.0007794839816041781
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v10)": {
+            "values": [
+              -0.001875
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "26f1a43a67405f9c09aaaf8ad6051663e1f928320d667a908c486f3dfa5fcac8"
+}

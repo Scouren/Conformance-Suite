@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "MONTE=list(...): exactly the listed trials, ranges expanded, after one nominal run.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "v(a) = v1 = 1 V at every trial; the nominal rv = 1k gives i(v1) = -1 mA."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12,
+            "values": [
+              1.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              -0.001
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (monte=2)",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12,
+            "values": [
+              1.0
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (monte=4)",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12,
+            "values": [
+              1.0
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (monte=5)",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12,
+            "values": [
+              1.0
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (monte=3)",
+        "match": "exact",
+        "columns": {
+          "v(a)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-12,
+            "values": [
+              1.0
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "notes": [
+    "A listed trial's draws equal that trial's in a MONTE=5 run; checked by hand on the raw output, not here."
+  ],
+  "twin_of": "variants/monte_list.sp",
+  "netlist_sha256": "a289f505f85884ada6d7d342a09eafcee5d823c547bb02849657624ae4925e9f"
+}

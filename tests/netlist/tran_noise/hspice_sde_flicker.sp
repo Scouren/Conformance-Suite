@@ -6,6 +6,7 @@
 * 25 degC. Oracle: analytic; the flicker poles' variances sum to exactly
 * KF ID ln(FMAX / FMIN) for AF = 1, and the white part is S / (2h).
 * Expected results: hspice_sde_flicker.expected.json
+* KNOWN GAP: spice2rack does not translate HSPICE's transient-noise analysis (W0015) (Scouren/SpiceRack#24)
 vdd dd 0 10
 rl dd d 1k noise=0
 j1 d 0 0 jm

@@ -1,0 +1,89 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "PWL at t = 0 and just past TD matches ngspice, V and I sources.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits, so up to 5e-7 rounding); ngspice-45 prints the same. Each .meas interpolates linearly on a grid of at most 0.1 ns (tmax), at most 8e-7 V here (h^2/8 |v''| on the EXP rise), so atol 2e-6 V and rtol 1e-6. The values match the closed forms in the deck header to 6e-7.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b source_t0_pwl.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "va_t0",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "va_td",
+    "value": 0.575,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vb_t0",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vb_td",
+    "value": 0.575,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vc_t0",
+    "value": 0.7,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vc_td",
+    "value": 0.765,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ia_t0",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ia_td",
+    "value": 0.575,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ic_t0",
+    "value": 0.7,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ic_td",
+    "value": 0.765,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "b0e1fc09dfa40931c804b3fb2e2fd58876bb3f49ea64399a665a99d963986308"
+}

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "R C ln 2 = 1 us with C = 1 nF: R = 1e-6 / (1e-9 ln 2)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

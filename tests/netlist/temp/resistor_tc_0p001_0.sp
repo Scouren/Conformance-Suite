@@ -3,5 +3,5 @@
 Vin in 0 10
 R1 in out 1k
 R2 out 0 3k tc1=0.001 tc2=0
-.temp -40 120 40
+.dc temp -40 120 40
 .end

@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "netlist_sha256": "69025dab1a4e2317f66277258abb2b0c7fd139baded75e65d82a3891b5b9c05e",
+ "netlist_sha256": "75b6fd82ea6428c4f1287d1312dd95a73068d30a1c02a1033413a77dc3cd17d7",
  "analysis": "hblin",
  "purpose": "HSPICE RF .hblin reads each P element in its hblin=[h, s] band about the HB orbit, lower bands conjugated.",
  "oracle": {

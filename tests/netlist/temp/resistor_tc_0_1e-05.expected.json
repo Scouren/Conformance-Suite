@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "analysis": "temp",
+  "analysis": "dc",
   "purpose": "Linear and quadratic resistor temperature coefficients",
   "oracle": {
     "kind": "analytic",
@@ -10,7 +10,7 @@
     "status": "success",
     "plots": [
       {
-        "name": "Temperature Sweep",
+        "name": "DC transfer characteristic",
         "match": "exact",
         "columns": {
           "v(out)": {
@@ -27,7 +27,7 @@
           }
         },
         "axis": {
-          "name": "temp",
+          "name": "temp-sweep",
           "values": [
             -40,
             0,
@@ -44,5 +44,5 @@
     "finite_values_required": true,
     "all_requested_analyses_must_complete": true
   },
-  "netlist_sha256": "e38aef2dd5153f5020f4c8a8f08e132361269dea835a3b3dfbe076699e6c69ce"
+  "netlist_sha256": "f34284c1335d7ee7feddb026cecc3853e35cbee65303dcb3eb0963a65d3471dd"
 }

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Dividers: base 1k/1k, alter=1 1k/3k, alter=2 2k/3k, alter=3 2k/(3k || 1k)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

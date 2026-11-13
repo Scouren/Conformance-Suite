@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v1 bits (2 ns from td = 1 ns): 1011 011 0m1, so bit centres 2n..20n read 1 0 1 1 0 1 1 0 0.5 1 and the delay holds 1; the 1->0 edge at 3 ns ramps over tf = 0.4 ns centred there (0.5). v2 = .pat a2=[b10 b01] r=1 = 1001 1001 at 1 ns bits, 2 V high: 2 at 0.5n, 0 at 2n, the 0->1 ramp centre at 3n reads 1, 2 at 4n, 0 at 6n, then the last bit's 2 V holds."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

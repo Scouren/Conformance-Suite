@@ -6,7 +6,6 @@
   "kind": "analytic",
   "derivation": "Exact DFT of the samples of 0.5 sin(2 pi 2k t) on [1 ms, 5 ms), NP = 256, weighted by the standard symmetric Kaiser window w[n] = I0(pi ALFA sqrt(1 - (2n/(NP-1) - 1)^2)) / I0(pi ALFA) with ALFA = 3 (Harris 1978), 2/sum(w) scaling, sine phase, normalized to the peak bin."
  },
- "tokenizer": "hspice",
  "netlist_sha256": "7671827a906aff4f2ae5443de5bebb8c209e792dfc24795420ddfca2806e58e9",
  "expect": {
   "status": "success",

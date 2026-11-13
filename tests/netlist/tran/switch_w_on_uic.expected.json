@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "W with ON under .tran uic, control inside a positive band (it=0.5m, ih=0.2m): ngspice starts it on and keeps it on. The UIC load seeds HYST_ON from CSWzero_stateGiven into state0 whatever the unsolved control (cswload.c:39-56), dctran.c:387-392 copies state0 to state1 at MODEINITTRAN, and every later in-band iteration takes state1 (cswload.c:65-71, written back at :130). OFF and no word start off (REALLY_OFF from the 0 A control at the UIC load). S with ON starts off: swload.c reads state0, which INITTRAN rewrites from the unsolved 0 V control (:99-108). ESPice cannot tell a uic start from the transient's .op (both evaluate with kind .ic and initial_step, sim_init.zig and op.zig), so cswitch.va starts every W off in the band: v(owon) = 0.999 V where ngspice gives 0.999 mV. Samples skip t = 0: ngspice's uic run writes no t = 0 row.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Stock ngspice-44.2 batch run of this deck, binary raw, columns by name; stock ngspice-45 writes the same bytes. Every column is constant over the run (no switch changes state), so the samples at 1-4 us are its one value. Analytic check: on = 1/1001 V (ron=1 under 1k), off = 1meg/1.001meg V; ngspice is within 1 ulp of both. On and off differ 1000x.",
+    "command": "ngspice -n -b -r reference.raw switch_w_on_uic.sp",
+    "source_sha256": "2a2bd21843549fdd8c954575c6ed38ca8a8af9e5a10a37ff4b679600682b1b44"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Transient Analysis",
+        "match": "samples",
+        "axis": {
+          "name": "time",
+          "values": [
+            1e-06,
+            2e-06,
+            3e-06,
+            4e-06
+          ],
+          "rtol": 1e-08,
+          "atol": 1e-15
+        },
+        "columns": {
+          "v(owon)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992,
+              0.0009990009990009992,
+              0.0009990009990009992,
+              0.0009990009990009992
+            ]
+          },
+          "v(owoff)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999
+            ]
+          },
+          "v(ownone)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999
+            ]
+          },
+          "v(oson)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999,
+              0.999000999000999
+            ]
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "4100c1d0368a15a8ebec7f4b0da70f65c78fafae0bf1a5fbac56a688638ddee5"
+}

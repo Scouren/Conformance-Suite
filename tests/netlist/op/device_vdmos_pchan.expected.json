@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A P-channel VDMOS (`pchan`) runs P-channel: ngspice rewrites the card to vdmosp (inpcom.c:8408-8436), VDMOStype = -1 (vdmosmpar.c:95-99), vdmos.va's ty = -1.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "ngspice 44.2 on this deck; binary raw doubles by column name.",
+    "command": "ngspice -n -b -r reference.raw device_vdmos_pchan.sp (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice, sha256 dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f)",
+    "corroboration": "By hand: vgs = -5, vto = -1, vds = -5 saturates, Id = kp/2 (vgs - vto)^2 = 8 A, so i(vd) = 8.",
+    "tolerance": "rtol 1e-3 follows ngspice's reltol"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(d)": {
+            "values": [
+              -5.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "v(g)": {
+            "values": [
+              -5.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "i(vg)": {
+            "values": [
+              0.0
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          },
+          "i(vd)": {
+            "values": [
+              8.000000000005016
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-11
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "49afe7393ad54f3e4466d59e88c7cacb7d799b504ec6fab8415bfbcc89a6f2fe"
+}

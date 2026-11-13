@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Bin-exact tones 1 V at 1 kHz, 10 mV at 3 kHz, 1 mV at 1.5 kHz; the figures follow the SA Ch.15 formulas."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

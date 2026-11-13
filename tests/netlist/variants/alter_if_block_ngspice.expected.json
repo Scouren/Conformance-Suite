@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "HSPICE .alter runs re-select top-level .if blocks: each condition reads the last .param definition, the one an .alter block appended (SpiceRack #9).",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "i(v1) = -10 V / R, R the resistors the state's branches keep: a=1 1k; a=2 b=0 2k; a=3 1k||1k = 500; a=4 4k; a=2 b=1 2k||2k||1k||500 = 250; a=2 b=0 2k. Conditions read each parameter's last definition: HSPICE UG E-2010.12 p. 84, and p. 110 for .alter with IF-ELSE."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.01
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (alter=1)",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.005
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (alter=2)",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.02
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (alter=3)",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.0025
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (alter=4)",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.04
+            ]
+          }
+        },
+        "row_count": 1
+      },
+      {
+        "name": "Operating Point (alter=5)",
+        "match": "exact",
+        "columns": {
+          "v(1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              10.0
+            ]
+          },
+          "i(v1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-12,
+            "values": [
+              -0.005
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "twin_of": "variants/alter_if_block.sp",
+  "netlist_sha256": "55abe588c1ab8268bbd23b51cebba4a222c622277d12c27dc86f817218ee88f9"
+}

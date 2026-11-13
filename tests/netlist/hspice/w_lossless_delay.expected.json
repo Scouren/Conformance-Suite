@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Z0 = sqrt(500n/200p) = 50 ohm matches both ends, so v(a) = v(in)/2 and v(b)(t) = v(a)(t - td), td = 0.1 m * sqrt(500n*200p) = 1 ns. Samples sit 0.1 ns off the PWL corners."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

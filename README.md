@@ -165,6 +165,7 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `iverilog.conf` | `verilog` | `iverilog` + `vvp` |
 | `verilator.conf` | `verilog` | `verilator --binary --timing` |
 | `ngspice.conf` | `netlist` | `tests/netlist/` through `rawcheck.py`, and the external decks |
+| `ngspice-converged.conf` | `netlist` | as `ngspice.conf` at `reltol=1e-9`, `vntol=1e-15`, `abstol=1e-18`: a golden that passes `ngspice.conf` and fails here was recorded at a tolerance looser than its `rtol`. Decks without an `.expected.json` SKIP |
 | `espice.conf` | `netlist` | as `ngspice.conf`; `ESPICE=` overrides the executable |
 
 ### SPICE decks
@@ -181,8 +182,12 @@ the deck's directory and prints one `ok=` line per check:
 run.netlist = python3 "$CONFORM_TOOLDIR/rawcheck.py" 'ngspice --batch ${RAW:+-r "$RAW"} "$DECK"'
 ```
 
-Oracles that use a check kind rawcheck has not ported yet (pole-zero sets,
-moments, THD, repeatability) SKIP. A deck in another dialect names it in its
+rawcheck judges every check kind tests/test_correctness.zig does, on what the
+tool writes; a kind it does not know is an `ok=0` line, "unported check kind
+X": unsupported fails, never skips. An optional second command reruns the
+deck without RAW when its oracle reads stdout (`.meas` lines, `.four`
+tables), which ngspice prints only without `-r`.
+A deck in another dialect names it in its
 oracle (`tokenizer: hspice`), passed on as `TOKENIZER`.
 
 ## Manifests

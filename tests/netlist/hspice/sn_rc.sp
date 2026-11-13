@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn as must-emit v3 asks (Scouren/SpiceRack#24)
 * HSPICE .sn TRES= PERIOD= [CR .SN] runs as .pss, PERIOD/TRES steps a
 * period. Oracle: pss/rc_default's, the analytic periodic RC orbit
 * offset + Im[A*H(jw)*exp(jwt)], H = 1/(1 + jwRC).

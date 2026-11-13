@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "analysis": "ac",
+  "purpose": "A model card's temp and dtemp are the R, C and L instance default under the instance's own, and the value may follow the model name",
+  "oracle": {
+    "kind": "ngspice",
+    "derivation": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice), batch run of this deck with `.control set filetype=ascii run write ref.raw .endc` inserted before `.end`; values read from the ascii raw. rtol 1e-7: ngspice solves this linear deck to rounding, the bound leaves room for a 1e-12 S gmin on a 1 kOhm node (1e-9) and sits four or more decades under every wrong value a dropped factor gave here (2% or more).",
+    "command": "ngspice -b deck.sp",
+    "version": "44.2"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000000.0
+          ],
+          "rtol": 1e-12,
+          "atol": 0
+        },
+        "columns": {
+          "i(v1)": {
+            "values": [
+              [
+                -0.0005780346820809249,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v2)": {
+            "values": [
+              [
+                -0.0006666666666666666,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v3)": {
+            "values": [
+              [
+                -0.0005780346820809249,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v4)": {
+            "values": [
+              [
+                -0.00065359477124183,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v5)": {
+            "values": [
+              [
+                -0.0009090909090909091,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v6)": {
+            "values": [
+              [
+                -0.0005780346820809249,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v7)": {
+            "values": [
+              [
+                -0.0006666666666666666,
+                0.0
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v8)": {
+            "values": [
+              [
+                0.0,
+                -0.01086991058142068
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v9)": {
+            "values": [
+              [
+                0.0,
+                -0.00942477796076938
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v10)": {
+            "values": [
+              [
+                0.0,
+                -0.006911503837897546
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v11)": {
+            "values": [
+              [
+                -0.008392433123776074,
+                0.09122499761599898
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v12)": {
+            "values": [
+              [
+                -0.01113257972089159,
+                0.1049220919999672
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          },
+          "i(v13)": {
+            "values": [
+              [
+                -0.01070491572792441,
+                0.1029092829009242
+              ]
+            ],
+            "unit": "A",
+            "rtol": 1e-07,
+            "atol": 0
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "99527d6cb9688e7fc3c6c401e45b2b6272a0754f1b4dfa278481fa0aaf3bc6ac"
+}

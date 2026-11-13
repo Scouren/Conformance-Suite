@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "Model parameters over temper (ngspice temper-2.cir) follow a .dc temp sweep",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "ngspice-44.2 batch run of this deck at its reltol=1e-7 abstol=1e-15 vntol=1e-12, ASCII raw doubles by column name; v(2) is within 2.7e-08 of ngspice's reltol=1e-9 run, and its i(v_test)/i(v_fix) is the temperature (gmin beside each junction). At the default reltol=1e-3 ngspice's v(2) sat up to 2.3e-4 from that run.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw temper_dc_sweep_diode.sp"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "row_count": 10,
+        "axis": {
+          "name": "temp-sweep",
+          "values": [
+            10.0,
+            20.0,
+            30.0,
+            40.0,
+            50.0,
+            60.0,
+            70.0,
+            80.0,
+            90.0,
+            100.0
+          ],
+          "atol": 1e-12,
+          "rtol": 1e-12
+        },
+        "columns": {
+          "v(2)": {
+            "values": [
+              0.5116410394476142,
+              0.471767020960431,
+              0.4373900860666933,
+              0.4052203045953602,
+              0.3741978610117082,
+              0.3438510125022431,
+              0.3139312637133603,
+              0.2842936721766355,
+              0.2548492447440365,
+              0.225545603864026
+            ],
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09
+          },
+          "i(v_test)": {
+            "values": [
+              0.000816065265136369,
+              0.0008625205670092732,
+              0.0008830857893843726,
+              0.0008965423792056983,
+              0.0009070200268930864,
+              0.0009159637349128828,
+              0.0009240135533288979,
+              0.0009314975459594407,
+              0.0009386012480431397,
+              0.0009454365138652525
+            ],
+            "unit": "A",
+            "rtol": 1e-05,
+            "atol": 1e-12
+          },
+          "i(v_fix)": {
+            "values": [
+              8.160652697411378e-05,
+              4.312602879864228e-05,
+              2.94361934022895e-05,
+              2.241355987523221e-05,
+              1.814040090457564e-05,
+              1.526606258666824e-05,
+              1.320019392843079e-05,
+              1.164371960523301e-05,
+              1.042890300805248e-05,
+              9.454365361942667e-06
+            ],
+            "unit": "A",
+            "rtol": 1e-05,
+            "atol": 1e-12
+          },
+          "i(v1)": {
+            "values": [
+              -0.0008976717921104772,
+              -0.0009056465958079138,
+              -0.0009125219827866614,
+              -0.000918955939080928,
+              -0.0009251604277976584,
+              -0.0009312297974995514,
+              -0.000937213747257328,
+              -0.0009431412655646729,
+              -0.0009490301510511927,
+              -0.0009548908792271949
+            ],
+            "unit": "A",
+            "rtol": 1e-05,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "5a24d4ed185909da4df376c80da2d676568dba0e933085e3dcb6fd3da3022824"
+}

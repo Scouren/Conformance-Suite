@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "analysis": "temp",
+  "analysis": "dc",
   "purpose": "Temperature-invariant ideal divider",
   "oracle": {
     "kind": "analytic",
@@ -10,7 +10,7 @@
     "status": "success",
     "plots": [
       {
-        "name": "Temperature Sweep",
+        "name": "DC transfer characteristic",
         "match": "exact",
         "columns": {
           "v(out)": {
@@ -51,7 +51,7 @@
           }
         },
         "axis": {
-          "name": "temp",
+          "name": "temp-sweep",
           "values": [
             20,
             21,
@@ -74,5 +74,5 @@
     "finite_values_required": true,
     "all_requested_analyses_must_complete": true
   },
-  "netlist_sha256": "8d91711a44ddfd1102f9d2f72df223aba9567e1465efc9b347fbb68128e286b8"
+  "netlist_sha256": "b09a7cb36edd64868ba7ac1a8b41c054e1f2e14ab2bf6f2bd18ada837da669a0"
 }

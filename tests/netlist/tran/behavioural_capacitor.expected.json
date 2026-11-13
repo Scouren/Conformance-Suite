@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "ngspice's behavioural C networks: c= (G/R/C/V/B, i = C(v) dv/dt) and q= (G/L/B, i = dq/dt), with m, tc1 and an X card's m",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "A current ramp i = k t (k = 1e3 A/s) puts Q = k t^2/2 on each node from v = 0. C(v) = C0(1 + a v), q(v) = C0(v + a v^2/2), C0 = 1n, a = 0.5/V, give C0(v + a v^2/2) = Q/s, v = (sqrt(1 + 2 a Q/(s C0)) - 1)/a; s = 1 for ca and cb, 2/1.1 for cc (m = 2, the B divided by 1 + tc1*100 = 1.1, reciproctc=1), 2 for xd (X card m=2 on the q= network's G).",
+    "corroboration": "ngspice-45 .meas on this deck agrees to 1e-5 (ngspice -b behavioural_capacitor.sp)",
+    "tolerance": "rtol 1e-4: the transient's own discretization error, measured at 1.3e-6 in ngspice-45 with the 2 ns step cap"
+  },
+  "expect": {
+    "status": "success",
+    "checks": [
+      {
+        "kind": "measure",
+        "name": "va1",
+        "value": 0.4494897427831779,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "va2",
+        "value": 0.9154759474226504,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb1",
+        "value": 0.4494897427831779,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vb2",
+        "value": 0.9154759474226504,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc1",
+        "value": 0.2583179581272428,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vc2",
+        "value": 0.5446021299998942,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vd1",
+        "value": 0.2360679774997898,
+        "rtol": 0.0001,
+        "atol": 0
+      },
+      {
+        "kind": "measure",
+        "name": "vd2",
+        "value": 0.5,
+        "rtol": 0.0001,
+        "atol": 0
+      }
+    ]
+  },
+  "netlist_sha256": "ed28d626f79937c94e2f94a55f832007fae0d99a4cf0cfeb744d9f7e4ee24aa6"
+}

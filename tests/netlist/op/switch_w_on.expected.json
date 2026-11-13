@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "W card with ON after the model: ngspice accepts the word (cswparam.c:24-31), but it never reaches the .op inside a positive band. At INITFLOAT, cswload.c:65-71 takes CKTstate1, which no .op iteration writes (0 = REALLY_OFF), not the state0 the flag seeded at :39-56. So mid starts off for ON, OFF and none alike. neg (ih=-0.2m) and zero (ih=0, control at it) start on (:72-88). SpiceRack P8-045: ESPice started neg and zero off.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Stock ngspice-44.2 batch run of this deck, binary raw, columns by name; stock ngspice-45 writes the same bytes for every column. Analytic check: each output is 1 V divided between 1k and the switch, on = 1/1001 V (ron=1) and off = 1meg/1.001meg V (roff=1meg); ngspice is within 1 ulp of both. On and off differ by 1000x, so rtol 1e-9 sees any wrong state.",
+    "command": "ngspice -n -b -r reference.raw switch_w_on.sp",
+    "source_sha256": "5a456e94646fc276f0fd7263d2d323c4b1620c26dc39b770b4ed7597575e5ba3"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "columns": {
+          "v(olo)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999
+            ]
+          },
+          "v(omid)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.999000999000999
+            ]
+          },
+          "v(ohi)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(oneg)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          },
+          "v(ozero)": {
+            "unit": "V",
+            "rtol": 1e-09,
+            "atol": 1e-15,
+            "values": [
+              0.0009990009990009992
+            ]
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "5a456e94646fc276f0fd7263d2d323c4b1620c26dc39b770b4ed7597575e5ba3"
+}

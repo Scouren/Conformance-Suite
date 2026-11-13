@@ -2,6 +2,7 @@
 * name bytes (dev/research/hspice-syntax.md T2), so `at={1n}` is no
 * expression and ESPice refuses the measure card by name instead of
 * skipping it (#203). The legal neighbour is `at=1n`.
+* KNOWN GAP: spice2rack accepts a braced .meas value (at={1n}) HSPICE refuses (SpiceRack row P4-133) (Scouren/SpiceRack#24)
 v1 a 0 pwl(0 0 2n 1)
 r1 a 0 1k
 .tran 0.1n 2n

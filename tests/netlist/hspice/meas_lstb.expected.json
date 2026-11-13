@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Ideal buffered chain, so the loop is unilateral and the break unloaded at its input: W = Wf = 4/(1+jf/1k)^3, Wr = y11 = y12 = 0, y22 = (1+jf/1k)/1k, y21 = W*y22. Unity gain at f = 1k*sqrt(4^(2/3)-1), PM = 180 - 3*atan(f/1k) deg there; phase crossover at f = 1k*sqrt(3), GM = 20*log10(8/4) dB; loop_gain_minifreq = 20*log10|W(10 Hz)|. At 1 kHz W = 4/(1+j)^3: |W| = sqrt(2), phase -135 deg. WHEN lstb(db)=0 interpolates the dec 10 grid linearly, within 1e-3 of the unity-gain frequency."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

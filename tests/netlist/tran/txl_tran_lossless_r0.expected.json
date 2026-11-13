@@ -1,0 +1,75 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "A TXL model with r=0 runs as ReadTxL's lossless line, and the card's LEN= is its length (SpiceRack P8-049: ESPice refused r=0).",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits, so up to 5e-8 relative rounding); ngspice-45 prints the same lines. A lossless line between matched 50 ohm ends is a pure delay of len*sqrt(L C): the far ends read 0 before 5 ns (Y1) and 10 ns (Y2) and 0.5 V after, the closed form in the deck header, which every value matches to ngspice's 0.1 gmin port stamp (-1.25e-12 V). Every sample sits on a flat plateau, so the 0.1 ns grid's interpolation adds nothing: rtol 1e-6, atol 1e-9 V. The model's length on Y2 would read 0.5 V at 8 ns (o2_8); the old refusal fails the run.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b txl_tran_lossless_r0.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "o1_3",
+    "value": -1.25e-12,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o2_3",
+    "value": -1.25e-12,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o1_8",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o2_8",
+    "value": -1.25e-12,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o1_12",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o2_12",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o1_25",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   },
+   {
+    "kind": "measure",
+    "name": "o2_25",
+    "value": 0.5,
+    "rtol": 1e-06,
+    "atol": 1e-09
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "5d09e6c6fc785318c549eaffccfdedd0311173afc5d7b559f5fbeafd7e77ea1a"
+}

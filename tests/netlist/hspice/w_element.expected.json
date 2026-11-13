@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "DC: series R0*l divider. AC: exact ABCD of each line, Z = R0 + Rs sqrt(f)(1+j) + j w L0, Y = Gd f + j w C0, gamma = sqrt(ZY), Zc = Z/gamma, 50 ohm source, 100 ohm load; f = 1 MHz to 10 GHz, 2 per decade."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn and .snxf as must-emit v3 asks (Scouren/SpiceRack#24)
 * HSPICE .snxf v(out) <sweep> [CR .SNXF] runs as .pxf at the .sn tone.
 * Oracle: pxf/rc's, analytic: the adjoint transfer of the LTI RC at
 * sideband 0.

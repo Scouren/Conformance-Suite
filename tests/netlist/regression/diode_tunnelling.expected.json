@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "analysis": "dc",
+  "purpose": "A diode's tunnelling currents (JTUN, JTUNSW) flow in reverse bias.",
+  "oracle": {
+    "kind": "ngspice-44.2",
+    "derivation": "Independent ngspice-44.2 run of this deck (the deck's own .options tighten ngspice to reltol=1e-6, so rtol=1e-3 sits above the oracle's accuracy). Stored binary raw doubles, selected by column name.",
+    "command": "ngspice -n -b -r reference.raw diode_tunnelling.sp"
+  },
+  "origin": "reduced from gf180mcu sm141064.ngspice np_3p3 (commit 9f992d5a)",
+  "netlist_sha256": "dfc3019e1d91e4403ac107b006c9395ff79342552b1cfdc6a50dc1a8f4c8c9cd",
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "DC transfer characteristic",
+        "match": "exact",
+        "row_count": 25,
+        "axis": {
+          "name": "v(v-sweep)",
+          "values": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75,
+            4.0,
+            4.25,
+            4.5,
+            4.75,
+            5.0,
+            5.25,
+            5.5,
+            5.75,
+            6.0
+          ],
+          "atol": 1e-15,
+          "rtol": 1e-08
+        },
+        "columns": {
+          "v(a)": {
+            "values": [
+              0.0,
+              0.25,
+              0.5,
+              0.75,
+              1.0,
+              1.25,
+              1.5,
+              1.75,
+              2.0,
+              2.25,
+              2.5,
+              2.75,
+              3.0,
+              3.25,
+              3.5,
+              3.75,
+              4.0,
+              4.25,
+              4.5,
+              4.75,
+              5.0,
+              5.25,
+              5.5,
+              5.75,
+              6.0
+            ],
+            "unit": "V",
+            "rtol": 0.001,
+            "atol": 2e-06
+          },
+          "i(v1)": {
+            "values": [
+              0.0,
+              -2.5175737220890215e-13,
+              -5.082918199522133e-13,
+              -7.740019292263903e-13,
+              -1.0653020035780532e-12,
+              -1.4238751922802406e-12,
+              -1.959301739104736e-12,
+              -2.9596556235837047e-12,
+              -5.18225052935364e-12,
+              -1.0617977881632762e-11,
+              -2.4500664498650854e-11,
+              -6.058944501551109e-11,
+              -1.5505551738774458e-10,
+              -4.029888415755229e-10,
+              -1.054370092710037e-09,
+              -2.766369995915361e-09,
+              -7.266615543691868e-09,
+              -1.9096841343362998e-08,
+              -5.019675042857128e-08,
+              -1.3195446228602222e-07,
+              -3.468857683165278e-07,
+              -9.119152865554693e-07,
+              -2.3973131327098294e-06,
+              -6.302254494057902e-06,
+              -1.6567900199910483e-05
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  }
+}

@@ -2,6 +2,7 @@
 * the ngspice reading was one sweep point at -55 degC. TNOM is HSPICE's
 * 25 degC. Oracle: ngspice 45 at each temperature with tnom=25.
 * Expected results: temp_list.expected.json
+* KNOWN GAP: spice2rack does not translate HSPICE's multi-value .temp list (W0016); ngspice runs one temperature (Scouren/SpiceRack#24)
 i1 0 a 1m
 d1 a 0 dmod
 .model dmod d is=1e-14 n=1.2 rs=5 eg=1.11 xti=3

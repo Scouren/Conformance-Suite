@@ -1,0 +1,145 @@
+{
+ "schema_version": 1,
+ "analysis": "tran",
+ "purpose": "AM with a nonzero VO output offset matches ngspice, before and past TD, V and I sources.",
+ "oracle": {
+  "kind": "ngspice-44.2",
+  "derivation": "ngspice 44.2 .meas values (7 significant digits, up to 5e-7 rounding); ngspice-45 prints the same. Each .meas interpolates linearly on a grid of at most 0.1 ns (tmax), under 1e-7 V for these 1 MHz waveforms, so atol 2e-6 V and rtol 1e-6. The values match the closed forms in the deck header to 5e-7.",
+  "command": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice -b source_am_offset.sp (ngspice-44.2; /nix/store/bvcwn52yfwwb8q3q2c939a64907k92zg-ngspice-45/bin/ngspice -b prints the same .meas lines)"
+ },
+ "expect": {
+  "status": "success",
+  "plots": [],
+  "checks": [
+   {
+    "kind": "measure",
+    "name": "va_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "va_td",
+    "value": 1.507971,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "va_mid",
+    "value": 1.198601,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vb_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vb_pre",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vb_td",
+    "value": 1.507971,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vc_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vc_td",
+    "value": 0.05271574,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "vc_mid",
+    "value": 0.2867894,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ia_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ia_td",
+    "value": 1.507971,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ia_mid",
+    "value": 1.198601,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ib_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ib_pre",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ib_td",
+    "value": 1.507971,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ic_t0",
+    "value": 0.0,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ic_td",
+    "value": 0.05271574,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   },
+   {
+    "kind": "measure",
+    "name": "ic_mid",
+    "value": 0.2867894,
+    "rtol": 1e-06,
+    "atol": 2e-06
+   }
+  ],
+  "finite_values_required": true,
+  "all_requested_analyses_must_complete": true
+ },
+ "netlist_sha256": "0cab1ff317a887b63136a6edf26b16977fde52e46f7b5e0e9a70566136d7d040"
+}

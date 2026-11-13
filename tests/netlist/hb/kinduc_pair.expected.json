@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "analysis": "hb",
+  "purpose": "A K card on harmonic balance: kinduc's coupling charge on the sampled operator, host and GPU lane batch",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Linear, so harmonics 0, 2 and 3 are zero and the fundamental is the phasor solution, x(t) = Re{X e^{jwt}}, SIN(0 1 1meg) -> Vin = -j, w = 2pi 1e6, M = 0.5 sqrt(L1 L2) = 1u: [R1 + jwL1, jwM; jwM, jwL2 + rl] [i(l1); i(l2)] = [Vin; 0], v(p1) = jw(L1 i(l1) + M i(l2)), v(p2) = jw(L2 i(l2) + M i(l1)), dots on each inductor's first node. Cross-checked: ngspice 44.2 `ac lin 1 1meg 1meg` on this circuit with `Vin in 0 ac 1 -90` gives every one of these phasors to 1e-15 relative, at rl=25 and rl=100. A flipped M negates v(p2) and i(l2); M = 0 moves v(p1) by 17% (rl=25) and 5% (rl=100) and zeroes v(p2). Tolerance: rtol 1e-6, above the HB GMRES tolerance (1e-7)."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Harmonic Balance (rl=25)",
+        "match": "exact",
+        "columns": {
+          "v(p1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.3749800922818929,
+                -0.2638188370307957
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "v(p2)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.1122515691504259,
+                -0.34845452623005285
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "i(l1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                -0.03749800922818928,
+                -0.07361811629692043
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "i(l2)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                -0.004490062766017034,
+                0.01393818104920211
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          }
+        },
+        "axis": {
+          "name": "frequency",
+          "values": [
+            0.0,
+            1000000.0,
+            2000000.0,
+            3000000.0
+          ],
+          "rtol": 1e-09,
+          "atol": 1e-09
+        },
+        "row_count": 4
+      },
+      {
+        "name": "Harmonic Balance (rl=100)",
+        "match": "exact",
+        "columns": {
+          "v(p1)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.4243151647896185,
+                -0.2890449751567066
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "v(p2)": {
+            "unit": "V",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.3571420093102103,
+                -0.3563646579209418
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "i(l1)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                -0.04243151647896184,
+                -0.07109550248432935
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "i(l2)": {
+            "unit": "A",
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "values": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                -0.0035714200931021025,
+                0.0035636465792094176
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          }
+        },
+        "axis": {
+          "name": "frequency",
+          "values": [
+            0.0,
+            1000000.0,
+            2000000.0,
+            3000000.0
+          ],
+          "rtol": 1e-09,
+          "atol": 1e-09
+        },
+        "row_count": 4
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "7f73ba94f8c00d481e0816ce20e3c28a215e0bc78007bf8fe190585c53bb8684"
+}

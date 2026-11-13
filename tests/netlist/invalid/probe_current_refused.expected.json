@@ -1,0 +1,14 @@
+{
+ "schema_version": 1,
+ "analysis": "op",
+ "purpose": "An ngspice .probe of i(), vd() or p() is refused naming the card, not dropped with its vectors.",
+ "oracle": {
+  "kind": "diagnostic",
+  "derivation": "ngspice writes i(r1) through an inserted 0 V source (inpc_probe.c:728-870); ESPice builds none, so the card refuses (UnsupportedCard)."
+ },
+ "expect": {
+  "status": "error",
+  "category": "unsupported_input"
+ },
+ "netlist_sha256": "0a82b68e47e0eea2a775a61a44a8be08c6b0c4ea4c8a2b87828717f3949cd3f1"
+}

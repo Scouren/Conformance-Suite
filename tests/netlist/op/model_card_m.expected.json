@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "A .model card's m reaches the instance multiplier on no device: ngspice drops it where the model table has no m (inpgmod.c:140-145) and binds the shape where it has one (diode grading, HFET/MESA knee). ESPice bound m=3 on a MOS1-9, BSIM1-3, B3SOI FD/DD, BJT, JFET 1/2 and MES card as the multiplicity and tripled each current.",
+  "oracle": {
+    "kind": "ngspice",
+    "executable_sha256": "dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f",
+    "derivation": "ngspice 44.2 batch run of this deck, values read from its ASCII raw. With the card's m=3 deleted from every multiplier card, the old ESPice build gave every column to 2e-7 or better, so the deck reads the binding alone.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw model_card_m.sp",
+    "version": "44.2",
+    "tolerance": "rtol 1e-3, ngspice's reltol; every terminal is pinned by a source. A card m bound as the multiplier misses by 200%. atol 1e-15 A."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "i(v1)": {
+            "values": [
+              -0.00016000000201
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v2)": {
+            "values": [
+              -0.00016000000201
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v3)": {
+            "values": [
+              -0.00016000000201
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v4)": {
+            "values": [
+              -0.7796371656846668
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v5)": {
+            "values": [
+              -0.0001042189362268662
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v6)": {
+            "values": [
+              -0.00020000000201
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v8)": {
+            "values": [
+              -1.606236264668256e-09
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v9)": {
+            "values": [
+              -0.00016000000201
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v55)": {
+            "values": [
+              -0.002949241464208334
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(v56)": {
+            "values": [
+              -0.003048303338406836
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vq)": {
+            "values": [
+              -0.000391880060939466
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vb)": {
+            "values": [
+              -3.918800076792943e-06
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vj1)": {
+            "values": [
+              -0.00100000000251
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vj2)": {
+            "values": [
+              -0.0009959171668021743
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vz1)": {
+            "values": [
+              -0.00313448276063069
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vz2)": {
+            "values": [
+              -0.002916149361728432
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vz5)": {
+            "values": [
+              -6.016281504507409e-06
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vz6)": {
+            "values": [
+              -5.998635146326052e-06
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          },
+          "i(vd)": {
+            "values": [
+              -0.0006405016705253452
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-15
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "22d14987612a6d72a4ca21ef9945ebaeac4da5d8ee9ab37f0c4fd71735bdba86"
+}

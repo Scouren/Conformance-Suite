@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "pss",
+  "purpose": "`.snosc` is no ESPice card: UnsupportedCard naming the line; `.pss v(osc) f` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.pss v(osc) f) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "53bc872fe89d2ba7e35c64379b3775df5250d5fa44530fa8f62c365c003b1bed"
+}

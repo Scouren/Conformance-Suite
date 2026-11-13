@@ -7,7 +7,6 @@
     "derivation": "ngspice -n -b -r cpl.raw on tran/device_coupled_tlines.sp (P card, CPL model with the same R, L, C); samples at ngspice's accepted times. CPL and the W fit both approximate the line; the tolerance (2.5e-2 V) covers edge timing.",
     "command": "ngspice -n -b -r cpl.raw device_coupled_tlines.sp"
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

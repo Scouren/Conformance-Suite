@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v(b) = v1 rl / (1k + rl) for each row the files give."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

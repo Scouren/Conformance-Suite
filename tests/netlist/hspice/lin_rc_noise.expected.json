@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "netlist_sha256": "002276e9467c2d74cf269be2b08d778001481e9fe3b02447d6c30446946494e9",
+ "netlist_sha256": "6fbbf4a5ce6f6c63cf3ac1b4d464f2fa09aab938039b51ae27ca05e148d1760b",
  "analysis": "sp",
  "purpose": "HSPICE .lin on a lossy RC two-port with unequal port impedances (50 and 75 ohm): S, Y, Z, H, group delay of every entry and the noise parameters of a passive network at 290 K.",
  "oracle": {

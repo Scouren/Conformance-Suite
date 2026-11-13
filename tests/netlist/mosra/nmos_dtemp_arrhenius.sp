@@ -10,6 +10,7 @@
 *   m3 temp=100 dtemp=50  T = 373.15 K
 * so dVth(m2)/dVth(m1) = exp(3000*(1/298.15 - 1/348.15)).
 * Expected results: nmos_dtemp_arrhenius.expected.json
+* KNOWN GAP: spice2rack keeps the MOSRA cards as HSPICE text (W0001); read as ngspice, no aging is applied (Scouren/SpiceRack#24)
 vd d 0 1.5
 vg g 0 1.2
 m1 d g 0 0 n3 w=10u l=1u

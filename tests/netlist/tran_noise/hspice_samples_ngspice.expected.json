@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "analysis": "tran_noise",
+  "purpose": "HSPICE .trannoise SAMPLES= runs one transient per Monte Carlo index; index 1 is noiseless.",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "RC thermal noise, h = 50 ps: stationary backward-Euler variance kT/C 2(h/tau)/((1+h/tau)^2-1) = 0.97561 kT/C at 25 degC; the time-weighted variance over 10 us has relative sd sqrt(2 tau/T) = 1.41 %, band +/- 6 sd. Sample 1 is exactly 0."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [],
+    "checks": [
+      {
+        "kind": "time_weighted_moments",
+        "plot": "Transient Noise Analysis (sample=1)",
+        "column": "v(out)",
+        "time_window": [
+          2e-08,
+          1e-05
+        ],
+        "mean_abs_max": 0,
+        "variance_min": 0,
+        "variance_max": 0,
+        "min_points": 10000
+      },
+      {
+        "kind": "time_weighted_moments",
+        "plot": "Transient Noise Analysis (sample=2)",
+        "column": "v(out)",
+        "time_window": [
+          2e-08,
+          1e-05
+        ],
+        "mean_abs_max": 5e-06,
+        "variance_min": 3.6752355583398207e-09,
+        "variance_max": 4.356774185074809e-09,
+        "min_points": 10000
+      },
+      {
+        "kind": "time_weighted_moments",
+        "plot": "Transient Noise Analysis (sample=3)",
+        "column": "v(out)",
+        "time_window": [
+          2e-08,
+          1e-05
+        ],
+        "mean_abs_max": 5e-06,
+        "variance_min": 3.6752355583398207e-09,
+        "variance_max": 4.356774185074809e-09,
+        "min_points": 10000
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "notes": [
+    "Statistical acceptance intervals over fixed-seed runs, not prescribed noise waveforms."
+  ],
+  "twin_of": "tran_noise/hspice_samples.sp",
+  "netlist_sha256": "44356fef5c453b9ccab7a8c446bffa51e1d75ad141437443c69842e5d0d99ed8"
+}

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "analysis": [
+    "op",
+    "ac"
+  ],
+  "purpose": "A VDMOS .model card's m is the body diode's grading coefficient (ngspice vdmos.c:121), never the multiplier, and the body diode with RB sits on the external source and drain (vdmosset.c:378-398, vdmosload.c:723-724, 888). ESPice bound the card's m=0.548 to the multiplicity (2.3471 mA forward, 0.548 IS reverse) and put the diode behind RS and RD.",
+  "oracle": {
+    "kind": "ngspice",
+    "executable_sha256": "dc4f01e9939875529334c55c0a14f422843ad88e5c51422ae2640c4ab79a0b1f",
+    "derivation": "ngspice 44.2 batch run of this deck, values read from its ASCII raw. Corroborated by the closed forms (Vt = kT/q at 300.15 K): D1 and MF are one Shockley junction, N = 1.564, with 3.8 mOhm in series, 4.96707 mA at 0.5 V; D2 and MR at -2 V carry dioload.c's reverse branch -IS(1 - (3 N Vt/(2e))^3) - 2 V GMIN = -2.13018e-8 A; the 1 kHz reverse admittance is j 2 pi 1k CJO/(1 + 2/VJ)^0.548 = j 3.79100e-6 S, where a grading left at 0.5 gives j 4.38753e-6 S.",
+    "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw vdmos_body_diode.sp",
+    "version": "44.2",
+    "tolerance": "rtol 1e-3, ngspice's reltol: every terminal is pinned, and ESPice matched each column to 4e-6 or better once the card's m bound the grading and the diode left RS and RD (measured with mj= and RS=RD=0 on the old build). The reverse 1 kHz point keeps 7.1e-10 S of ngspice's real part that ESPice does not: vdmosload.c:797 takes gdb = IS*3*arg/vd with arg not cubed, where dioload.c cubes it; that is 1.9e-4 of the admittance, inside rtol. atol 1e-12 A."
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Operating Point",
+        "match": "exact",
+        "row_count": 1,
+        "columns": {
+          "i(vdf)": {
+            "values": [
+              0.004967073400565569
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdr)": {
+            "values": [
+              -2.130176501857761e-08
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(va)": {
+            "values": [
+              -0.004967073400564459
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vb)": {
+            "values": [
+              2.130184384441236e-08
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      },
+      {
+        "name": "AC Analysis",
+        "match": "exact",
+        "row_count": 1,
+        "axis": {
+          "name": "frequency",
+          "values": [
+            1000.0
+          ],
+          "atol": 1e-12,
+          "rtol": 1e-12
+        },
+        "columns": {
+          "i(vdf)": {
+            "values": [
+              [
+                -0.1227303664809929,
+                -0.001230947391858517
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vdr)": {
+            "values": [
+              [
+                -7.142614277810821e-10,
+                -3.791005172576852e-06
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(va)": {
+            "values": [
+              [
+                -0.1227303664810506,
+                -0.001230947391867123
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          },
+          "i(vb)": {
+            "values": [
+              [
+                -1.4210854715202e-12,
+                -3.790999040533439e-06
+              ]
+            ],
+            "unit": "A",
+            "rtol": 0.001,
+            "atol": 1e-12
+          }
+        }
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "1af60a85a0bfa94d5013d0569272b57250b085204967da7b590ad6d44d0261c7"
+}

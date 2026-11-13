@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "op",
+  "purpose": "An E card's VALUE={...} SCALE= is HSPICE's: UnsupportedCard naming the line; value={3*(...)} is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "ngspice-44.2 stops on it (\"Undefined parameter [scale]\", measured), as on max=, min= and abs= (\"Expression err ... Cannot compute substitute\"); SpiceRack translates the HSPICE deck."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "a459a0194127f71f968194489caa5a7d7bbfbf22a4feffe06a7a221a8615f3f1"
+}

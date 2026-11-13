@@ -1,0 +1,14 @@
+{
+ "schema_version": 1,
+ "analysis": "op",
+ "purpose": "A three-argument limit(x, a, b), PSPICE's clamp, is refused by name: plain ngspice's numparam limit takes (nominal, variation).",
+ "oracle": {
+  "kind": "diagnostic",
+  "derivation": "inpcompat.c:692-695 defines the clamp only in ngspice's PSPICE mode; xpressn.c:81-85 gives plain numparam limit(nom, var). ngspice-44.2 -b prints v(p) = -0.75 for this deck (measured 2026-11-11); ESPice refuses the card (UnsupportedCard) rather than run a value."
+ },
+ "expect": {
+  "status": "error",
+  "category": "unsupported_input"
+ },
+ "netlist_sha256": "3b82ef7858d49bb3ffe9f5009ca859a64f263fcd92cb75bb0e9ef9deefae925a"
+}

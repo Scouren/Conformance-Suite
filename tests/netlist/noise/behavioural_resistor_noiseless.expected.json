@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "analysis": "noise",
+  "purpose": "Thermal noise of an R that reads v(): the noiseless default",
+  "oracle": {
+    "kind": "analytic",
+    "derivation": "Without noisy=1 the B is noiseless (inpcom.c:6869-6875), so only R1 reaches out: output PSD = 4 kB T R1 (R2/(R1+R2))^2 = 4 kB T 250. T = 300.15 K, spectrum = sqrt(PSD), input spectrum = output/0.5, integrated RMS = sqrt(PSD*(fstop-fstart)).",
+    "corroboration": "ngspice-45 on this deck agrees to 1e-6 (SPICE_ASCIIRAWFILE=1 ngspice -n -b -r ref.raw behavioural_resistor_noiseless.sp)"
+  },
+  "expect": {
+    "status": "success",
+    "plots": [
+      {
+        "name": "Noise Spectral Density Curves",
+        "match": "exact",
+        "columns": {
+          "onoise_spectrum": {
+            "values": [
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09,
+              2.0356861186096448e-09
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 5e-05,
+            "atol": 1e-18
+          },
+          "inoise_spectrum": {
+            "values": [
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09,
+              4.0713722372192895e-09
+            ],
+            "unit": "V/sqrt(Hz)",
+            "rtol": 5e-05,
+            "atol": 1e-18
+          }
+        },
+        "axis": {
+          "name": "frequency",
+          "values": [
+            10.0,
+            17.782794100389,
+            31.622776601684,
+            56.234132519035,
+            100.0,
+            177.82794100389,
+            316.22776601684,
+            562.34132519035,
+            1000.0,
+            1778.2794100389,
+            3162.2776601684,
+            5623.4132519035,
+            10000.0
+          ],
+          "rtol": 1e-09,
+          "atol": 1e-15
+        },
+        "row_count": 13
+      },
+      {
+        "name": "Integrated Noise",
+        "match": "exact",
+        "columns": {
+          "v(onoise_total)": {
+            "values": [
+              2.0346680209622652e-07
+            ],
+            "unit": "V_rms",
+            "rtol": 5e-05,
+            "atol": 1e-16
+          },
+          "v(inoise_total)": {
+            "values": [
+              4.0693360419245303e-07
+            ],
+            "unit": "V_rms",
+            "rtol": 5e-05,
+            "atol": 1e-16
+          }
+        },
+        "row_count": 1
+      }
+    ],
+    "finite_values_required": true,
+    "all_requested_analyses_must_complete": true
+  },
+  "netlist_sha256": "aef2a906b0336d90f92cf56ae14888e7d31a6f2e0d1f6d89e40fd79d0d3a4f49"
+}

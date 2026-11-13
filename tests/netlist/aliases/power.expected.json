@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "`.power` is no ESPice card: UnsupportedCard naming the line; `.meas tran` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.meas tran) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "e6b38b79fd120dc138b927b0a778cf39e7280b34e9a236ae835e04033209e58d"
+}

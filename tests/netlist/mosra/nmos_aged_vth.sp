@@ -9,6 +9,7 @@
 * BSIM3's mobility from depending on Vth; its remaining second-order
 * couplings move the aged gate by under 2e-6 V more, inside atol 1e-5.
 * Expected results: nmos_aged_vth.expected.json
+* KNOWN GAP: spice2rack keeps the MOSRA cards as HSPICE text (W0001); read as ngspice, no aging is applied (Scouren/SpiceRack#24)
 vd d 0 1.5
 vref r 0 -0.01
 h1 x 0 vd 1k
