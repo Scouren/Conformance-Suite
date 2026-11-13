@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "1 - exp(-1 us / (R 1 nF)) = 0.5 at R = 1e-6 / (1e-9 ln 2) = 1442.695 ohm; the window ends within 1e-6 * 9900 ohm."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

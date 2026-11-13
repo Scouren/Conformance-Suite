@@ -1,4 +1,4 @@
-* KNOWN GAP: W ON under .tran uic needs the UIC flag in the model (#TBD)
+* KNOWN GAP: W ON under .tran uic needs the UIC flag in the model (#266)
 * Expected results: switch_w_on_uic.expected.json
 * A uic transient skips the .op (SpiceRack P8-045 follow-up). ngspice's UIC
 * load seeds W's ON as HYST_ON in state0 (cswload.c:39-56), dctran.c:387-392

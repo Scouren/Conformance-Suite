@@ -4,6 +4,7 @@
 * lower sideband f0 - f (1 nF across it), P3 the upper sideband f0 + f.
 * Oracle: analytic (see the expected.json derivation).
 * Expected results: hblin_mixer.expected.json
+* KNOWN GAP: spice2rack writes no portnum V for HSPICE's P card with hblin=[...] (R0001) (Scouren/SpiceRack#24)
 P1 rf 0 port=1 z0=50 dc=2
 vlo lo 0 sin(0 0.5 1meg)
 m1 if rf lo 0 nm w=10u l=1u

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v(b) = (rv + d)/(2k + d), rv ~ N(1k, 50) read by both resistors, d ~ N(0, 50): to first order mean 0.5 and sigma = sqrt((50/2k)^2 + (50/4k)^2) = 27.95 mV; independent draws per use would give 21.7 mV."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

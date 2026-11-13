@@ -3,7 +3,7 @@
 * CTYPE "Default=0"; p. 183 "Capacitor equations are not implicitly
 * converted to charge equations"; under CTYPE=0 the amplitude of ch. 31
 * pp. 986-988 keeps v as C steps). Built as ngspice's c= network.
-* KNOWN GAP: spice2rack writes M, TC1 and DTEMP through on a behavioural C, whose ngspice network drops DTEMP and scales by 1/(1+TC1(T-27)); fold M(1+TC1 dT) into the equation (SpiceRack row P3-144) (#TBD)
+* KNOWN GAP: spice2rack writes M, TC1 and DTEMP through on a behavioural C, whose ngspice network drops DTEMP and scales by 1/(1+TC1(T-27)); fold M(1+TC1 dT) into the equation (SpiceRack row P3-144) (Scouren/SpiceRack#24)
 * Expected results: behavioural_capacitor_ctype0.expected.json
 * Oracle (analytic): each node takes a current ramp i = k t, k = 1e3 A/s,
 * the charge Q = k t^2/2 from v = 0; C0 = 1n, v(ctl) = 1 + r t, r = 1e6/s.

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Divider r2/(r1+r2) = 1/4 at each decade point 10^(k/2)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

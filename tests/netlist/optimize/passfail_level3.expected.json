@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "WHEN v(out)=2 exists in the 0-5 V sweep iff 5 rx / (1k + rx) >= 2, i.e. rx >= 2k/3; the result is the last passing value, within 1e-4 ohm above."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

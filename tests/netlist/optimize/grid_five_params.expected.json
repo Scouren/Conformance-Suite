@@ -6,7 +6,6 @@
   "kind": "analytic",
   "derivation": "5 r / (1k + r) = g gives r = 1k g / (5 - g); on a grid, the neighbouring multiple with the smaller relative error. The dividers are independent, so each parameter's own best grid point is the joint optimum."
  },
- "tokenizer": "hspice",
  "expect": {
   "status": "success",
   "plots": [],

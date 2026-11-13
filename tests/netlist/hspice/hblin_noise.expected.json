@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "netlist_sha256": "581fff9cd5c25d748efc959938e2a503ca23f1386e3289800feff664257ef086",
+ "netlist_sha256": "7fba530de6aaf342775409411918eae624a94273f790d69ebe10524a290f538a",
  "analysis": "hblin",
  "purpose": "HSPICE RF .hblin noisecalc=1: S and the single-sideband noise figure of an ideal multiplying mixer.",
  "oracle": {

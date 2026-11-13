@@ -1,7 +1,7 @@
 * HSPICE behavioural resistors (User Guide E-2010.12 ch. 8 pp. 170-173,
 * `Rxxx n1 n2 [R=]'equation'`) in the quoted and R= forms, run as
 * ngspice's B source, with HSPICE's TNOM = 25 degC and default NOISE=1.
-* KNOWN GAP: spice2rack writes RELV through, which ngspice lacks (reltol), and TC1/TC2 on a behavioural R, which ngspice's B scales from 27 degC, not TNOM (SpiceRack rows P3-144, P3-145) (#TBD)
+* KNOWN GAP: spice2rack writes RELV through, which ngspice lacks (reltol), and TC1/TC2 on a behavioural R, which ngspice's B scales from 27 degC, not TNOM (SpiceRack rows P3-144, P3-145) (Scouren/SpiceRack#24)
 * Expected results: behavioural_resistor.expected.json
 * Oracle (analytic), the circuit of tests/netlist/dc/behavioural_resistor.sp
 * over the sweep vin = Vs from -2 to 4 V:

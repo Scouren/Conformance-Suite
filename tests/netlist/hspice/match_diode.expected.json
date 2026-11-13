@@ -7,7 +7,6 @@
   "kind": "analytic",
   "derivation": "Op by Newton on (Vdd - V)/R = Is(e^{V/Vt} - 1) + gmin V (Vt = k T/q, k and q as diode.va, T = 300.15 K, gmin 1e-12). G = 1/R + Is/Vt e^{V/Vt} + gmin; dV/dR = -((Vdd - V)/R^2)/G; dG/dR = -1/R^2 + Is/Vt^2 e^{V/Vt} dV/dR. y = 1/(G + j w C); per sigma dy = -y^2 dG/dR sigma_R and -y^2 j w sigma_C with sigma_R = 100 ohm, sigma_C = 50 pF. Spreads in quadrature over both: |y| moves by Re(conj(y) dy)/|y|, the phase by Im(dy/y) (degrees). .dcsens and .dcmatch: dV/dR sigma_R, 0 for c1; total_3sigma = 3 |dV/dR sigma_R|."
  },
- "tokenizer": "hspice",
  "expect": {
   "status": "success",
   "plots": [

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Ten whole periods of a 1 V, 1 kHz sine: bin 10 holds 1 at phase 0; DC and bin 30 hold 0."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

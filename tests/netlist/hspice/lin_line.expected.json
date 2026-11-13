@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "netlist_sha256": "e2db2bd0736b8766e6cf88c81ca0dba493bec79af0f8d9cfb2ba9ef76c9d2399",
+ "netlist_sha256": "3ac77bc2de1687afee45c5d9d4b34de10aac9454c76343f8db4d3c0f323c5faa",
  "analysis": "sp",
  "purpose": "HSPICE .lin through a matched lossless line: S, Y, Z, H and the exact td group delay.",
  "oracle": {

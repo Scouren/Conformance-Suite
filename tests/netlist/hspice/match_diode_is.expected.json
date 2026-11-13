@@ -7,7 +7,6 @@
   "kind": "analytic",
   "derivation": "Op by Newton on (Vdd - V)/R = Is(e^{V/Vt} - 1) + gmin V (Vt = k T/q, k and q as diode.va, T = 300.15 K, gmin 1e-12). G = 1/R + Is/Vt e^{V/Vt} + gmin; dV/dIs = -(e^{V/Vt} - 1)/G; dG/dIs = e^{V/Vt}/Vt + Is/Vt^2 e^{V/Vt} dV/dIs. y = 1/(G + j w C); dy = -y^2 dG/dIs sigma_Is with sigma_Is = 1e-15. Spreads: |y| moves by Re(conj(y) dy)/|y|, the phase by Im(dy/y) degrees. .dcmatch: total_3sigma = 3 |dV/dIs sigma_Is|."
  },
- "tokenizer": "hspice",
  "expect": {
   "status": "success",
   "plots": [

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "UIC start at the loaded v(b) = 0.25 V, RC = 1 us charging to 1 V: v(b) = 1 - 0.75 exp(-t / 1 us)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

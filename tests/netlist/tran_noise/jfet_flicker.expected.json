@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Drain flicker KF*ID/f into a 1k load: Var v(d1) = R^2 KF ID ln(FMAX/FMIN) (+0.2 % channel thermal); through a 10 MHz pole Var v(d2) = R^2 KF ID [ln f - ln(1+(f/fc)^2)/2] from FMIN to FMAX. Bands of 15 % and 20 % in variance cover the sample spread of a 20 us record (measured 2 % and 6 % rms over 12 seeds)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

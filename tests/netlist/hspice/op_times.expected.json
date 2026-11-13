@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "RC step response 1 - exp(-t/5 ns) at 1 ns and 5 ns."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "With va satisfied and vb violated, the fit minimizes ((v-2)/2)^2 + ((v-3)/3)^2: v = 30/13, rx = 1000 v / (5 - v) = 6000/7."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "t = R C ln 2 = 693.1 ns nominal; over trials mean 693.1 ns, relative sigma sqrt(0.03^2 + 0.1^2)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

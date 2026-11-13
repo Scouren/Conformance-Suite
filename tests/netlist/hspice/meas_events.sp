@@ -5,6 +5,7 @@
 * its peak between them is 1; sin^2 averages 1/2 over a period, 2 sin has
 * RMS sqrt 2, and EM_AVG over a period is (1 - 0.5) / pi.
 * Expected results: meas_events.expected.json
+* KNOWN GAP: spice2rack does not translate these HSPICE .measure event forms (W0048); read as ngspice, d1 differs (Scouren/SpiceRack#24)
 .option delmax=2n em_recovery=0.5
 v1 s 0 sin(0 1 1meg)
 r1 s 0 1k

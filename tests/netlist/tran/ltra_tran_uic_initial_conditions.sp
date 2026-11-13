@@ -1,4 +1,4 @@
-* KNOWN GAP: LTRA v1/v2/i1/i2 under .tran uic need the UIC flag in the model (#TBD)
+* KNOWN GAP: LTRA v1/v2/i1/i2 under .tran uic need the UIC flag in the model (#266)
 * Expected results: ltra_tran_uic_initial_conditions.expected.json
 * Under uic ngspice keeps an O card's v1, v2, i1 and i2 (ic= is their
 * vector, in that order: v1, i1, v2, i2) as the line's state at t <= 0

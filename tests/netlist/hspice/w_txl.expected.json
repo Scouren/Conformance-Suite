@@ -7,7 +7,6 @@
     "derivation": "ngspice -n -b -r txl.raw txl.cir with the W card as Y1 a 0 b 0 ymod, .model ymod txl R=5 L=300n G=0 C=120p length=0.2; samples at ngspice's accepted times. Both are approximations of the same line (TXL: its own convolution; W: rational fit), so the tolerance covers edge timing: 1.5e-2 V.",
     "command": "ngspice -n -b -r txl.raw txl.cir"
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

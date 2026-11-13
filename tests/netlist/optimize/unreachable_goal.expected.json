@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "4.9 V needs rx = 49k > 10k: rx ends at 10k and v(out) at 5 * 10k / 11k."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

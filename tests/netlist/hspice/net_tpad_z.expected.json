@@ -7,7 +7,6 @@
   "kind": "analytic",
   "derivation": "T network Z = [[R1+R2, R2], [R2, R3+R2]]; S = (Zn - E)(Zn + E)^-1 with Zn = F^-1 Z F^-1, F = diag(sqrt(RIN), sqrt(ROUT)); Y = Z^-1; H from Z (h11 = det Z / Z22, h12 = Z12/Z22, h21 = -Z21/Z22, h22 = 1/Z22); Rollett K and Edwards-Sinsky MU from S."
  },
- "tokenizer": "hspice",
  "expect": {
   "status": "success",
   "plots": [

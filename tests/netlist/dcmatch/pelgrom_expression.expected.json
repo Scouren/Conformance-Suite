@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Diode-connected level-1 nmos at a fixed 10 uA: dv/dvto = 1. sigma(vto) = 5 mV*um/sqrt(W*L): m1 5 mV, m2 2.5 mV; total_3sigma of v(a,b) = 3*sqrt(5^2+2.5^2) mV = 16.770510 mV."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

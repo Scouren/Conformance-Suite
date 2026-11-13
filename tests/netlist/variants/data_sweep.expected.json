@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "DC: v(b) = v1 rl/(1k + rl). AC with a 1 V drive: v(b) = rl/(rl + 1k + j w 1k rl 1n)."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

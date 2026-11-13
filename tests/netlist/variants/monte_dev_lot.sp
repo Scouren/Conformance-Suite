@@ -6,6 +6,7 @@
 * v = n Vt ln(I/IS), so sigma(v(a)) = Vt sqrt(0.1^2 + 0.02^2) = 2.64 mV and
 * sigma(v(a) - v(b)) = Vt 0.02 sqrt(2) = 0.731 mV (Vt = 25.85 mV at 27 C).
 * Expected results: monte_dev_lot.expected.json
+* KNOWN GAP: spice2rack keeps HSPICE's DEV/LOT variation as HSPICE text (W0001); read as ngspice, the lot spread is lost (Scouren/SpiceRack#24)
 i1 0 a 1m
 i2 0 b 1m
 d1 a 0 dmod

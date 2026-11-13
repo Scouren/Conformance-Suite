@@ -74,6 +74,5 @@
   "finite_values_required": true,
   "all_requested_analyses_must_complete": true
  },
- "netlist_sha256": "3f224e692984788447b3c9e13a124c39fea613dc62f1fafa3533c0fc2e80f035",
- "tokenizer": "hspice"
+ "netlist_sha256": "3f224e692984788447b3c9e13a124c39fea613dc62f1fafa3533c0fc2e80f035"
 }

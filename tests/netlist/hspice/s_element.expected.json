@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "Y = [[Ys+1/100, -Ys], [-Ys, Ys+Yc]], Ys = 1/(10+s 5n), Yc = s 2p/(1+s 25*2p); S = (I - 50Y)(I + 50Y)^-1 written to net.s2p; node voltages from (Y + I/50) v = [1/50, 0]. AC at the 41 data frequencies."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

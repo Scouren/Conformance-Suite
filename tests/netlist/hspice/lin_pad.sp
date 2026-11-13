@@ -1,6 +1,7 @@
 * HSPICE .lin on the matched 6.02 dB pi pad between P-element ports: S, Y, Z, H and the two-port noise parameters (a matched pad at 290 K has NF = NFMIN = 4).
 * Oracle: analytic (see the expected.json derivation).
 * Expected results: lin_pad.expected.json
+* KNOWN GAP: spice2rack writes no portnum V for HSPICE's P card (R0001) (Scouren/SpiceRack#24)
 P1 a 0 port=1 z0=50
 P2 b 0 port=2 z0=50
 R1 a 0 150

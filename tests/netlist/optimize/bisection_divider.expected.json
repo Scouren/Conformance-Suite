@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "5 rx / (1k + rx) = 2 V at rx = 2k/3; the last passing value lies within RELIN * 9900 = 1e-4 ohm above it."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

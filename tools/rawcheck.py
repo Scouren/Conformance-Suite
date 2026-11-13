@@ -23,7 +23,8 @@ A port of ESPice's tests/test_correctness.zig judge, tool-neutral:
 - plots: the `exact`, `selected_rows`, `samples` and `unordered` match
   modes, |got - want| <= atol + rtol*|want| on the complex plane.
 - checks: `measure` (a `.meas` line on stdout, at the digits it prints:
-  "printed channel: N digits"), `repeatability` (the command once more,
+  "printed channel: N digits"), `display` (an .hdl display task's
+  `name = value` line, read the same way), `repeatability` (the command once more,
   its plots bitwise equal), `stderr_line` (the first run's stderr), and the
   plot checks `axis_bounds`, `selected_values`, `fourier_thd`,
   `sample_moments`, `time_weighted_moments`, `oscillation` and
@@ -486,8 +487,10 @@ def judge(oracle, rc, stdout, raw, again=b"", stderr=""):
             out.append((f"plot {want['name']}", False, f"got={e} want=columns present"))
     for check in exp.get("checks", []):
         kind = check["kind"]
-        if kind == "measure":
-            out.append((f"measure {check['name']}", *measure(stdout, check)))
+        # `display`: an .hdl display task's `name = value` stdout line, read
+        # as a measure's listing line (ESPice's --measures does not hold it).
+        if kind in ("measure", "display"):
+            out.append((f"{kind} {check['name']}", *measure(stdout, check)))
         elif kind == "repeatability":
             out.append(("repeatability", *repeatable(check, plots, again)))
         elif kind == "stderr_line":
@@ -631,6 +634,10 @@ def plot_checks_selftest(raw):
     line = {"expect": {"status": "success", "checks": [{"kind": "stderr_line", "prefix": "note: seam"}]}}
     assert judge(line, 0, "", raw, stderr="warning: x\nnote: seam 4 of 11\n")[0][1]
     assert not judge(line, 0, "", raw, stderr="warning: x\n  note: seam 4 of 11\n")[0][1]
+    # A $strobe("%m vdrop = %g") line, 0.35 V across the VA resistor n1.
+    strobe = {"expect": {"status": "success", "checks": [{"kind": "display", "name": "n1 vdrop", "value": 0.35, "rtol": 1e-5, "atol": 0}]}}
+    assert judge(strobe, 0, "n1 vdrop = 0.35\n", raw)[0][1]
+    assert not judge(strobe, 0, "n1 vdrop = 0.36\n", raw)[0][1]
 
 
 if __name__ == "__main__":

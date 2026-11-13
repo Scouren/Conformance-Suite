@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "RC thermal noise, h = 50 ps: stationary backward-Euler variance kT/C 2(h/tau)/((1+h/tau)^2-1) = 0.97561 kT/C at 25 degC; the time-weighted variance over 10 us has relative sd sqrt(2 tau/T) = 1.41 %, band +/- 6 sd. Sample 1 is exactly 0."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

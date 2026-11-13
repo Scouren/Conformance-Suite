@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "5 rx / (1k + rx) = 2 V gives rx = 2k/3; the final run measures 2 V."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],

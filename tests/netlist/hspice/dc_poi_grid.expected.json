@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v(out) = (v1/3k + i1) * (3k || 1k) = (v1/3k + i1) * 750."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

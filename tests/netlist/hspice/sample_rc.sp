@@ -5,6 +5,7 @@
 * at f is the sum over k of S(|f + k FS|) for 0 < |f + k FS| <= 10 MHz, with
 * S(g) = 4kTR / (1 + (g / fc)^2) at 25 degC; the unsampled spectrum is S(f).
 * Expected results: sample_rc.expected.json
+* KNOWN GAP: spice2rack does not translate .sample with .noise v(out) src (W0015) (Scouren/SpiceRack#24)
 vs in 0 dc 0 ac 1
 r1 in out 1k
 c1 out 0 1n

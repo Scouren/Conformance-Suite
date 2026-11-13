@@ -7,6 +7,7 @@
 * F = (2 * 100 + 50 / 1.25^2) / 50 = 4.64.
 * Oracle: analytic (see the expected.json derivation).
 * Expected results: hblin_noise.expected.json
+* KNOWN GAP: spice2rack writes no portnum V for HSPICE's P card with hblin=[...] (R0001) (Scouren/SpiceRack#24)
 P1 rf 0 port=1 z0=50
 R1 rf 0 50
 vlo lo 0 sin(0 1 1meg)

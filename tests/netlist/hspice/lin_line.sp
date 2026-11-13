@@ -3,6 +3,7 @@
 * from a central difference across the line's frequency-dependent stamp.
 * Oracle: analytic (see the expected.json derivation).
 * Expected results: lin_line.expected.json
+* KNOWN GAP: spice2rack writes no portnum V for HSPICE's P card (R0001) (Scouren/SpiceRack#24)
 P1 a 0 port=1 z0=50
 T1 a 0 b 0 z0=50 td=1n
 P2 b 0 port=2 z0=50

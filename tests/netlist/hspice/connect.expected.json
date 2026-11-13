@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v(b) = 1 V drives 1k on the joined net c: i(v1) = -1 mA."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

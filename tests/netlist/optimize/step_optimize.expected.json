@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "5 rx / (rt + rx) = 2 V gives rx = 2 rt / 3 per point; at the .op, i(v1) = -5 / (rt + rx) = -3 mA and -1.5 mA."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

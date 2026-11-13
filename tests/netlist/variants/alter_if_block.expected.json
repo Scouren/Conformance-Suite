@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "i(v1) = -10 V / R, R the resistors the state's branches keep: a=1 1k; a=2 b=0 2k; a=3 1k||1k = 500; a=4 4k; a=2 b=1 2k||2k||1k||500 = 250; a=2 b=0 2k. Conditions read each parameter's last definition: HSPICE UG E-2010.12 p. 84, and p. 110 for .alter with IF-ELSE."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [

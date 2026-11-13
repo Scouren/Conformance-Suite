@@ -7,6 +7,7 @@
 * the step-by-step recursion. As h -> 0 it is kT/C (1 - exp(-2t/tau)); at
 * h/tau = 0.0025 the two differ by under 0.2 %.
 * Expected results: hspice_sde_rc.expected.json
+* KNOWN GAP: spice2rack does not translate HSPICE's transient-noise analysis (W0015) (Scouren/SpiceRack#24)
 r1 out 0 1k
 c1 out 0 1p
 .tran 5p 3n

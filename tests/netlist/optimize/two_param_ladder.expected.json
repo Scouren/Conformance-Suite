@@ -6,7 +6,6 @@
     "kind": "analytic",
     "derivation": "v(b) = 1 V puts 1 mA through the 1k foot: ra = 2 V / 1 mA, rb = 2 V / 1 mA."
   },
-  "tokenizer": "hspice",
   "expect": {
     "status": "success",
     "plots": [],
