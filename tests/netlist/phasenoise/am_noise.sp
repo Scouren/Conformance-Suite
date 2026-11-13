@@ -13,11 +13,12 @@
 * below the first offset where the two agree within 0.5 dB to METHOD=1
 * above it; here they agree from 1 kHz, so it is METHOD=1.
 * Expected results: am_noise.expected.json
+* Respelled from `.hbosc v(t) 1meg 7`, same job.
 L1 t 0 25.330296u
 C1 t 0 1n
 R1 t 0 10k
 Bneg t 0 I=-1.6e-4*V(t)+8e-5*V(t)*V(t)*V(t)
-.hbosc v(t) 1meg 7
+.hb v(t) 1meg 7
 .phasenoise v(t) dec 2 1k 10k method=1
 .phasenoise v(t) dec 2 1k 10k method=2
 .end

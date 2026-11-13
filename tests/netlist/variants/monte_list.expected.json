@@ -100,5 +100,5 @@
   "notes": [
     "A listed trial's draws equal that trial's in a MONTE=5 run; checked by hand on the raw output, not here."
   ],
-  "netlist_sha256": "234ad64557489761d505841022b16319328333a20c8d277027cc89d73b453dc0"
+  "netlist_sha256": "10295dccf202f6946b449b257113d572c6954e6842312df65c011933ecd5b5d6"
 }

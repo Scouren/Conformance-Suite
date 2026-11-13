@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "noise",
+  "purpose": "`.acphasenoise` is no ESPice card: UnsupportedCard naming the line; `.noise` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.noise) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "ed626ac8711fe62e54f79a9adbf8104728159c9040dabf1db14eab43305cea6b"
+}

@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn and .snnoise as must-emit v3 asks (#TBD)
 * HSPICE .snnoise ov insrc <sweep> [n1 +/-1] [CR .SNNOISE] runs as .pnoise
 * at the .sn tone, in the n1 = 0 band. Oracle: pnoise/lti_rc_sidebands_7's,
 * analytic LTI RC noise at 27 C (TNOM and TEMP pinned to it).

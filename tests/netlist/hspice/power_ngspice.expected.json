@@ -98,5 +98,5 @@
     "all_requested_analyses_must_complete": true
   },
   "twin_of": "hspice/power.sp",
-  "netlist_sha256": "92ea1e807ac9bccda49a64d699e6c08c4904fc2ffaeee2a70d07358621098c6f"
+  "netlist_sha256": "15aa3173723da99f661c40650f3fe4ecd90cefaa3493dd42cc33f3edac389df0"
 }

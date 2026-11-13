@@ -1,4 +1,4 @@
-* HSPICE .power [CR .POWER]: AVG, RMS, MAX and MIN of a signal as
+* HSPICE .power [CR .POWER] as `.meas tran`: AVG, RMS, MAX and MIN of a signal as
 * ngspice twin of hspice/power.sp (P1-062): the same circuit and oracle in ESPice's own dialect, with HSPICE's defaults written out.
 * power<N>_avg, _rms, _max and _min. A bare voltage source name reads the
 * power it absorbs, v(n+,n-) * i(source). Oracle: analytic. v1 drives
@@ -6,6 +6,7 @@
 * avg -0.5 mW, rms sqrt(3/8) mW, max 0, min -1 mW. v2 holds 2 V across
 * 1k + 1k: -2 mW throughout. i(v1) over the period: avg 0, max 1 mA.
 * Expected results: power_ngspice.expected.json
+* Respelled from three `.power` cards (power<N>_avg/_rms/_max/_min, REF= dropped), same job.
 * HSPICE: TNOM 25 degC, and the circuit at TNOM unless the deck sets TEMP.
 .options tnom=25 temp=25
 .option delmax=1n
@@ -14,8 +15,17 @@ r1 a 0 1k
 v2 b c 2
 r2 b 0 1k
 r3 c 0 1k
-.power v1 ref=top from=0 to=1u
-.power v2 from=0.5u to=1.5u
-.power i(v1) from=0 to=1u
+.meas tran power1_avg avg par('v(a)*i(v1)') from=0 to=1u
+.meas tran power1_rms rms par('v(a)*i(v1)') from=0 to=1u
+.meas tran power1_max max par('v(a)*i(v1)') from=0 to=1u
+.meas tran power1_min min par('v(a)*i(v1)') from=0 to=1u
+.meas tran power2_avg avg par('(v(b)-v(c))*i(v2)') from=0.5u to=1.5u
+.meas tran power2_rms rms par('(v(b)-v(c))*i(v2)') from=0.5u to=1.5u
+.meas tran power2_max max par('(v(b)-v(c))*i(v2)') from=0.5u to=1.5u
+.meas tran power2_min min par('(v(b)-v(c))*i(v2)') from=0.5u to=1.5u
+.meas tran power3_avg avg i(v1) from=0 to=1u
+.meas tran power3_rms rms i(v1) from=0 to=1u
+.meas tran power3_max max i(v1) from=0 to=1u
+.meas tran power3_min min i(v1) from=0 to=1u
 .tran 1n 2u
 .end

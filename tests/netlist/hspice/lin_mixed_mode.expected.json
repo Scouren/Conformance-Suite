@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "netlist_sha256": "a01267375c3d707ff6098857acda3e18ec4167e8f1bf432b8f6e2207e8f94c68",
+ "netlist_sha256": "6b5e43603a51ccea12b88a9b58fa383c4599b752e151e86c78848f0575bb022f",
  "analysis": "sp",
  "purpose": "HSPICE .lin mixed-mode S, Y, Z, H and stability factors of a balanced port 1 and a single-ended port 2.",
  "oracle": {

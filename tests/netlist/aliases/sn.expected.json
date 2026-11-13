@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "pss",
+  "purpose": "`.sn` is no ESPice card: UnsupportedCard naming the line; `.pss` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.pss) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "ac2e35e4e9c51eaf5545624928d86237dddfc777112425613e3f247fdd41d9da"
+}

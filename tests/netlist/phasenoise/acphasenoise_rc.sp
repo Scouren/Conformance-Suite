@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .acphasenoise as must-emit v3 asks; the oracle's phnoise column becomes onoise when it does (#TBD)
 * HSPICE .acphasenoise [CR .ACPHASENOISE; RF Ch.7]: a phase-domain
 * circuit, where node voltages stand for phases in radians. The reference
 * phase noise is a 1k resistor's 4kTR (rad^2/Hz) into a 1 nF loop-filter

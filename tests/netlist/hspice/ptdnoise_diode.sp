@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn as must-emit v3 asks (#TBD)
 * HSPICE .ptdnoise [CR .PTDNOISE]: a diode driven by the current
 * I(t) = 1m + 0.5m sin(2 pi 1MEG t). Its shot noise 2 q I(t) flows through
 * its own conductance I(t)/Vt, so the output noise is memoryless and

@@ -2,6 +2,7 @@
 * holds the charge q = C v (User Guide E-2010.12 ch. 8 p. 181; ch. 31
 * pp. 986-988: C Vm = A C Vm' as C steps to A C, Figure 219). Built as
 * ngspice's q= network over q = (equation)*v(n1,n2).
+* KNOWN GAP: spice2rack writes CTYPE=1 through, which ngspice's behavioural C drops (i = C dv/dt); write q={(eq)*v(n1,n2)} with M and TC folded in (SpiceRack row P3-144) (#TBD)
 * Expected results: behavioural_capacitor_ctype1.expected.json
 * Oracle (analytic): each node takes a current ramp i = k t, k = 1e3 A/s,
 * the charge Q = k t^2/2 from v = 0; C = C0 v(ctl), C0 = 1n,

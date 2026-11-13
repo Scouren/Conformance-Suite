@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "hb",
+  "purpose": "`.hbosc` is no ESPice card: UnsupportedCard naming the line; `.hb v(osc) f` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.hb v(osc) f) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "86d448cba78ae734e36b08ddc568d50741cc766ab5315134b8a15883d0cb9816"
+}

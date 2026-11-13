@@ -4,11 +4,11 @@
   "purpose": "A .dc long enough to split into segments, over a bistable circuit where a cold segment start lands on the middle branch: the seam check refuses the stitch and the sweep reruns whole, continued point to point as ngspice continues it",
   "oracle": {
     "kind": "ngspice-44.2",
-    "derivation": "ngspice-44.2 binary raw doubles of this deck, every point. Continued from vin = -5 the output stays on the low branch through vin = 2.1 and jumps high at 2.15. rtol 2e-3, atol 2e-6 V and 2e-12 A: twice the Newton acceptance test (reltol 1e-3, vntol 1e-6, abstol 1e-12), one share for each simulator's convergence; the prebuilt espice of 2026-11-11 (unsplit, serial) sits within 0.49 of it, at vin = 1.95 by the fold. The stderr check is the rerun's note: segment 4, cold at vin = -1.7, starts on the middle branch where segment 3 continued on the low one.",
+    "derivation": "ngspice-44.2 binary raw doubles of this deck, every point. Continued from vin = -5 the output stays on the low branch through vin = 2.1 and jumps high at 2.15. rtol 2e-3, atol 2e-6 V and 2e-12 A: twice the Newton acceptance test (reltol 1e-3, vntol 1e-6, abstol 1e-12), one share for each simulator's convergence; the prebuilt espice of 2026-11-11 (unsplit, serial) sits within 0.49 of it, at vin = 1.95 by the fold. The stderr check is the rerun's note: segment 4, cold at vin = -1.75 (the prebuilt espice's .dc from there: v(out) 3.7987 V), is on the middle branch at -1.7 where segment 3 continued on the low one. The deck's comments changed after the reference run; ngspice-44.2 gives byte-identical raw data for both versions.",
     "command": "ngspice -n -b -r reference.raw hysteresis_segments_schmitt.sp",
     "ngspice": "/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice"
   },
-  "netlist_sha256": "7d4d5c4133d195449cc94c691908583fd75866f14ab9373d0e9d201dfdc612b0",
+  "netlist_sha256": "3a76d2a0260dc7564174ae0fa26b820c51d3ec42f2f65588b408872909799be8",
   "expect": {
     "status": "success",
     "finite_values_required": true,

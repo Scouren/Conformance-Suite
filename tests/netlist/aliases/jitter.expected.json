@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "`.jitter` is no ESPice card: UnsupportedCard naming the line; `.meas tran ... jitter` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.meas tran ... jitter) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "b7918d5c77b77a934657c2632933deeb527b22519d2963895ec8c6b5fd6064ad"
+}

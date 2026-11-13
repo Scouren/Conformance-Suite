@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn as must-emit v3 asks (#TBD)
 * HSPICE .measure PTDNOISE [CR .MEASURE] over hspice/ptdnoise_diode's
 * first card: the density 2 q Vt^2 / I(t) at t = 250 ns, I = 1.5 mA, flat
 * in frequency. Oracle: analytic, 1.41015e-19 V^2/Hz.

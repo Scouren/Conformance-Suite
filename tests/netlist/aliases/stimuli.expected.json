@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "tran",
+  "purpose": "`.stimuli` is no ESPice card: UnsupportedCard naming the line; `.stim` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.stim) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "ee07f51bd7d028991bfb67cf692f322caea59c1dc59634122c27af73327de339"
+}

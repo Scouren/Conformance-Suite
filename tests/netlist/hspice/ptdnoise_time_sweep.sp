@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn as must-emit v3 asks (#TBD)
 * HSPICE .ptdnoise with a TIME sweep [CR .PTDNOISE]: the ptdnoise_diode
 * circuit, I(t) = 1m + 0.5m sin(2 pi 1MEG t) through a diode, strobed at
 * TIME = LIN 3 250n 750n, one plot per time. Oracle: analytic; the density

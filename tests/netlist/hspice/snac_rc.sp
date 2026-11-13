@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .sn and .snac as must-emit v3 asks (#TBD)
 * HSPICE .snac <sweep> [CR .SNAC] runs as .pac at the .sn tone.
 * Oracle: pac/rc's, analytic: an LTI circuit has no sidebands, so
 * sideband 0 is the ordinary H(f) = 1/(1 + j*2*pi*f*RC).

@@ -6,7 +6,7 @@
         "kind": "analytic",
         "derivation": "cap_val = max(icap_calc(1,2,3,4)) = max(2*sqrt(24), 1) = 4*sqrt(6) (numparam's one-argument max, xpressn.c:142-146, 921). I = 10 uA into C = cap_val nF from v = 0 is the exact ramp v = I t / C: t1 = 0.5 C / I, cv = (I t / v) 1e9 = cap_val, ratio = t1 / capac2 = 5e-5, mix = 2 t1, fast = 1, slow = 0, both = 1.",
         "corroboration": "ngspice 44.2 (/nix/store/bywwgg84ccx0544z9qrfm4zc4ls30ghd-ngspice-44.2/bin/ngspice, sha256 dc4f01e9...0b1f) -n -b on this deck with `.print tran v(p)` added before .end (batch mode runs only with an output card): capacitance = capac2 = 9.79796e+00, t1 = 4.89898e-04, cv = 9.797944e+00, ratio = 5.00000e-05, mix = 9.79796e-04, fast = 1, slow = 0, both = 1",
-        "tolerance": "rtol 1e-12 for the folded constants; rtol 1e-5 for the ramp's cards, above ngspice 44.2's 1.5e-6 miss on cv; the 0/1 cards exact"
+        "tolerance": "rtol 1e-12 for the folded constants, read as the exact f64 of the --measures JSON (ngspice 44.2 keeps the same double: it substitutes `param=    9.797958971132712e+00` into the card, seen with `.control set numdgt=16 run echo` added, and prints 9.79796e+00 at %.5e); rtol 1e-5 for the ramp's cards, above ngspice 44.2's 1.5e-6 miss on cv; the 0/1 cards exact"
     },
     "expect": {
         "status": "success",

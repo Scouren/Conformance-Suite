@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "analysis": "pxf",
+  "purpose": "`.snxf` is no ESPice card: UnsupportedCard naming the line; `.pxf` is the one spelling.",
+  "oracle": {
+    "kind": "diagnostic",
+    "derivation": "The keyword rule: a spelling that only renames an ESPice card (.pxf) is deleted, and SpiceRack translates it. ngspice-44.2 stops on it too (unimplemented dot command, measured)."
+  },
+  "expect": {
+    "status": "error",
+    "category": "unsupported_input"
+  },
+  "netlist_sha256": "7c43bda7482e4bc90cdd271e0e1e89152334e300b5b0589de4d479da8123564f"
+}

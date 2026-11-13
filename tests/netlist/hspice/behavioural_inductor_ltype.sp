@@ -4,6 +4,7 @@
 * any other; the flux is the dual of CTYPE=1's charge q = C v, ch. 31
 * pp. 986-988). Built as ngspice's L network, and for LTYPE=1 with the
 * flux on the F twin.
+* KNOWN GAP: spice2rack writes LTYPE=1, TC1 and DTEMP through on a behavioural L, whose ngspice network drops LTYPE and DTEMP and scales by 1+TC1(T-27); write the flux network and fold TC (SpiceRack row P3-144) (#TBD)
 * Expected results: behavioural_inductor_ltype.expected.json
 * Oracle (analytic): each inductor takes a current ramp i = k t,
 * k = 1e3 A/s; L0 = 1m, v(ctl) = 1 + r t, r = 1e6/s.

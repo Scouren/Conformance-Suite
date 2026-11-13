@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack does not yet write .power as must-emit v3 asks (#TBD)
 * HSPICE .power [CR .POWER]: AVG, RMS, MAX and MIN of a signal as
 * power<N>_avg, _rms, _max and _min. A bare voltage source name reads the
 * power it absorbs, v(n+,n-) * i(source). Oracle: analytic. v1 drives

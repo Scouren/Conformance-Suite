@@ -4,7 +4,8 @@
   "purpose": "GSHUNT loads every node; option aliases are accepted.",
   "oracle": {
     "kind": "analytic",
-    "derivation": "1 mA into 1 kOhm in parallel with the 1 mS shunt: 0.5 V."
+    "derivation": "1 mA into 1 kOhm in parallel with the 1 mS shunt: 0.5 V.",
+    "dropped": "SpiceRack e2ad5d7 writes the HSPICE options through and ESPice drops six, each listed below as a stderr_line check: gmindc=1e-12, absv=1e-6, relv=1e-3 and absi=1e-12 equal ngspice's gmin, vntol, reltol and abstol defaults, POST is output control, and METHOD acts only in a transient; the deck is one .op."
   },
   "tokenizer": "hspice",
   "expect": {
@@ -25,6 +26,14 @@
         },
         "row_count": 1
       }
+    ],
+    "checks": [
+      { "kind": "stderr_line", "prefix": "warning: options: ignoring unsupported option 'gmindc'" },
+      { "kind": "stderr_line", "prefix": "warning: options: ignoring unsupported option 'absv'" },
+      { "kind": "stderr_line", "prefix": "warning: options: ignoring unsupported option 'relv'" },
+      { "kind": "stderr_line", "prefix": "warning: options: ignoring unsupported option 'absi'" },
+      { "kind": "stderr_line", "prefix": "warning: options: unsupported integration method 'bdf'; the method is unchanged" },
+      { "kind": "stderr_line", "prefix": "warning: options: ignoring unsupported option 'post'" }
     ],
     "finite_values_required": true,
     "all_requested_analyses_must_complete": true

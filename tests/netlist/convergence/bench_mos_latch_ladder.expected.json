@@ -4,7 +4,7 @@
   "purpose": "Cross-coupled NMOS cell whose DC sweep drops out of plain Newton into the",
   "oracle": {
     "kind": "ngspice-44.2",
-    "derivation": "Independent ngspice-44.2 run of the preserved benchmark circuit. Stored binary raw doubles, selected by column name. Transient values retain reference accepted times. Large sweeps retain explicit row indices including outer-sweep boundaries.",
+    "derivation": "Independent ngspice-44.2 run of the preserved benchmark circuit. Stored binary raw doubles, selected by column name. Transient values retain reference accepted times. Large sweeps retain explicit row indices including outer-sweep boundaries. rtol is 3e-3, not 1e-3: the deck is scored on its Newton path at the default reltol=1e-3, so it keeps that reltol, and there ngspice-44.2 sits up to 1.05e-3 (v(qb)[6]) from its own reltol=1e-9 answer; another engine's path may sit as far on the other side (2.1e-3), rounded up.",
     "command": "ngspice -n -b -r reference.raw circuit.sp",
     "source_sha256": "264f6635916381579da39517ed6ec408ac843a65b5b6c2a93994789879071be8"
   },
@@ -71,7 +71,7 @@
               5.0
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(wl)": {
@@ -129,7 +129,7 @@
               2.0
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(d)": {
@@ -187,7 +187,7 @@
               5.0
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(db)": {
@@ -245,7 +245,7 @@
               2.0
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(bl)": {
@@ -303,7 +303,7 @@
               0.083022225704716
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(blb)": {
@@ -361,7 +361,7 @@
               0.24734242198217
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(q)": {
@@ -419,7 +419,7 @@
               0.41596201956773
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "v(qb)": {
@@ -477,7 +477,7 @@
               0.99861638091193
             ],
             "unit": "V",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 2e-06
           },
           "i(vdb)": {
@@ -535,7 +535,7 @@
               0.0
             ],
             "unit": "A",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 1e-11
           },
           "i(vd)": {
@@ -593,7 +593,7 @@
               0.0
             ],
             "unit": "A",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 1e-11
           },
           "i(vwl)": {
@@ -651,7 +651,7 @@
               0.0
             ],
             "unit": "A",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 1e-11
           },
           "i(vdd)": {
@@ -709,7 +709,7 @@
               -4.2523609212909e-05
             ],
             "unit": "A",
-            "rtol": 0.001,
+            "rtol": 0.003,
             "atol": 1e-11
           }
         },

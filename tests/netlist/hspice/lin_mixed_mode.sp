@@ -1,3 +1,4 @@
+* KNOWN GAP: SpiceRack writes no mixed-mode .lin (row P5-108)
 * HSPICE .lin with a mixed-mode P element [SA Ch.17]: port 1 is balanced
 * (legs a and b against ground, z0 = 50), port 2 single-ended at c. An
 * asymmetric resistive network with 1 nF at c couples every mode, so the

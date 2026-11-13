@@ -2,6 +2,7 @@
 * UG08 p. 49 (dev/research/hspice-syntax.md T3), "not both". ESPice refuses
 * the deck by name instead of reading 1e3k as 1e6. Legal neighbours: 1e6
 * and 1meg.
+* KNOWN GAP: spice2rack accepts an exponent with a scale factor (1e3k, written 1meg) HSPICE refuses (SpiceRack row P4-133) (#TBD)
 v1 a 0 1
 r1 a 0 1e3k
 .op
