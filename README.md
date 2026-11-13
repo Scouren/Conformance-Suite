@@ -13,7 +13,7 @@ tests and are judged by the same rules.
 ## Quick start
 
 ```sh
-git clone --recurse-submodules --shallow-submodules https://github.com/OmarSiwy/VAMS-Conformance-Suite
+git clone --recurse-submodules --shallow-submodules https://github.com/OpenFAT/VAMS-Conformance-Suite
 cd VAMS-Conformance-Suite
 nix develop                       # conform, openvaf-r, ngspice, iverilog, verilator
 conform -t tools/iverilog.conf -j 16 tests/verilog external/ivtest.manifest
@@ -99,10 +99,12 @@ Two kinds of directive:
 | `//! exit N` | harness | the run's exit status |
 | `//! checks N` | harness | exactly N `ok=` lines |
 | `//! stdout TEXT` | harness | stdout contains TEXT |
+| `//! expect stdout GOLD` | harness | stdout equals GOLD (beside the test) instead of `<stem>.expected.txt`; a GOLD that is not there fails the test |
 | `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD, `$date`/`$version` bodies aside |
 | `//! neighbour FILE` | nobody | the legal twin of a `_rejected` test |
 | `//@ files A.v B.v` | tool | more sources (exported absolute as `CONFORM_FILES`) |
 | `//@ libmap X.map`, `//@ liblist LIB`, `//@ std 1364-2001` | tool | IEEE 1364 clause 13 configuration and the `begin_keywords` set |
+| `//@ protect-keys K.json` | tool | the key file that decrypts an IEEE 1364 clause 28 envelope |
 
 ### The verdict
 
@@ -130,9 +132,12 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 
 - **Stages:** `compile` then `run`. A tool may define either or both. With
   `compile` only, a run test that compiles counts as *compile-only*, and a
-  `reject-run` test is skipped. With `run` only, the run does both.
+  `reject-run` test is skipped. With `run` only, the run does both; for an
+  accept test (compiling is enough) it gets `CONFORM_COMPILE_ONLY=1` and may
+  stop after compiling.
 - **Languages:** the directory under `tests/` (`verilog-a`, `verilog-ams`,
-  `verilog`, `spice`), `vpi` for a `.c` test, or a manifest row's first
+  `verilog`, `spice`), `vpi` for a `.c` test, `netlist` for a `.sp` deck
+  wherever it is filed, or a manifest row's first
   column (`netlist` for SPICE decks). `stage.*` is a fallback. A language with
   no command is skipped.
 - **Exit 77** from a stage means the tool cannot express this test (an adapter
@@ -149,8 +154,9 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `CONFORM_WORK` | the scratch directory, also the working directory |
 | `CONFORM_INCLUDE` | `tests/include` (for a manifest test, the suite's root) |
 | `CONFORM_TOOLDIR` | the config's directory, for adapters beside it |
-| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD` | from `//@` lines |
-| `CONFORM_<KEY>` | from a manifest row's `KEY=VALUE` columns |
+| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS` | from `//@` lines |
+| `CONFORM_COMPILE_ONLY` | `1` when only compiling is judged (see Stages) |
+| `CONFORM_<KEY>` | from a manifest row's `KEY=VALUE` columns (a row sets these, not `//@` lines: `STD`, `INCDIR`, `DIRS` the directories its runner makes in the cwd, `DEFINES`, `SHIM` an include directory under `external/`). The harness reads `FILTER`, `RTOL`, `ATOL` and `DIFF=OUT:GOLD` (the file the run writes must equal GOLD, compared as `//! expect vcd`) |
 
 | Config | Languages | Notes |
 |---|---|---|
@@ -208,8 +214,15 @@ Columns, tab-separated: language, want, source, gold (`-` for none), then
 Two keys change the gold comparison: `FILTER` is a shell command both stdout
 and the gold pass through first (upstream's own filter, so a tool's banner
 does not count), and `RTOL`/`ATOL` compare the numbers in them within
-`atol + rtol·max(|a|, |b|)`. A test name is `<manifest>/<source>`, which is
+`atol + rtol·max(|a|, |b|)`. `STDERR` is text the run's stderr must contain (a reject-run's diagnostic). A test name is `<manifest>/<source>`, which is
 also how an xfail file lists it.
+
+Where the governing LRM (IEEE 1364-2005, VAMS-2023) decides a test
+differently from its upstream suite, `external/expectations.tsv` overrides
+the row's want and gold and names the clause, written into the row as
+`LRM=`. Most are upstream tests of a construct the LRM forbids, now `reject`
+(issue #1); the gold files it adds live in `external/gold/`. A name there that
+no manifest has stops `manifests.py`.
 
 | Manifest | Upstream | Selected | Rule |
 |---|---|---:|---|
@@ -239,7 +252,7 @@ same class, with as many tests in parallel as it has CPUs; treat differences
 under about 20% as noise.
 
 <!-- conformance:start -->
-Measured 2026-10-23 by `.github/workflows/conformance.yml`, each tool at its latest version (`tools/ci.sh` says which).
+Measured 2026-11-09 by `.github/workflows/conformance.yml`, each tool at its latest version (`tools/ci.sh` says which).
 
 ![Verilog (IEEE 1364-2005) conformance](docs/conformance/verilog.svg)
 ![Verilog (IEEE 1364-2005) speed](docs/conformance/verilog-time.svg)
@@ -258,14 +271,11 @@ Measured 2026-10-23 by `.github/workflows/conformance.yml`, each tool at its lat
 
 | Language | Tool | Version | Passed | Failed | Not supported | Conformance | Time on common tests |
 |---|---|---|---:|---:|---:|---:|---:|
-| Verilog (IEEE 1364-2005) | VerA | vera 0.12.1 | 3105 | 467 | 35 | 86.1% | - |
-| Verilog (IEEE 1364-2005) | Verilator | Verilator 5.052 2026-09-05 rev v5.052 | 1807 | 1765 | 35 | 50.1% | - |
-| Verilog (IEEE 1364-2005) | ngspice | ** ngspice-45 : Circuit level simulation program | 0 | 76 | 3531 | 0.0% | - |
-| Verilog-A | VerA | vera 0.12.1 | 770 | 1695 | 0 | 31.2% | 55.4 s (770) |
-| Verilog-AMS | VerA | vera 0.12.1 | 513 | 158 | 73 | 69.0% | - |
-| Verilog-AMS | Verilator | Verilator 5.052 2026-09-05 rev v5.052 | 0 | 3 | 741 | 0.0% | - |
-| Verilog-AMS | ngspice | ** ngspice-45 : Circuit level simulation program | 0 | 3 | 741 | 0.0% | - |
-| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 584 | 415 | 34 | 56.5% | 206.6 s (584) |
+| Verilog (IEEE 1364-2005) | VerA | vera 0.23.0 | 3611 | 0 | 0 | 100.0% | 118.5 s (3611) |
+| Verilog-A | VerA | vera 0.23.0 | 2452 | 0 | 0 | 100.0% | 2424.7 s (2452) |
+| Verilog-AMS | VerA | vera 0.23.0 | 755 | 0 | 0 | 100.0% | 2000.1 s (755) |
+| SPICE | ESPice | espice espice 0.20.0 (VerA 0.23.0 0bc0092b345e7b87977e7240660ce6767ea78367; backends: cpu) | 925 | 112 | 36 | 86.2% | 341.1 s (552) |
+| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 599 | 438 | 36 | 55.8% | 292.9 s (552) |
 
 </details>
 <!-- conformance:end -->
