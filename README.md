@@ -34,7 +34,12 @@ XPASS verilog/09_behavioral_modeling/case_default.v: expected to fail, passed
 
 `conform` exits 1 on any FAIL or XPASS. `-o results.tsv` writes every
 verdict with its wall time in milliseconds; `-x tools/<tool>.xfail` turns known failures into XFAIL, so a CI gate
-fails only when something changes. `harness/selftest.sh` feeds the harness a
+fails only when something changes. A stage gets `-T` seconds (default 120),
+and its process group `-M` MiB resident (default 4096, sampled every
+100 ms; address space reserved and never touched does not count); a stage
+past either limit is killed and fails its test
+(`compile exceeded 4096 MiB resident`), never a skip or a pass, so one
+runaway tool cannot take the machine. `harness/selftest.sh` feeds the harness a
 scripted fake tool and checks every verdict (`nix flake check` runs it).
 
 ## Layout
@@ -94,24 +99,28 @@ Two kinds of directive:
 | Line | Read by | Meaning |
 |---|---|---|
 | `//! lrm 4.5.7`, `//! inherited IEEE 1364-2005 3.8` | nobody | the clause, or `clause:sentence`, the test checks |
+| `//! lrm-reject 12.32`, `//! inherited-reject IEEE 1364-2005 9.2` | nobody | as `lrm`/`inherited`, naming the clause whose prohibition a rejection test checks |
 | `//! reject <note>` | harness | the tool must refuse the source with a diagnostic (exit 1–125, not a crash or timeout). The note names the expected error, often as VerA's code; the harness does not match it. |
 | `//! reject-run <note>` | harness | compiles, and the run must fail |
-| `//! exit N` | harness | the run's exit status |
+| `//! exit N` | harness | the run's exit status, 0–125 |
+| `//! exit any` | harness | the run may exit with any status 0–125, for a clause that leaves it open (a crash, timeout or exit ≥ 126 still fails); the output checks below still apply |
 | `//! checks N` | harness | exactly N `ok=` lines |
 | `//! stdout TEXT` | harness | stdout contains TEXT |
+| `//! diagnostic` | harness | stdout or stderr has a line that is not blank and holds no `//! stdout` TEXT: a message the tool printed, for a clause that requires one in no set words or stream (IEEE 1364 17.2.9's "an error message is issued") |
 | `//! expect stdout GOLD` | harness | stdout equals GOLD (beside the test) instead of `<stem>.expected.txt`; a GOLD that is not there fails the test |
-| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD, `$date`/`$version` bodies aside |
+| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD up to what IEEE 1364 18.2 leaves the writer: identifier codes (compared as the names they stand for), the order of `$scope`/`$var` lines and of the changes within one time or section, `1 ns` vs `1ns`, the case of `x`/`z`/`b`/`r`, an event's value, an integer's or time's range, and `$date`, `$version` and `$comment` text; a repeated `$scope`, an empty section or a time with no change counts for nothing. Values, times, sections, the scope tree, var types, sizes and declared ranges must match |
 | `//! neighbour FILE` | nobody | the legal twin of a `_rejected` test |
 | `//@ files A.v B.v` | tool | more sources (exported absolute as `CONFORM_FILES`) |
 | `//@ libmap X.map`, `//@ liblist LIB`, `//@ std 1364-2001` | tool | IEEE 1364 clause 13 configuration and the `begin_keywords` set |
 | `//@ protect-keys K.json` | tool | the key file that decrypts an IEEE 1364 clause 28 envelope |
+| `//@ negative-timing` | tool | IEEE 1364 15.5.4's invocation option that enables negative `$setuphold` and `$recrem` limits (exported as `CONFORM_NEGATIVE_TIMING=1`); a tool without one leaves it unmapped and runs the test without it |
 
 ### The verdict
 
 1. A test with only metadata (`lrm`, `reject`, ...) is an accept or reject
    test: the compile stage decides it.
 2. Any other `//!` line, a `CHECK` macro, or an `.expected.txt` makes it a run
-   test. The run must exit 0 (or `//! exit N`), and then:
+   test. The run must exit 0 (or `//! exit N`, or 0–125 under `//! exit any`), and then:
    - stdout must equal `<stem>.expected.txt` byte for byte;
    - stderr must contain `<stem>.expected.stderr.txt` (stderr also carries the
      tool's own diagnostics, so containment, not equality);
@@ -154,7 +163,7 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `CONFORM_WORK` | the scratch directory, also the working directory |
 | `CONFORM_INCLUDE` | `tests/include` (for a manifest test, the suite's root) |
 | `CONFORM_TOOLDIR` | the config's directory, for adapters beside it |
-| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS` | from `//@` lines |
+| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS`, `CONFORM_NEGATIVE_TIMING` | from `//@` lines |
 | `CONFORM_COMPILE_ONLY` | `1` when only compiling is judged (see Stages) |
 | `CONFORM_<KEY>` | from a manifest row's `KEY=VALUE` columns (a row sets these, not `//@` lines: `STD`, `INCDIR`, `DIRS` the directories its runner makes in the cwd, `DEFINES`, `SHIM` an include directory under `external/`). The harness reads `FILTER`, `RTOL`, `ATOL` and `DIFF=OUT:GOLD` (the file the run writes must equal GOLD, compared as `//! expect vcd`) |
 

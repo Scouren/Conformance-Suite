@@ -8,6 +8,8 @@
  * POSIX C99, no dependencies: cc -O2 -o conform conform.c
  */
 #define _XOPEN_SOURCE 700
+#include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <dirent.h>
@@ -34,6 +36,7 @@ static int nconf;
 static char conf_dir[PATH_MAX];
 static char work_root[PATH_MAX];
 static int timeout_s = 120;
+static int mem_mib = 4096; /* resident set of each stage's process group */
 static int jobs = 1;
 static int verbose;
 static int keep_work;
@@ -252,14 +255,18 @@ static int locate(const char *abs, char *root, char *lang, const char **rel) {
 
 /* ---- one test -------------------------------------------------------- */
 
+/* Spec.exit_want below 0: any status 1..125 (reject-run), any 0..125 (`//! exit any`) */
+enum { EXIT_FAILED = -1, EXIT_ANY = -2 };
 typedef struct {
     int reject, reject_run, exit_want, checks_want, needs_run, self_checks, passed;
+    int diagnostic; /* `//! diagnostic`: the tool must say something of its own */
     char *stdout_want[16];
     int nstdout;
     char *stderr_want[16]; /* a row's STDERR= */
     int nstderr;
     char *vcd_out, *vcd_gold;
     char *files, *libmap, *liblist, *std, *protect_keys;
+    int negative_timing; /* `//@ negative-timing`: IEEE 1364-2005 15.5.4's invocation option */
     char gold[PATH_MAX], errgold[PATH_MAX]; /* empty: none */
     char *filter;                           /* applied to stdout and gold alike */
     double rtol, atol;                      /* gold numbers within tolerance */
@@ -315,6 +322,7 @@ static int parse(const char *src, const char *dir, Spec *sp, char *why) {
             else if (!strcmp(kw, "liblist")) append(&sp->liblist, rest);
             else if (!strcmp(kw, "std")) append(&sp->std, rest);
             else if (!strcmp(kw, "protect-keys")) append_paths(&sp->protect_keys, rest, dir);
+            else if (!strcmp(kw, "negative-timing") && !*rest) sp->negative_timing = 1;
             else return snprintf(why, MSG, "unknown directive //@ %s", kw), free(text), -1;
             continue;
         }
@@ -323,8 +331,16 @@ static int parse(const char *src, const char *dir, Spec *sp, char *why) {
         const char *arg = d + kn + strspn(d + kn, " \t");
         if (kw_is(d, kn, "reject") || kw_is(d, kn, "reject-only")) sp->reject = 1;
         else if (kw_is(d, kn, "reject-run")) sp->reject_run = 1;
-        else if (kw_is(d, kn, "exit")) sp->exit_want = atoi(arg), exit_set = 1;
+        else if (kw_is(d, kn, "exit")) {
+            int any = !strncmp(arg, "any", 3);
+            char *end = (char *)arg + 3;
+            long n = any ? EXIT_ANY : strtol(arg, &end, 10);
+            if (end == arg || *trim(end) || (!any && (n < 0 || n > 125)))
+                return snprintf(why, MSG, "//! exit takes 0..125 or `any`: %s", arg), free(text), -1;
+            sp->exit_want = (int)n, exit_set = 1;
+        }
         else if (kw_is(d, kn, "checks")) sp->checks_want = atoi(arg);
+        else if (kw_is(d, kn, "diagnostic")) sp->diagnostic = 1;
         else if (kw_is(d, kn, "stdout") && sp->nstdout < 16) sp->stdout_want[sp->nstdout++] = xstrdup(trim((char *)arg));
         else if (kw_is(d, kn, "expect")) {
             char out[256], gold[256];
@@ -335,7 +351,7 @@ static int parse(const char *src, const char *dir, Spec *sp, char *why) {
         if (!is_meta(d, kn)) sp->needs_run = 1;
     }
     free(text);
-    if (sp->reject_run && !exit_set) sp->exit_want = -1; /* any normal failure */
+    if (sp->reject_run && !exit_set) sp->exit_want = EXIT_FAILED;
     if (*named) {
         /* a named gold that is not there is a broken test, not a gold-less one */
         snprintf(sp->gold, sizeof sp->gold, "%s/%s", dir, named);
@@ -371,7 +387,7 @@ static int parse_row(char *row, const char *mroot, Spec *sp, char *lang, char *s
     else if (!strcmp(w, "passed")) sp->needs_run = sp->passed = 1;
     else if (!strcmp(w, "compile")) ;
     else if (!strcmp(w, "reject")) sp->reject = 1;
-    else if (!strcmp(w, "reject-run")) sp->reject_run = sp->needs_run = 1, sp->exit_want = -1;
+    else if (!strcmp(w, "reject-run")) sp->reject_run = sp->needs_run = 1, sp->exit_want = EXIT_FAILED;
     else return snprintf(why, MSG, "unknown want `%s`", w), -1;
     if (n > 3 && strchr(col[3], '=')) return snprintf(why, MSG, "gold column is `%s`: write `-` before KEY=VALUE", col[3]), -1;
     if (n > 3 && strcmp(col[3], "-")) snprintf(sp->gold, sizeof sp->gold, "%s/%s", mroot, col[3]);
@@ -447,8 +463,46 @@ static void link_inputs(const char *src, const char *dir, const char *work) {
     free(text);
 }
 
+/* The resident set of process group `pgrp`, in MiB: field 24 of each
+ * /proc/<pid>/stat, in pages, summed over the processes in the group (a
+ * library two of them map counts twice). Threads are not listed in /proc.
+ * ponytail: one read per process on the machine per sample, 2 ms for 600
+ * processes; walk the group's children instead if a busy machine makes the
+ * scan show. */
+static long group_rss_mib(pid_t pgrp) {
+    assert(pgrp > 0);
+    DIR *d = opendir("/proc");
+    if (!d) return 0;
+    long pages = 0;
+    size_t seen = 0;
+    char path[64], buf[1024];
+    for (struct dirent *e; (e = readdir(d));) {
+        seen++;
+        assert(seen <= 1u << 22); /* PID_MAX_LIMIT */
+        if (!isdigit((unsigned char)e->d_name[0])) continue;
+        snprintf(path, sizeof path, "/proc/%s/stat", e->d_name);
+        int fd = open(path, O_RDONLY);
+        if (fd < 0) continue; /* exited since readdir */
+        ssize_t n = read(fd, buf, sizeof buf - 1);
+        close(fd);
+        if (n <= 0) continue;
+        buf[n] = 0;
+        char *p = strrchr(buf, ')'); /* field 2, the command, may hold ')' */
+        int group; /* field 5, read alone first: most processes are not ours */
+        long rss = 0;
+        if (p && sscanf(p + 1, "%*s %*s %d", &group) == 1 && group == pgrp &&
+            sscanf(p + 1, "%*s %*s %*d" "%*s %*s %*s %*s %*s %*s %*s %*s %*s"
+                   "%*s %*s %*s %*s %*s %*s %*s %*s %*s %ld", &rss) == 1)
+            pages += rss;
+    }
+    closedir(d);
+    assert(pages >= 0);
+    return pages * (sysconf(_SC_PAGESIZE) >> 10) >> 10;
+}
+
+enum { CRASHED = -1, TIMED_OUT = -2, OUT_OF_MEMORY = -3 }; /* Stage.status below 0 */
 typedef struct {
-    int status; /* exit code, or -1 signal, -2 timeout */
+    int status; /* exit code, or CRASHED, TIMED_OUT, OUT_OF_MEMORY */
     char *out, *err;
 } Stage;
 
@@ -478,19 +532,29 @@ static Stage run_stage(const char *cmd, const char *work, const char *name) {
     int st;
     struct timespec tick = {0, 5000000};
     time_t deadline = time(NULL) + timeout_s;
-    for (;;) {
+    for (int t = 1;; t++) {
         pid_t r = waitpid(pid, &st, WNOHANG);
         if (r == pid) break;
         if (r < 0 && errno != EINTR) die("waitpid: %s", strerror(errno));
-        if (time(NULL) >= deadline) {
+        int late = time(NULL) >= deadline;
+        /* A runaway tool (ivlpp expanding two macros that name each other)
+         * takes every byte the machine has, so the group dies when its
+         * resident set passes the limit, sampled every 100 ms. Not an
+         * rlimit: RLIMIT_DATA and RLIMIT_AS count what Zig and LLVM reserve
+         * and never touch, and openvaf-r fails under 4096 MiB of either at
+         * 2540 MiB resident. */
+        int fat = !late && t % 20 == 0 && group_rss_mib(pid) > mem_mib;
+        if (late || fat) {
             kill(-pid, SIGKILL);
             waitpid(pid, &st, 0);
-            s.status = -2;
+            s.status = late ? TIMED_OUT : OUT_OF_MEMORY;
             goto done;
         }
         nanosleep(&tick, NULL);
     }
-    s.status = WIFEXITED(st) ? WEXITSTATUS(st) : -1;
+    s.status = WIFEXITED(st) ? WEXITSTATUS(st) : CRASHED;
+    assert(s.status >= CRASHED);
+    assert(s.status <= 255);
     kill(-pid, SIGKILL); /* stray background children */
 done:
     s.out = slurp(out, NULL);
@@ -501,8 +565,9 @@ done:
 }
 
 static const char *describe(const Stage *s, const char *name, char *buf) {
-    if (s->status == -2) snprintf(buf, MSG, "%s timed out after %ds", name, timeout_s);
-    else if (s->status == -1) snprintf(buf, MSG, "%s crashed (signal)", name);
+    if (s->status == TIMED_OUT) snprintf(buf, MSG, "%s timed out after %ds", name, timeout_s);
+    else if (s->status == OUT_OF_MEMORY) snprintf(buf, MSG, "%s exceeded %d MiB resident", name, mem_mib);
+    else if (s->status == CRASHED) snprintf(buf, MSG, "%s crashed (signal)", name);
     else if (s->status >= 126) snprintf(buf, MSG, "%s could not run the command (exit %d)", name, s->status);
     else snprintf(buf, MSG, "%s exited %d", name, s->status);
     return buf;
@@ -518,19 +583,161 @@ static int count(const char *hay, const char *needle) {
     return n;
 }
 
-/* VCD tokens with the `$date` and `$version` bodies dropped (IEEE 1364
- * §18.2.3.2, §18.2.3.8: tool-specific text). */
-static char *vcd_norm(char *text) {
-    char *out = malloc(strlen(text) + 1), *o = out;
-    if (!out) die("out of memory");
-    int skip = 0;
-    for (char *t = strtok(text, " \t\r\n"); t; t = strtok(NULL, " \t\r\n")) {
-        if (skip && strcmp(t, "$end")) continue;
-        skip = !strcmp(t, "$date") || !strcmp(t, "$version");
-        o += sprintf(o, "%s ", t);
+typedef struct {
+    char **at;
+    size_t n, cap;
+} Lines;
+
+static void push(Lines *l, const char *fmt, ...) {
+    if (l->n == l->cap) {
+        l->cap = l->cap ? 2 * l->cap : 64;
+        l->at = realloc(l->at, l->cap * sizeof *l->at);
+        if (!l->at) die("out of memory");
     }
-    *o = 0;
-    return out;
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(NULL, 0, fmt, ap);
+    va_end(ap);
+    assert(n >= 0);
+    char *s = malloc((size_t)n + 1);
+    if (!s) die("out of memory");
+    va_start(ap, fmt);
+    vsnprintf(s, (size_t)n + 1, fmt, ap);
+    va_end(ap);
+    l->at[l->n++] = s;
+}
+
+static int by_text(const void *a, const void *b) { return strcmp(*(char *const *)a, *(char *const *)b); }
+
+/* Moves `g`'s lines to `out`, sorted. */
+static void flush_sorted(Lines *g, Lines *out) {
+    qsort(g->at, g->n, sizeof *g->at, by_text);
+    for (size_t i = 0; i < g->n; i++) push(out, "%s", g->at[i]), free(g->at[i]);
+    g->n = 0;
+}
+
+/* The index past the `$end` that closes the section at `i`. */
+static size_t past_end(char **tok, size_t i, size_t n) {
+    while (i < n && strcmp(tok[i], "$end")) i++;
+    return i + (i < n);
+}
+
+/* A VCD as lines with every choice IEEE 1364 §18.2 leaves to the writer
+ * made one way, so two dumps of one run compare equal. Dropped: `$date`,
+ * `$version` and `$comment` bodies (§18.2.3.1, .2, .8: the writer's text), an
+ * integer's or time's `[31:0]`-like range (no declaration gives one), a
+ * repeated `$scope`, a section with no change and a time that heads none.
+ * Canonical: the `$timescale` body without its inner space (`1 ns`), and each
+ * identifier code, which becomes the hierarchical name of every variable that
+ * shares it (§18.2.3.7 b). Sorted: the header's lines, and the changes
+ * between two times or within a `$dumpvars`-like section. Value letters lose
+ * their case (`X`, `B`), and an event's value is 1 (§18.2.2: irrelevant).
+ * Kept: every value, time, section, scope path and type, var type, size and
+ * declared range. A file without `$enddefinitions` (a manifest's DIFF= of
+ * plain text) is only its tokens. NULL when the header is malformed. */
+static char *vcd_norm(char *text) {
+    size_t cap = strlen(text) / 2 + 2, n = 0;
+    char **tok = malloc(cap * sizeof *tok);
+    if (!tok) die("out of memory");
+    for (char *t = strtok(text, " \t\r\n"); t; t = strtok(NULL, " \t\r\n")) tok[n++] = t;
+    assert(n < cap);
+    int vcd = 0;
+    for (size_t i = 0; i < n && !vcd; i++) vcd = !strcmp(tok[i], "$enddefinitions");
+    /* ponytail: each change scans every var, O(changes * vars); a hash when a dump grows past test size */
+    char **code = malloc(cap * sizeof *code), **name = malloc(cap * sizeof *name);
+    char *event = malloc(cap);
+    if (!code || !name || !event) die("out of memory");
+    size_t nvar = 0, up[256], depth = 0;
+    char path[4096] = "", unit[256];
+    Lines g = {0}, out = {0};
+    int header = vcd, bad = 0;
+    for (size_t i = 0; i < n && !bad;) {
+        char *t = tok[i];
+        if (!strcmp(t, "$date") || !strcmp(t, "$version") || !strcmp(t, "$comment")) {
+            i = past_end(tok, i, n);
+        } else if (!vcd) {
+            push(&out, "%s", t), i++;
+        } else if (header && !strcmp(t, "$timescale")) {
+            size_t e = past_end(tok, i, n);
+            unit[0] = 0;
+            for (size_t k = i + 1; k + 1 < e; k++) strncat(unit, tok[k], sizeof unit - strlen(unit) - 1);
+            push(&g, "$timescale %s", unit), i = e;
+        } else if (header && !strcmp(t, "$scope")) {
+            size_t len = strlen(path);
+            bad = i + 2 >= n || depth == sizeof up / sizeof *up || len + strlen(tok[i + 2]) + 2 > sizeof path;
+            if (bad) break;
+            up[depth++] = len;
+            snprintf(path + len, sizeof path - len, "%s%s", len ? "." : "", tok[i + 2]);
+            push(&g, "$scope %s %s", path, tok[i + 1]), i = past_end(tok, i, n);
+        } else if (header && !strcmp(t, "$upscope")) {
+            bad = depth == 0;
+            if (bad) break;
+            path[up[--depth]] = 0, i = past_end(tok, i, n);
+        } else if (header && !strcmp(t, "$var")) {
+            size_t e = past_end(tok, i, n);
+            bad = e < i + 6;
+            if (bad) break;
+            char ref[1024] = "";
+            for (size_t k = i + 4; k + 1 < e; k++) strncat(ref, tok[k], sizeof ref - strlen(ref) - 1);
+            char *range = strchr(ref, '['); /* an integer's or time's: never declared, so the writer's */
+            if (range && strchr(range, ':') && (!strcmp(tok[i + 1], "integer") || !strcmp(tok[i + 1], "time"))) *range = 0;
+            code[nvar] = tok[i + 3], event[nvar] = !strcmp(tok[i + 1], "event");
+            Lines nm = {0};
+            push(&nm, "%s%s%s", path, *path ? "." : "", ref);
+            name[nvar] = nm.at[0], free(nm.at);
+            push(&g, "$var %s %s %s", tok[i + 1], tok[i + 2], name[nvar++]), i = e;
+        } else if (header && !strcmp(t, "$enddefinitions")) {
+            flush_sorted(&g, &out);
+            size_t kept = 0;
+            for (size_t k = 0; k < out.n; k++)
+                if (kept && !strcmp(out.at[kept - 1], out.at[k])) free(out.at[k]);
+                else out.at[kept++] = out.at[k];
+            out.n = kept;
+            header = 0, i = past_end(tok, i, n);
+        } else if (header) {
+            push(&g, "%s", t), i++;
+        } else if (*t == '#' || *t == '$') {
+            flush_sorted(&g, &out);
+            push(&out, "%s", t), i++;
+        } else {
+            int vector = strchr("bBrR", *t) != NULL;
+            bad = vector && i + 1 == n;
+            if (bad) break;
+            char *id = vector ? tok[i + 1] : t + 1, value[1024];
+            snprintf(value, sizeof value, "%s", vector ? t : (char[]){*t, 0});
+            for (char *v = value; *v; v++) *v = (char)tolower((unsigned char)*v);
+            size_t hits = 0;
+            for (size_t k = 0; k < nvar; k++)
+                if (!strcmp(code[k], id)) push(&g, "%s %s", name[k], event[k] ? "1" : value), hits++;
+            if (!hits) push(&g, "?%s %s", id, value);
+            i += 1 + vector;
+        }
+    }
+    flush_sorted(&g, &out);
+    char *res = NULL;
+    if (!bad) {
+        size_t len = 1;
+        for (size_t i = 0; i < out.n; i++) len += strlen(out.at[i]) + 1;
+        char *o = res = malloc(len);
+        if (!res) die("out of memory");
+        /* A section that holds no change, and a time that heads none,
+         * record nothing (Icarus writes `$dumpall $end` before `#0`, and the
+         * time `$finish` ran at). */
+        size_t kept = 0;
+        for (size_t i = 0; i < out.n; i++)
+            if (vcd && *out.at[i] == '$' && strcmp(out.at[i], "$end") && i + 1 < out.n && !strcmp(out.at[i + 1], "$end"))
+                free(out.at[i]), free(out.at[++i]);
+            else out.at[kept++] = out.at[i];
+        out.n = kept;
+        for (size_t i = 0; i < out.n; i++)
+            if (!vcd || *out.at[i] != '#' || (i + 1 < out.n && *out.at[i + 1] != '#')) o += sprintf(o, "%s\n", out.at[i]);
+        *o = 0;
+    }
+    for (size_t i = 0; i < out.n; i++) free(out.at[i]);
+    for (size_t i = 0; i < g.n; i++) free(g.at[i]);
+    for (size_t i = 0; i < nvar; i++) free(name[i]);
+    free(out.at), free(g.at), free(tok), free(code), free(name), free(event);
+    return res;
 }
 
 /* Judges the output of the stage that produced the program's transcript. */
@@ -570,6 +777,23 @@ static int passed_line(const char *out) {
     return 0;
 }
 
+/* A line of `text` that is not blank and holds no `//! stdout` text: one
+ * the tool printed, not the test. A clause that requires a message in no set
+ * words (IEEE 1364-2005 17.2.9's "an error message is issued") is judged by
+ * one on either stream, since no clause names the stream. */
+static int foreign_line(const char *text, const Spec *sp) {
+    char line[1024];
+    for (const char *l = text; *l;) {
+        size_t n = strcspn(l, "\n");
+        snprintf(line, sizeof line, "%.*s", (int)n, l);
+        int own = strspn(line, " \t\r") == strlen(line);
+        for (int i = 0; i < sp->nstdout && !own; i++) own = strstr(line, sp->stdout_want[i]) != NULL;
+        if (!own) return 1;
+        l += n + (l[n] == '\n');
+    }
+    return 0;
+}
+
 static int judge_output(const char *dir, const char *work, const Spec *sp, const Stage *s, char *why) {
     char *want;
     if (*sp->gold) {
@@ -594,6 +818,8 @@ static int judge_output(const char *dir, const char *work, const Spec *sp, const
         if (!has) return snprintf(why, MSG, "stderr lacks %s", strrchr(sp->errgold, '/') + 1), 0;
     }
     if (sp->passed && !passed_line(s->out)) return snprintf(why, MSG, "no PASSED line"), 0;
+    if (sp->diagnostic && !foreign_line(s->out, sp) && !foreign_line(s->err, sp))
+        return snprintf(why, MSG, "no diagnostic: the run printed only the test's own lines"), 0;
     for (int i = 0; i < sp->nstdout; i++)
         if (!strstr(s->out, sp->stdout_want[i])) return snprintf(why, MSG, "stdout lacks \"%s\"", sp->stdout_want[i]), 0;
     for (int i = 0; i < sp->nstderr; i++)
@@ -613,7 +839,7 @@ static int judge_output(const char *dir, const char *work, const Spec *sp, const
         int same = 0;
         if (x && y) {
             char *nx = vcd_norm(x), *ny = vcd_norm(y);
-            same = !strcmp(nx, ny);
+            same = nx && ny && !strcmp(nx, ny);
             free(nx), free(ny);
         }
         free(x), free(y);
@@ -696,6 +922,7 @@ static int run_test(const Test *t, size_t index, char *why) {
         setenv_opt("CONFORM_LIBLIST", sp.liblist);
         setenv_opt("CONFORM_STD", sp.std);
         setenv_opt("CONFORM_PROTECT_KEYS", sp.protect_keys);
+        setenv_opt("CONFORM_NEGATIVE_TIMING", sp.negative_timing ? "1" : NULL);
     }
     free(stem);
     if (t->row) link_root(root, work);
@@ -703,7 +930,7 @@ static int run_test(const Test *t, size_t index, char *why) {
 
     char d[MSG];
     int verdict = PASS;
-    Stage c = {0, NULL, NULL}, r = {0, NULL, NULL};
+    Stage c = {0}, r = {0};
     if (cc) {
         c = run_stage(cc, work, "compile");
         if (c.status != 0) {
@@ -733,7 +960,8 @@ static int run_test(const Test *t, size_t index, char *why) {
         } else if (!judge_output(dir, work, &sp, &r, why)) verdict = FAIL;
         goto out;
     }
-    if (r.status != sp.exit_want) {
+    /* `//! exit any`: the tool's to choose, short of a crash, a timeout or a shell failure */
+    if (sp.exit_want == EXIT_ANY ? r.status < 0 || r.status > 125 : r.status != sp.exit_want) {
         snprintf(why, MSG, "%s", describe(&r, "run", d));
         if (r.status >= 0 && r.status < 126) {
             const char *e = *r.err ? r.err : r.out;
@@ -771,12 +999,13 @@ static int expected_fail(const char *name) {
 }
 
 static void usage(void) {
-    fputs("usage: conform -t TOOL.conf [-j N] [-x XFAIL] [-T SECONDS] [-o RESULTS.tsv] [-k] [-v] PATH...\n"
+    fputs("usage: conform -t TOOL.conf [-j N] [-x XFAIL] [-T SECONDS] [-M MIB] [-o RESULTS.tsv] [-k] [-v] PATH...\n"
           "  PATH      test files, directories under a suite root (tests/), or .manifest files\n"
           "  -t        the tool config: `stage.language = shell command` lines\n"
           "  -j        tests run in parallel (default 1)\n"
           "  -x        expected failures: one test name (as printed) per line\n"
           "  -T        per-stage timeout (default 120)\n"
+          "  -M        resident memory limit of each stage's process group, in MiB (default 4096)\n"
           "  -o        write every verdict as `STATUS<TAB>name<TAB>milliseconds<TAB>detail`\n"
           "  -k        keep every work directory (failures always keep theirs)\n"
           "  -v        print passing tests too\n",
@@ -787,12 +1016,13 @@ static void usage(void) {
 int main(int argc, char **argv) {
     const char *tool = NULL, *results = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "t:j:x:T:o:kv")) != -1) {
+    while ((opt = getopt(argc, argv, "t:j:x:T:M:o:kv")) != -1) {
         switch (opt) {
         case 't': tool = optarg; break;
         case 'j': jobs = atoi(optarg) > 0 ? atoi(optarg) : 1; break;
         case 'x': load_xfails(optarg); break;
         case 'T': timeout_s = atoi(optarg) > 0 ? atoi(optarg) : 1; break;
+        case 'M': mem_mib = atoi(optarg) > 0 ? atoi(optarg) : 1; break;
         case 'o': results = optarg; break;
         case 'k': keep_work = 1; break;
         case 'v': verbose = 1; break;
