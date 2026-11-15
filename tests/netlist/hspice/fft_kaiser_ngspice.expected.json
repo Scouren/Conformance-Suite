@@ -4,7 +4,7 @@
  "purpose": ".fft weights its samples with the symmetric Kaiser window (WINDOW=KAISER ALFA=3), whose edge samples reach 1/I0(pi ALFA).",
  "oracle": {
   "kind": "analytic",
-  "derivation": "Exact DFT of the samples of 0.5 sin(2 pi 2k t) on [1 ms, 5 ms), NP = 256, weighted by the standard symmetric Kaiser window w[n] = I0(pi ALFA sqrt(1 - (2n/(NP-1) - 1)^2)) / I0(pi ALFA) with ALFA = 3 (Harris 1978), 2/sum(w) scaling, sine phase, normalized to the peak bin."
+  "derivation": "Exact DFT of the samples of 0.5 sin(2 pi 2k t) on [1 ms, 5 ms), NP = 256, weighted by the standard symmetric Kaiser window w[n] = I0(pi ALFA sqrt(1 - (2n/(NP-1) - 1)^2)) / I0(pi ALFA) with ALFA = 3 (Harris 1978), 2/sum(w) scaling, cosine-referenced phase. HSPICE's FFT phase is cosine-referenced (Star-Hspice 1998.2 ch. 25 Example 1: a sine at a whole-cycle window start reads -90 deg), as in the HSPICE deck; ESPice reads .fft as HSPICE's in either dialect, normalized to the peak bin."
  },
  "expect": {
   "status": "success",
@@ -47,32 +47,32 @@
         0.0
        ],
        [
-        0.12401303176469097,
-        -0.0030389800067173833
+        -0.0030389800067173833,
+        -0.12401303176469097
        ],
        [
-        -0.6209972728586923,
-        0.007625939499375457
+        0.007625939499375457,
+        0.6209972728586923
        ],
        [
-        0.999999999990905,
-        4.264970442406945e-06
+        4.264970442406945e-06,
+        -0.999999999990905
        ],
        [
-        -0.6210021300570294,
-        -0.007617396751089085
+        -0.007617396751089085,
+        0.6210021300570294
        ],
        [
-        0.12400318651110963,
-        0.0030475599660757693
+        0.0030475599660757693,
+        -0.12400318651110963
        ],
        [
-        0.00019077395764248862,
-        1.2216469595422634e-05
+        1.2216469595422634e-05,
+        -0.00019077395764248862
        ],
        [
-        -2.7661209967159072e-05,
-        -2.5988974922917855e-06
+        -2.5988974922917855e-06,
+        2.7661209967159072e-05
        ]
       ]
      }
@@ -83,5 +83,5 @@
   "all_requested_analyses_must_complete": true
  },
  "twin_of": "hspice/fft_kaiser.sp",
- "netlist_sha256": "aa2c1c10cc4c9d8e1c4c72086d0c8578918ff7d59435ce7df00859891ec1759c"
+ "netlist_sha256": "f1830413166fae5fd7d515bbd90adf4a98ee9e0fa68f7381c30e1577542a154d"
 }
