@@ -1,0 +1,29 @@
+// §5.5.1, after Syntax 5-3 (p. 103): "For a port probe function call, the
+// nature attribute identifier must be the access function name for the flow
+// nature associated with the port, and the port reference many not use
+// hierarchical specifications, i.e., it must be a declared port of the module
+// in which the port access function is used."
+//
+// `I(<u1.a>)` names the port a of the instance u1, which is not a declared
+// port of pahr_top, the module whose analog block holds the probe, so the
+// tool must refuse it. (Syntax 5-3's analog_port_reference lists
+// hierarchical_port_identifier; the sentence above narrows it.)
+//
+// EXACTLY ONE RULE IS BROKEN: the legal read of the same flow is §5.5.5's
+// `I(u1.branch(<a>))`, which port_access_hierarchical_instance.va runs.
+//
+//! lrm 5.5.1
+//! lrm 5.5.1:4
+//! reject hierarchical port reference in a port probe
+//! neighbour port_access_hierarchical_instance.va
+`include "disciplines.vams"
+module pahr_g(a);
+  inout a; electrical a;
+  analog I(a) <+ V(a) / 1k;
+endmodule
+module pahr_top(p);
+  inout p; electrical p;
+  real f;
+  pahr_g u1(p);
+  analog f = I(<u1.a>);
+endmodule

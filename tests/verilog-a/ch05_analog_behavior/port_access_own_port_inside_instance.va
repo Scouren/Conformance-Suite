@@ -16,7 +16,7 @@
 //
 // port_branch_own_port_inside_instance.va is the port-branch spelling;
 // port_access_hierarchical_instance.va reads the same flows from the top as
-// `I(<u1.a>)`, `I(<u2.a>)`.
+// `I(u1.branch(<a>))`, `I(u2.branch(<a>))` (§5.5.5).
 //
 //! lrm 5.4.3
 //! bias V(p) = 0.5

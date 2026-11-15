@@ -31,10 +31,13 @@
 // Annex D gives `rotational` the natures Angle and Angular_Force, whose access
 // functions are Theta and Tau, where `electrical` has V and I. §5.4.3 names a
 // port access function after "the flow nature of the discipline of the port",
-// so `Tau(<r2.p>)` — the flow into r2 through its own port p, reached as
-// §6.7.1 allows ("flow access for ... port branches can be done
-// hierarchically"; A.8.9 analog_port_reference) — type-checks only if r2's
-// port came out rotational, and `I(<r3.p>)` only if r3's came out electrical.
+// so `Tau(r2.branch(<p>))` — the flow into r2 through its own port p, read
+// through §5.5.5's hierarchical_unnamed_branch_reference to r2's unnamed port
+// branch (the clause's example is `I(top.drv.branch(<p>))`; §6.7.1 "flow
+// access for ... port branches can be done hierarchically") — type-checks only
+// if r2's port came out rotational, and `I(r3.branch(<p>))` only if r3's came
+// out electrical. (Not `Tau(<r2.p>)`: §5.5.1 says a port probe's "port
+// reference many not use hierarchical specifications".)
 // A tool that left r2 on the electrical default, or refused the
 // attribute-less instance, cannot reach those assertions at all (VerA's
 // refusal, when the segment says nothing, is measured in
@@ -95,6 +98,7 @@
 //! lrm 5.4.1
 //! lrm 5.4.3
 //! lrm 5.5.4
+//! lrm 5.5.5
 //! lrm 6.7.1
 //! lrm 6.5.7.2
 //! lrm 6.5.7.2:1000
@@ -117,13 +121,13 @@ module annex_e_primitive_segment_discipline(shaft1, shaft2);
     // E.3.2.2: r2 has no attribute of its own; its port carries the segment's
     // discipline, so Tau is its port access function, and the flow is r2's own.
     `CHECKR("r2's port took the segment's discipline: Tau into r2 = 2/2000",
-            Tau(<r2.p>), 1.0e-3, 1e-12);
+            Tau(r2.branch(<p>)), 1.0e-3, 1e-12);
     `CHECKR("r1 is a separate branch on the same nets: Tau into r1 = 2/1000",
-            Tau(<r1.p>), 2.0e-3, 1e-12);
+            Tau(r1.branch(<p>)), 2.0e-3, 1e-12);
     // E.3.2.2, last sentence: u/v are declared by nothing and no instance on
     // them carries an attribute, so this segment defaults to electrical.
     `CHECKX("V reads across r3's nets", V(r3.p, r3.n), 1.5);
     `CHECKR("r3's segment defaults to electrical: I into r3 = 1.5/4000",
-            I(<r3.p>), 3.75e-4, 1e-12);
+            I(r3.branch(<p>)), 3.75e-4, 1e-12);
   end
 endmodule
