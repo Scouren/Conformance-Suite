@@ -4,7 +4,8 @@ A conformance and torture suite for Verilog-AMS and its three sublanguages:
 Verilog-A (Annex C), IEEE 1364-2005 Verilog, and the SPICE compatibility of
 Annex E. It holds hand-written tests that cite the clause they check, pins
 larger upstream suites as git submodules, and runs any tool against both with
-one C harness, `conform`.
+one harness, `conform` (stdlib Python, 3.11 or newer), which can also keep
+every tool's full output as a dump to benchmark against.
 
 The harness knows no tool. A tool is a config file of shell commands, so
 VerA, OpenVAF-Reloaded, Icarus Verilog, Verilator and ngspice run the same
@@ -15,13 +16,13 @@ tests and are judged by the same rules.
 ```sh
 git clone --recurse-submodules --shallow-submodules https://github.com/OpenFAT/VAMS-Conformance-Suite
 cd VAMS-Conformance-Suite
-nix develop                       # conform, openvaf-r, ngspice, iverilog, verilator
-conform -t tools/iverilog.conf -j 16 tests/verilog external/ivtest.manifest
-conform -t tools/openvaf.conf  -j 16 tests/verilog-a external/va-models.manifest
+nix develop                       # conform, sprack, openvaf-r, vacask, ngspice, xyce, iverilog, verilator
+conform -t tools/iverilog.conf tests/verilog external/ivtest.manifest
+conform -t tools/openvaf.conf  tests/verilog-a external/va-models.manifest
 ```
 
-Without Nix, build the harness with `cc -O2 -o conform harness/conform.c -lm`
-and put the tools on `PATH`.
+Without Nix, run `python3 -m harness` from the repository root in place of
+`conform`, with the tools on `PATH`.
 
 Every non-passing test prints one line, then a summary:
 
@@ -33,9 +34,22 @@ XPASS verilog/09_behavioral_modeling/case_default.v: expected to fail, passed
 ```
 
 `conform` exits 1 on any FAIL or XPASS. `-o results.tsv` writes every
-verdict with its wall time in milliseconds; `-x tools/<tool>.xfail` turns known failures into XFAIL, so a CI gate
-fails only when something changes. `harness/selftest.sh` feeds the harness a
-scripted fake tool and checks every verdict (`nix flake check` runs it).
+verdict with its wall time in milliseconds; `-x tools/<tool>.xfail` turns
+known failures into XFAIL, so a CI gate fails only when something changes.
+Output and the results file are in test-name order, whatever `-j` is (default
+min(4, CPUs)). Each stage has a timeout (`-T`, default 120 s) and a memory cap
+(`-M`, in MiB or with a K/M/G suffix, default 4096; `0` for none): it runs
+in a systemd user scope with `MemoryMax`, no swap and `OOMPolicy=kill`, so
+the kernel kills the stage's whole process tree past the cap, or, without a
+systemd user session, the harness samples the process group's resident set
+every 100 ms and kills it past the cap. Either way only touched memory
+counts, not address space reserved and never used (Zig, LLVM and openvaf-r
+reserve far more than they touch, so an rlimit would fail them). A stage
+past either limit is killed and fails its test ("compile exceeded 4096 MiB
+resident"), never a skip, a pass or a crash of the harness. `-d DIR` keeps every test's full output (Dumps, below).
+`python3 -m unittest discover -s harness -t .` feeds the harness scripted
+fake tools and checks every verdict, the memory cap and the dump format
+(`nix flake check` runs it, with `tools/rawcheck.py --selftest`).
 
 ## Layout
 
@@ -48,7 +62,7 @@ scripted fake tool and checks every verdict (`nix flake check` runs it).
 | `tests/netlist/` | SPICE decks by analysis (`op`, `dc`, `tran`, `ac`, `noise`, `pss`, `hb`, ...), each with a `.expected.json` oracle. |
 | `tests/include/` | `check.vh`, the `CHECK` assertion macros, and `erfc.vh`. |
 | `external/` | Upstream suites as submodules, one `<suite>.manifest` each, and `manifests.py`, which writes them. |
-| `harness/` | `conform.c` and its selftest. |
+| `harness/` | `conform.py` (the harness, `python3 -m harness`), `dump.py` (dumps and their manifest) and their test. |
 | `tools/` | One `<tool>.conf` per tool, adapters, and `<tool>.xfail` baselines. |
 
 Chapter directories follow the Verilog-AMS LRM 2023 (`ch05_analog_behavior`,
@@ -96,22 +110,25 @@ Two kinds of directive:
 | `//! lrm 4.5.7`, `//! inherited IEEE 1364-2005 3.8` | nobody | the clause, or `clause:sentence`, the test checks |
 | `//! reject <note>` | harness | the tool must refuse the source with a diagnostic (exit 1–125, not a crash or timeout). The note names the expected error, often as VerA's code; the harness does not match it. |
 | `//! reject-run <note>` | harness | compiles, and the run must fail |
-| `//! exit N` | harness | the run's exit status |
+| `//! exit N` | harness | the run's exit status, 0–125 |
+| `//! exit any` | harness | the run may exit with any status 0–125, for a clause that leaves it open (a crash, timeout or exit ≥ 126 still fails); the output checks below still apply |
 | `//! checks N` | harness | exactly N `ok=` lines |
 | `//! stdout TEXT` | harness | stdout contains TEXT |
+| `//! diagnostic` | harness | stdout or stderr has a line that is not blank and holds no `//! stdout` TEXT: a message the tool printed, for a clause that requires one in no set words or stream (IEEE 1364 17.2.9's "an error message is issued") |
 | `//! expect stdout GOLD` | harness | stdout equals GOLD (beside the test) instead of `<stem>.expected.txt`; a GOLD that is not there fails the test |
-| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD, `$date`/`$version` bodies aside |
+| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD up to what IEEE 1364 18.2 leaves the writer: identifier codes (compared as the names they stand for), the order of `$scope`/`$var` lines and of the changes within one time or section, `1 ns` vs `1ns`, the case of `x`/`z`/`b`/`r`, an event's value, an integer's or time's range, and `$date`, `$version` and `$comment` text; a repeated `$scope`, an empty section or a time with no change counts for nothing. Values, times, sections, the scope tree, var types, sizes and declared ranges must match |
 | `//! neighbour FILE` | nobody | the legal twin of a `_rejected` test |
 | `//@ files A.v B.v` | tool | more sources (exported absolute as `CONFORM_FILES`) |
 | `//@ libmap X.map`, `//@ liblist LIB`, `//@ std 1364-2001` | tool | IEEE 1364 clause 13 configuration and the `begin_keywords` set |
 | `//@ protect-keys K.json` | tool | the key file that decrypts an IEEE 1364 clause 28 envelope |
+| `//@ negative-timing` | tool | IEEE 1364 15.5.4's invocation option that enables negative `$setuphold` and `$recrem` limits (exported as `CONFORM_NEGATIVE_TIMING=1`); it takes no argument |
 
 ### The verdict
 
 1. A test with only metadata (`lrm`, `reject`, ...) is an accept or reject
    test: the compile stage decides it.
 2. Any other `//!` line, a `CHECK` macro, or an `.expected.txt` makes it a run
-   test. The run must exit 0 (or `//! exit N`), and then:
+   test. The run must exit 0 (or `//! exit N`, or 0–125 under `//! exit any`), and then:
    - stdout must equal `<stem>.expected.txt` byte for byte;
    - stderr must contain `<stem>.expected.stderr.txt` (stderr also carries the
      tool's own diagnostics, so containment, not equality);
@@ -124,6 +141,7 @@ self-checking test needs nothing but a tool that runs `$strobe`.
 ## Tool configs
 
 A config maps `stage.language` to a shell command; `#` starts a comment.
+`version` is a command that prints the tool's exact version, for a dump.
 
 ```
 compile.verilog = iverilog -g2005 -o "$CONFORM_WORK/sim.vvp" "$CONFORM_SRC" $CONFORM_FILES
@@ -154,7 +172,7 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `CONFORM_WORK` | the scratch directory, also the working directory |
 | `CONFORM_INCLUDE` | `tests/include` (for a manifest test, the suite's root) |
 | `CONFORM_TOOLDIR` | the config's directory, for adapters beside it |
-| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS` | from `//@` lines |
+| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS`, `CONFORM_NEGATIVE_TIMING` | from `//@` lines |
 | `CONFORM_COMPILE_ONLY` | `1` when only compiling is judged (see Stages) |
 | `CONFORM_<KEY>` | from a manifest row's `KEY=VALUE` columns (a row sets these, not `//@` lines: `STD`, `INCDIR`, `DIRS` the directories its runner makes in the cwd, `DEFINES`, `SHIM` an include directory under `external/`). The harness reads `FILTER`, `RTOL`, `ATOL` and `DIFF=OUT:GOLD` (the file the run writes must equal GOLD, compared as `//! expect vcd`) |
 
@@ -167,6 +185,8 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `ngspice.conf` | `netlist` | `tests/netlist/` through `rawcheck.py`, and the external decks |
 | `ngspice-converged.conf` | `netlist` | as `ngspice.conf` at `reltol=1e-9`, `vntol=1e-15`, `abstol=1e-18`: a golden that passes `ngspice.conf` and fails here was recorded at a tolerance looser than its `rtol`. Decks without an `.expected.json` SKIP |
 | `espice.conf` | `netlist` | as `ngspice.conf`; `ESPICE=` overrides the executable |
+| `xyce.conf` | `netlist` | `Xyce -r`, every deck translated to Xyce's dialect first |
+| `vacask.conf` | `netlist` | `vacask`, every deck translated to VACASK's dialect first; its per-analysis raw files joined |
 
 ### SPICE decks
 
@@ -188,7 +208,14 @@ X": unsupported fails, never skips. An optional second command reruns the
 deck without RAW when its oracle reads stdout (`.meas` lines, `.four`
 tables), which ngspice prints only without `-r`.
 A deck in another dialect names it in its
-oracle (`tokenizer: hspice`), passed on as `TOKENIZER`.
+oracle (`tokenizer: hspice`), passed on as `TOKENIZER`. A config that sets
+`SPRACK_TO` (the dialect its tool reads; `SPRACK_READS`, others it reads as
+they are) has every other deck translated first, with everything it
+includes, by SpiceRack: `sprack project --from <d> --to <target> --out DIR
+DECK` (`ngspice`, `espice`, `xyce`, `vacask`). sprack's refusal, a construct the
+target cannot say, is the run's failure: it passes a `status: error` oracle
+and fails any other. The flake builds `sprack` at the SPRack commit
+`flake.lock` pins.
 
 ## Manifests
 
@@ -248,8 +275,8 @@ every test in the language: a test it cannot express counts against it, as
 "not supported". Speed is the wall time `conform` measured per test (compile
 and run), summed over the tests every charted tool passes, so each tool is
 timed on the same work. Each tool runs on its own GitHub-hosted runner of the
-same class, with as many tests in parallel as it has CPUs; treat differences
-under about 20% as noise.
+same class, with min(4, CPUs) tests in parallel; treat differences under
+about 20% as noise.
 
 <!-- conformance:start -->
 Measured 2026-11-15 by `.github/workflows/conformance.yml`, each tool at its latest version (`tools/ci.sh` says which).
@@ -279,6 +306,58 @@ Measured 2026-11-15 by `.github/workflows/conformance.yml`, each tool at its lat
 
 </details>
 <!-- conformance:end -->
+
+## Dumps
+
+`conform -d DIR/<tool>` keeps everything a tool did on every test it ran, so
+any tool can be benchmarked against any other without rerunning them.
+`.github/workflows/dumps.yml` builds a full set every Monday and on every
+push to `main` (`tools/ci.sh <tool> results/dumps`, one job per tool) and
+publishes it as the release `dumps-<run number>`: the tarball
+`dumps-<n>.tar.gz`, its `dumps-<n>.manifest.json` and `SHA256SUMS`. Dumps are
+never committed.
+
+```sh
+gh release download dumps-42 -R Scouren/Conformance-Suite   # or the latest: gh release list
+sha256sum -c SHA256SUMS
+tar -xzf dumps-42.tar.gz                                    # dumps/<tool>/..., dumps/manifest.json
+```
+
+One tool's directory:
+
+| File | Contents |
+|---|---|
+| `tool.json` | `tool`, `version` (the config's `version` command's output), `source` (where `ci.sh` got it: flake ref and revision, nixpkgs revision, release URL; and the sprack revision), `config` and `config_sha256`, `date`, `records` and `records_sha256`, `format` (1) |
+| `records.jsonl` | one JSON object per test the tool ran, in test-name order: `test`, `verdict` (as `-o`), `detail`, `ms` (wall time), `stages` (each stage: `stage`, `exit`, `ms`, `stdout`, `stderr`), and for a SPICE deck `simulator` (each run `rawcheck.py` made: `run` = `translate`, `sim`, `again` or `measure`, its `command`, `exit`, `ms`, `stdout`, `stderr`) and `raw`, `raw_sha256` |
+| `raw/<test>.raw` | the deck's waveforms |
+
+`exit` is the exit status, or -1 for a signal, -2 for the timeout, -3 for the
+memory cap. A stream over 4 MiB keeps its first 4 MiB and records its full
+size as `stdout_bytes` or `stderr_bytes`. A test with no command for its
+language has no record.
+
+The waveforms are one binary SPICE raw file per deck, rewritten canonically:
+only the header lines a reader needs (`Title`, `Plotname`, `Flags`, `No.
+Variables`, `No. Points`, `Variables`, `Binary`; no `Date` or command line),
+every value a little-endian IEEE double (complex: real, imaginary), every plot
+the tool wrote in its order. The raw format is what ngspice, ESPice, Xyce and
+VACASK already write, so nothing is lost or rounded in conversion, unlike CSV
+or JSON numbers; it reads with Python's `struct` alone (`parse_raw` in
+`tools/rawcheck.py`, 40 lines), and two runs that computed the same numbers
+write the same bytes, so `raw_sha256` compares results across tools and
+versions. A raw file that does not parse is kept as the tool wrote it.
+
+`manifest.json` covers the set:
+
+| Key | Contents |
+|---|---|
+| `format`, `suite`, `suite_commit`, `date` | the format version (1), this repository, the commit the set ran at, when |
+| `tools` | per tool: its `tool.json` and `available: true`; or `available: false` and `why` (HSPICE is always such a slot: licensed, no runner; a tool whose job failed is another) |
+| `decks` | per test name: the sha256 of its source (`tests/<name>`, or a manifest row's source under its `#root`) |
+| `dumps` | per tool, per test: `record_sha256` (its `records.jsonl` line) and, for a deck, `raw_sha256` |
+
+`python3 -m harness.dump manifest DIR [TOOL=WHY]...` writes it over a
+directory of tool dumps.
 
 ## License
 

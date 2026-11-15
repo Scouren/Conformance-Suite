@@ -6,3 +6,4 @@ results/
 __pycache__/
 # BSIM parameter-check logs ngspice writes beside a deck it runs
 *check.log
+bsim*.out

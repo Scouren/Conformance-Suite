@@ -1,5 +1,64 @@
 {
   "nodes": {
+    "asap7": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721314045,
+        "narHash": "sha256-/U+NHOPT+qL1I2h2q4WudvLYNxQmCwxtJ9KANe9PPpw=",
+        "owner": "The-OpenROAD-Project",
+        "repo": "asap7_pdk_r1p7",
+        "rev": "58d72c9d291e186a77468586ab0c43d8a21eda6a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "The-OpenROAD-Project",
+        "repo": "asap7_pdk_r1p7",
+        "type": "github"
+      }
+    },
+    "conformance": {
+      "inputs": {
+        "flake-utils": [
+          "sprack",
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "sprack",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794243639,
+        "narHash": "sha256-DyZQ4Dl4Iv7JeYTgmwVpt0d2nwrSSQ7ikWz/EZU8XwE=",
+        "ref": "main",
+        "rev": "4d565dd4e7ca6e7304a3619031df6c17846ae1f1",
+        "revCount": 118,
+        "type": "git",
+        "url": "https://github.com/Scouren/Conformance-Suite"
+      },
+      "original": {
+        "ref": "main",
+        "rev": "4d565dd4e7ca6e7304a3619031df6c17846ae1f1",
+        "type": "git",
+        "url": "https://github.com/Scouren/Conformance-Suite"
+      }
+    },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696426674,
+        "narHash": "sha256-kvjfFW7WAETZlt09AgDn1MrtKzP7t90Vf7vypd3OL1U=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "0f9255e01c2351cc7d116c072cb317785dd33b33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -15,6 +74,55 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "freepdk45": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1608196087,
+        "narHash": "sha256-UMGO8bOnw6dXUGWnTlesdjpDS+yWGcN7kKdoZ/lEDBk=",
+        "owner": "baichen318",
+        "repo": "FreePDK45",
+        "rev": "a75cb116a3efd1d3ae05b695285452e6ffbc7ca5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "baichen318",
+        "repo": "FreePDK45",
+        "type": "github"
+      }
+    },
+    "gf180mcu_fd_pr": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792400777,
+        "narHash": "sha256-U1+kW3dQEzd+tJMj97Xhwg4e/wmBfmxeTzsIrZVA+ds=",
+        "owner": "fossi-foundation",
+        "repo": "globalfoundries-pdk-libs-gf180mcu_fd_pr",
+        "rev": "5e4be8726e2ae8be099c4131f697a353d6457874",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fossi-foundation",
+        "repo": "globalfoundries-pdk-libs-gf180mcu_fd_pr",
+        "rev": "5e4be8726e2ae8be099c4131f697a353d6457874",
+        "type": "github"
+      }
+    },
+    "ihp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794327219,
+        "narHash": "sha256-iv1N3E7AyB2h5x2nK4a7KHIioi1M5Z0Z+nstfeYzl+8=",
+        "owner": "IHP-GmbH",
+        "repo": "IHP-Open-PDK",
+        "rev": "e73adb4045731ddec21634146d536380057f6a26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "IHP-GmbH",
+        "repo": "IHP-Open-PDK",
         "type": "github"
       }
     },
@@ -37,7 +145,56 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "sprack": "sprack"
+      }
+    },
+    "sky130_fd_pr": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1605038979,
+        "narHash": "sha256-bJMkhouLRdTc4JcH7WA4qCBYj53RE8RW56hSoHNguN8=",
+        "owner": "google",
+        "repo": "skywater-pdk-libs-sky130_fd_pr",
+        "rev": "f62031a1be9aefe902d6d54cddd6f59b57627436",
+        "type": "github"
+      },
+      "original": {
+        "owner": "google",
+        "repo": "skywater-pdk-libs-sky130_fd_pr",
+        "type": "github"
+      }
+    },
+    "sprack": {
+      "inputs": {
+        "asap7": "asap7",
+        "conformance": "conformance",
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "freepdk45": "freepdk45",
+        "gf180mcu_fd_pr": "gf180mcu_fd_pr",
+        "ihp": "ihp",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "sky130_fd_pr": "sky130_fd_pr",
+        "vacask-src": "vacask-src",
+        "zig-overlay": "zig-overlay",
+        "zls": "zls"
+      },
+      "locked": {
+        "lastModified": 1794731616,
+        "narHash": "sha256-AxQeEbGHsUy4+US+XVufUKmRDFoP1SpKUtkqBXKTf4c=",
+        "owner": "Scouren",
+        "repo": "SPRack",
+        "rev": "b53d6fffc2ef1004964de9e87e0d6d107c677934",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Scouren",
+        "repo": "SPRack",
+        "type": "github"
       }
     },
     "systems": {
@@ -52,6 +209,106 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "vacask-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794582867,
+        "narHash": "sha256-Y1ApTXMwgv4z664q7YaM1xIDIiRH5DiLwp6FKR6UPlI=",
+        "ref": "refs/heads/main",
+        "rev": "b2c15511a1a7c6246cca6bcfd8d38bfb3c750d7a",
+        "revCount": 1139,
+        "type": "git",
+        "url": "https://codeberg.org/arpadbuermen/VACASK"
+      },
+      "original": {
+        "rev": "b2c15511a1a7c6246cca6bcfd8d38bfb3c750d7a",
+        "type": "git",
+        "url": "https://codeberg.org/arpadbuermen/VACASK"
+      }
+    },
+    "zig-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "sprack",
+          "zls",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794400348,
+        "narHash": "sha256-ge/Hg9mrl90G8qBWrX0XjV1t0XVRduCg8vT63KVJEPo=",
+        "owner": "silversquirl",
+        "repo": "zig-flake",
+        "rev": "a16d0a105ba8f33a35b04ef67194e35784022a66",
+        "type": "github"
+      },
+      "original": {
+        "owner": "silversquirl",
+        "repo": "zig-flake",
+        "type": "github"
+      }
+    },
+    "zig-overlay": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "nixpkgs": [
+          "sprack",
+          "nixpkgs"
+        ],
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1792326242,
+        "narHash": "sha256-RKLMwqJUag/IQSZD6DhqWW/9JSNSg0hJeG4Ww5WqQ2A=",
+        "owner": "mitchellh",
+        "repo": "zig-overlay",
+        "rev": "e7e40b6e759546e3da1182ddc338c165862b5a54",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mitchellh",
+        "repo": "zig-overlay",
+        "type": "github"
+      }
+    },
+    "zls": {
+      "inputs": {
+        "nixpkgs": [
+          "sprack",
+          "nixpkgs"
+        ],
+        "zig-flake": "zig-flake"
+      },
+      "locked": {
+        "lastModified": 1794608446,
+        "narHash": "sha256-TFMDd8FQ2lNRhxoj9Fwn8P11NOmIg40YiRLUOwpQ9h8=",
+        "owner": "zigtools",
+        "repo": "zls",
+        "rev": "9d9c9d2c41b15ed00e2b1004780e069fef495109",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zigtools",
+        "repo": "zls",
         "type": "github"
       }
     }
