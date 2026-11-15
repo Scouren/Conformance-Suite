@@ -31,6 +31,8 @@ from dataclasses import dataclass, field
 from harness import dump
 
 PASS, FAIL, SKIP, ACCEPT = range(4)  # ACCEPT: compiled, run stage absent
+EXIT_FAILED, EXIT_ANY = -1, -2  # Spec.exit_want: any status 1..125 (reject-run), any 0..125 (`//! exit any`)
+CRASHED, TIMED_OUT, OUT_OF_MEMORY = -1, -2, -3  # Stage.status below 0
 NAMES = ["PASS", "FAIL", "SKIP", "PASS"]
 META = {"lrm", "inherited", "lrm-reject", "inherited-reject", "neighbour", "reject", "reject-only", "warn", "nowarn"}
 WORD = re.compile(r"[A-Za-z0-9_.+-]+")
@@ -78,6 +80,7 @@ class Spec:
     needs_run: bool = False
     self_checks: bool = False
     passed: bool = False
+    diagnostic: bool = False  # `//! diagnostic`: the tool must say something of its own
     stdout_want: list = field(default_factory=list)
     stderr_want: list = field(default_factory=list)
     vcd_out: str = None
@@ -92,7 +95,7 @@ class Spec:
 
 @dataclass
 class Stage:
-    status: int  # exit code, -1 signal, -2 timeout, -3 killed at the memory cap
+    status: int  # exit code, or CRASHED, TIMED_OUT, OUT_OF_MEMORY
     out: str
     err: str
     ms: int = 0
@@ -114,7 +117,7 @@ def run(argv):
         usage()
     tool_path = results = dump_dir = None
     jobs, timeout, keep, verbose, xfails = min(4, os.cpu_count() or 1), 120, False, False, set()
-    cap = 4 << 30
+    cap = 4096 << 20
     for o, a in opts:
         if o == "-t":
             tool_path = a
@@ -276,28 +279,52 @@ def load_xfails(path):
 
 
 def parse_bytes(s):
+    """-M's argument in bytes: MiB, or a number with a K, M or G suffix."""
     m = re.fullmatch(r"(\d+)([KMG]?)i?B?", s.strip(), re.I)
     if not m:
-        raise Die(f"-M {s}: not a size (4G, 512M, bytes)")
-    return int(m.group(1)) << {"": 0, "k": 10, "m": 20, "g": 30}[m.group(2).lower()]
+        raise Die(f"-M {s}: not a size (4096, 512M, 4G)")
+    return int(m.group(1)) << {"": 20, "k": 10, "m": 20, "g": 30}[m.group(2).lower()]
 
 
-def human(n):
-    for unit, shift in (("GiB", 30), ("MiB", 20), ("KiB", 10)):
-        if n >= 1 << shift and n % (1 << shift) == 0:
-            return f"{n >> shift} {unit}"
-    return f"{n} bytes"
+def mib(n):
+    return f"{n >> 20} MiB" if n % (1 << 20) == 0 else f"{n} bytes"
+
+
+def group_rss(pgrp):
+    """The resident set of process group `pgrp` in bytes: field 24 of each
+    /proc/<pid>/stat (pages), summed over the group's processes (a library
+    two of them map counts twice).
+    ponytail: reads every process's stat per sample, ~2 ms for 600 processes;
+    walk the group's children if a busy machine makes the scan show."""
+    pages = 0
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        try:
+            with open(f"/proc/{pid}/stat", "rb") as f:
+                fields = f.read().rsplit(b")", 1)[1].split()  # the command, field 2, may hold ')'
+        except (OSError, IndexError):
+            continue  # exited since the listing
+        if int(fields[2]) == pgrp:
+            pages += int(fields[21])
+    return pages * resource.getpagesize()
 
 
 def capper(cap):
-    """The argv prefix that holds a stage to `cap` bytes: a systemd user scope
-    (MemoryMax, no swap, OOMPolicy=kill: past the cap the kernel kills the
-    whole tree, the shell too, so the stage ends on SIGKILL), else
-    ("rlimit", cap), an address-space limit on the shell and what it starts.
-    Probed once; () for no cap. `--expand-environment=no`: systemd-run
-    would otherwise expand `$VAR` in the command before the shell sees it."""
+    """How a stage is held to `cap` bytes: a systemd user scope, as the argv
+    prefix (MemoryMax, no swap, OOMPolicy=kill: past the cap the kernel kills
+    the whole tree, the shell too, so the stage ends on SIGKILL), else
+    ("rss", cap): the process group's resident set, sampled every 100 ms,
+    the group killed past it. Never an rlimit: RLIMIT_AS and RLIMIT_DATA
+    count what Zig and LLVM reserve and never touch (openvaf-r fails under
+    4096 MiB of either at 2540 MiB resident). Both count touched memory
+    only. Probed once; () for no cap; CONFORM_CAP=rss forces the sampler.
+    `--expand-environment=no`: systemd-run would otherwise expand `$VAR` in
+    the command before the shell sees it."""
     if not cap:
         return ()
+    if os.environ.get("CONFORM_CAP") == "rss":
+        return ("rss", cap)
     scope = ("systemd-run", "--user", "--scope", "-q", "--expand-environment=no", "-p", f"MemoryMax={cap}", "-p", "MemorySwapMax=0", "-p", "OOMPolicy=kill",
              "--")
     try:
@@ -305,7 +332,7 @@ def capper(cap):
             return scope
     except (OSError, subprocess.TimeoutExpired):
         pass
-    return ("rlimit", cap)
+    return ("rss", cap)
 
 
 def limit_file_size():
@@ -440,6 +467,9 @@ def parse(src, d):
         if body is not None:
             m = re.match(r"(\S{0,31})\s*([^\r]*)", body)
             kw, rest = m.group(1), m.group(2)
+            if kw == "negative-timing" and not rest:  # IEEE 1364-2005 15.5.4's invocation option
+                sp.env["CONFORM_NEGATIVE_TIMING"] = "1"
+                continue
             if kw not in at:
                 raise Broken(f"unknown directive //@ {kw}")
             words = rest.split() if kw in ("files", "libmap", "protect-keys") else [rest]
@@ -455,7 +485,12 @@ def parse(src, d):
         elif kw == "reject-run":
             sp.reject_run = True
         elif kw == "exit":
-            sp.exit_want, exit_set = atoi(arg), True
+            a = arg.strip(" \t\r\n")
+            if a != "any" and not (re.fullmatch(r"[+-]?\d+", a) and 0 <= int(a) <= 125):
+                raise Broken(f"//! exit takes 0..125 or `any`: {arg}")
+            sp.exit_want, exit_set = EXIT_ANY if a == "any" else int(a), True
+        elif kw == "diagnostic":
+            sp.diagnostic = True
         elif kw == "checks":
             sp.checks_want = atoi(arg)
         elif kw == "stdout" and len(sp.stdout_want) < 16:
@@ -470,7 +505,7 @@ def parse(src, d):
         if kw not in META:
             sp.needs_run = True
     if sp.reject_run and not exit_set:
-        sp.exit_want = -1  # any normal failure
+        sp.exit_want = EXIT_FAILED
     if named:  # a named gold that is not there is a broken test, not a gold-less one
         sp.gold = f"{d}/{named}"
         if not os.path.exists(sp.gold):
@@ -486,6 +521,7 @@ def parse(src, d):
     for kw, var in (("files", "FILES"), ("libmap", "LIBMAP"), ("liblist", "LIBLIST"), ("std", "STD"),
                     ("protect-keys", "PROTECT_KEYS")):
         sp.env[f"CONFORM_{var}"] = " ".join(at[kw]) if at[kw] else None
+    sp.env.setdefault("CONFORM_NEGATIVE_TIMING", None)
     return sp
 
 
@@ -503,7 +539,7 @@ def parse_row(row, mroot):
         sp.reject = True
     elif want == "reject-run":
         sp.reject_run = sp.needs_run = True
-        sp.exit_want = -1
+        sp.exit_want = EXIT_FAILED
     elif want != "compile":
         raise Broken(f"unknown want `{want}`")
     if len(col) > 3 and "=" in col[3]:
@@ -614,7 +650,8 @@ def judge_stages(ctx, sp, cc, rc, stage, d, work, env):
             return FAIL, "ran cleanly; expected a rejection" if r.status == 0 else describe(r, "run", ctx)
         why = judge_output(d, work, sp, r, env, ctx)
         return (FAIL, why) if why else (PASS, "")
-    if r.status != sp.exit_want:
+    # `//! exit any`: the tool's to choose, short of a crash, a timeout or a shell failure
+    if not (0 <= r.status <= 125) if sp.exit_want == EXIT_ANY else r.status != sp.exit_want:
         why = describe(r, "run", ctx)
         if 0 <= r.status < 126:
             e = r.err or r.out
@@ -652,23 +689,28 @@ def link_inputs(src, d, work):
 def run_stage(cmd, work, name, env, timeout, wrap=(), cwd=None):
     """`cmd` under /bin/sh in `cwd` (default `work`), stdout and stderr to
     `work/<name>.stdout|.stderr`, killed with its process group at `timeout`.
-    `wrap` (capper) caps its memory; a SIGKILL nobody here sent is the cap."""
+    `wrap` (capper) caps its memory: a scope's SIGKILL nobody here sent is
+    the cap, and the sampler kills the group itself."""
     out, err = f"{work}/{name}.stdout", f"{work}/{name}.stderr"
     t0 = time.monotonic()
-    rlimit = wrap[1] if wrap and wrap[0] == "rlimit" else None
-    argv = (list(wrap) if not rlimit else []) + ["/bin/sh", "-c", cmd]
+    rss = wrap[1] if wrap and wrap[0] == "rss" else None
+    argv = (list(wrap) if not rss else []) + ["/bin/sh", "-c", cmd]
     try:
         with open(out, "wb") as o, open(err, "wb") as e:
             p = subprocess.Popen(argv, cwd=cwd or work, env=env, stdin=subprocess.DEVNULL, stdout=o, stderr=e,
-                                 process_group=0, restore_signals=False,
-                                 preexec_fn=(lambda: resource.setrlimit(resource.RLIMIT_AS, (rlimit, rlimit))) if rlimit else None)
+                                 process_group=0, restore_signals=False)
     except OSError:
         return Stage(126, slurp(out) or "", slurp(err) or "")
-    try:
-        p.wait(timeout=timeout)
-        status = p.returncode if p.returncode >= 0 else -3 if p.returncode == -signal.SIGKILL and wrap and not rlimit else -1
-    except subprocess.TimeoutExpired:
-        status = -2
+    deadline, status = t0 + timeout, None
+    while status is None:
+        try:
+            p.wait(timeout=max(0.0, min(0.1, deadline - time.monotonic())) if rss else max(0.0, deadline - time.monotonic()))
+            status = p.returncode if p.returncode >= 0 else OUT_OF_MEMORY if p.returncode == -signal.SIGKILL and wrap and not rss else CRASHED
+        except subprocess.TimeoutExpired:
+            if time.monotonic() >= deadline:
+                status = TIMED_OUT
+            elif rss and group_rss(p.pid) > rss:
+                status = OUT_OF_MEMORY
     try:
         os.killpg(p.pid, signal.SIGKILL)  # the timed-out group, or stray background children
     except OSError:
@@ -678,12 +720,12 @@ def run_stage(cmd, work, name, env, timeout, wrap=(), cwd=None):
 
 
 def describe(s, name, ctx):
-    if s.status == -2:
+    if s.status == TIMED_OUT:
         return f"{name} timed out after {ctx.timeout}s"
-    if s.status == -3:
-        return f"{name} killed at the memory cap {human(ctx.cap)}"
-    if s.status == -1:
-        return f"{name} crashed (signal)" + (f" under the address-space cap {human(ctx.cap)}" if ctx.wrap[:1] == ("rlimit",) else "")
+    if s.status == OUT_OF_MEMORY:
+        return f"{name} exceeded {mib(ctx.cap)} resident"
+    if s.status == CRASHED:
+        return f"{name} crashed (signal)"
     if s.status >= 126:
         return f"{name} could not run the command (exit {s.status})"
     return f"{name} exited {s.status}"
@@ -711,6 +753,8 @@ def judge_output(d, work, sp, s, env, ctx):
             return f"stderr lacks {os.path.basename(sp.errgold)}"
     if sp.passed and not passed_line(s.out):
         return "no PASSED line"
+    if sp.diagnostic and not foreign_line(s.out, sp) and not foreign_line(s.err, sp):
+        return "no diagnostic: the run printed only the test's own lines"
     for w in sp.stdout_want:
         if w not in s.out:
             return f'stdout lacks "{w}"'
@@ -727,20 +771,107 @@ def judge_output(d, work, sp, s, env, ctx):
     if sp.vcd_out:
         gold = sp.vcd_gold if sp.vcd_gold.startswith("/") else f"{d}/{sp.vcd_gold}"
         x, y = slurp(f"{work}/{sp.vcd_out}"), slurp(gold)
-        if x is None or y is None or vcd_norm(x) != vcd_norm(y):
+        nx, ny = (vcd_norm(x) if x is not None else None), (vcd_norm(y) if y is not None else None)
+        if nx is None or ny is None or nx != ny:
             return f"{sp.vcd_out} differs from {sp.vcd_gold}"
     return ""
 
 
+def foreign_line(text, sp):
+    """A line of `text` that is not blank and holds no `//! stdout` text: one
+    the tool printed, not the test. A clause that requires a message in no
+    set words (IEEE 1364-2005 17.2.9's "an error message is issued") is
+    judged by one on either stream, since no clause names the stream."""
+    return any(line.strip(" \t\r") and not any(w in line for w in sp.stdout_want) for line in text.split("\n"))
+
+
 def vcd_norm(text):
-    """VCD tokens with the `$date` and `$version` bodies dropped (IEEE 1364
-    §18.2.3.2, §18.2.3.8: tool-specific text)."""
-    out, skip = [], False
-    for t in re.split(r"[ \t\r\n]+", text):
-        if not t or skip and t != "$end":
-            continue
-        skip = t in ("$date", "$version")
-        out.append(t)
+    """A VCD as lines with every choice IEEE 1364 §18.2 leaves to the writer
+    made one way, so two dumps of one run compare equal. Dropped: `$date`,
+    `$version` and `$comment` bodies (§18.2.3.1, .2, .8: the writer's text),
+    an integer's or time's `[31:0]`-like range (no declaration gives one), a
+    repeated `$scope`, a section with no change and a time that heads none.
+    Canonical: the `$timescale` body without its inner space (`1 ns`), and
+    each identifier code, which becomes the hierarchical name of every
+    variable that shares it (§18.2.3.7 b). Sorted: the header's lines, and the
+    changes between two times or within a `$dumpvars`-like section. Value
+    letters lose their case (`X`, `B`), and an event's value is 1 (§18.2.2:
+    irrelevant). Kept: every value, time, section, scope path and type, var
+    type, size and declared range. A file without `$enddefinitions` (a
+    manifest's DIFF= of plain text) is only its tokens. None when the header
+    is malformed."""
+    tok = [t for t in re.split(r"[ \t\r\n]+", text) if t]
+    n, vcd = len(tok), "$enddefinitions" in tok
+
+    def past_end(i):  # the index past the `$end` that closes the section at i
+        while i < n and tok[i] != "$end":
+            i += 1
+        return i + (i < n)
+    names = {}  # identifier code -> [(hierarchical name, is an event)]
+    up, path, group, out, header, i = [], "", [], [], vcd, 0
+    while i < n:
+        t = tok[i]
+        if t in ("$date", "$version", "$comment"):
+            i = past_end(i)
+        elif not vcd:
+            out.append(t)
+            i += 1
+        elif header and t == "$timescale":
+            e = past_end(i)
+            group.append("$timescale " + "".join(tok[i + 1:e - 1]))
+            i = e
+        elif header and t == "$scope":
+            if i + 2 >= n or len(up) == 256:
+                return None
+            up.append(len(path))
+            path = f"{path}.{tok[i + 2]}" if path else tok[i + 2]
+            group.append(f"$scope {path} {tok[i + 1]}")
+            i = past_end(i)
+        elif header and t == "$upscope":
+            if not up:
+                return None
+            path = path[:up.pop()]
+            i = past_end(i)
+        elif header and t == "$var":
+            e = past_end(i)
+            if e < i + 6:
+                return None
+            ref = "".join(tok[i + 4:e - 1])
+            r = ref.find("[")
+            if r >= 0 and ":" in ref[r:] and tok[i + 1] in ("integer", "time"):  # never declared, so the writer's
+                ref = ref[:r]
+            full = f"{path}.{ref}" if path else ref
+            names.setdefault(tok[i + 3], []).append((full, tok[i + 1] == "event"))
+            group.append(f"$var {tok[i + 1]} {tok[i + 2]} {full}")
+            i = e
+        elif header and t == "$enddefinitions":
+            out = sorted(set(out + group))
+            group, header = [], False
+            i = past_end(i)
+        elif header:
+            group.append(t)
+            i += 1
+        elif t[0] in "#$":
+            out += sorted(group) + [t]
+            group = []
+            i += 1
+        else:
+            vector = t[0] in "bBrR"
+            if vector and i + 1 == n:
+                return None
+            code, value = (tok[i + 1], t.lower()) if vector else (t[1:], t[0].lower())
+            group += [f"{v} {'1' if event else value}" for v, event in names.get(code, [])] or [f"?{code} {value}"]
+            i += 1 + vector
+    out += sorted(group)
+    if vcd:  # a section that holds no change, and a time that heads none, record nothing
+        kept, k = [], 0
+        while k < len(out):
+            if out[k][0] == "$" and out[k] != "$end" and k + 1 < len(out) and out[k + 1] == "$end":
+                k += 2
+                continue
+            kept.append(out[k])
+            k += 1
+        out = [x for k, x in enumerate(kept) if x[0] != "#" or k + 1 < len(kept) and kept[k + 1][0] != "#"]
     return out
 
 

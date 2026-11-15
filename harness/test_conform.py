@@ -18,7 +18,7 @@ SUITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 TOOL = r'''
 run.verilog-a = cat "$CONFORM_DIR/$CONFORM_STEM.out" 2>/dev/null; s=$(cat "$CONFORM_DIR/$CONFORM_STEM.exit" 2>/dev/null || echo 0); [ "$s" = segv ] && kill -SEGV $$; [ "$s" = hang ] && sleep 30; exit $s
-run.verilog = [ -z "$CONFORM_COMPILE_ONLY" ] || exit 0; cp "$CONFORM_DIR/$CONFORM_STEM.file" out.txt 2>/dev/null; cat "$CONFORM_DIR/$CONFORM_STEM.out" 2>/dev/null; cat "$CONFORM_DIR/$CONFORM_STEM.err" >&2 2>/dev/null; ${CONFORM_STD:+echo std=$CONFORM_STD}; ${CONFORM_PROTECT_KEYS:+echo keys=${CONFORM_PROTECT_KEYS##*/}}; exit $(cat "$CONFORM_DIR/$CONFORM_STEM.exit" 2>/dev/null || echo 0)
+run.verilog = [ -z "$CONFORM_COMPILE_ONLY" ] || exit 0; cp "$CONFORM_DIR/$CONFORM_STEM.file" out.txt 2>/dev/null; cat "$CONFORM_DIR/$CONFORM_STEM.out" 2>/dev/null; cat "$CONFORM_DIR/$CONFORM_STEM.err" >&2 2>/dev/null; ${CONFORM_STD:+echo std=$CONFORM_STD}; ${CONFORM_PROTECT_KEYS:+echo keys=${CONFORM_PROTECT_KEYS##*/}}; ${CONFORM_NEGATIVE_TIMING:+echo negative-timing=$CONFORM_NEGATIVE_TIMING}; exit $(cat "$CONFORM_DIR/$CONFORM_STEM.exit" 2>/dev/null || echo 0)
 run.vpi = echo "$CONFORM_LANG $(basename "$CONFORM_SRC")"
 '''
 
@@ -47,6 +47,20 @@ FAIL	verilog-a/reject_crash.va
 FAIL	verilog-a/reject_exit_139.va
 PASS	verilog-a/reject_run_ok.va
 PASS	verilog-a/exit_code.va
+PASS	verilog-a/exit_any.va
+FAIL	verilog-a/exit_any_crash.va
+FAIL	verilog-a/exit_any_wrong_output.va
+FAIL	verilog-a/exit_any_misspelt.va
+FAIL	verilog-a/exit_out_of_range.va
+PASS	verilog-a/diagnostic.va
+PASS	verilog/diagnostic_stderr.v
+FAIL	verilog-a/diagnostic_silent.va
+PASS	verilog/negative_timing.v
+FAIL	verilog/negative_timing_argument.v
+PASS	verilog/vcd_canonical.v
+FAIL	verilog/vcd_value.v
+FAIL	verilog/vcd_time.v
+FAIL	verilog/vcd_scope.v
 PASS	verilog-a/stdout_line.va
 FAIL	verilog-a/timeout.va
 XFAIL	verilog-a/xfail.va
@@ -126,6 +140,18 @@ class Verdicts(unittest.TestCase):
         c("verilog-a", "reject_exit_139", "//! reject E0001", "", 139)  # a crash as the shell reports it: 128 + SIGSEGV
         c("verilog-a", "reject_run_ok", "//! reject-run out of range", "", 1)
         c("verilog-a", "exit_code", "//! exit 3", "", 3)
+        # `//! exit any`: any status 0..125, the output still judged; a crash fails.
+        c("verilog-a", "exit_any", "//! exit any\n//! stdout loaded 2", "loaded 2\n", 1)
+        c("verilog-a", "exit_any_crash", "//! exit any\n//! stdout loaded 2", "loaded 2\n", "segv")
+        c("verilog-a", "exit_any_wrong_output", "//! exit any\n//! stdout loaded 2", "loaded 3\n", 0)
+        c("verilog-a", "exit_any_misspelt", "//! exit anything", "", 0)
+        c("verilog-a", "exit_out_of_range", "//! exit 126", "", 0)
+        # `//! diagnostic`: a line the test did not print itself, on either stream.
+        c("verilog-a", "diagnostic", "//! exit any\n//! diagnostic\n//! stdout mem 11", "mem 11\nreadmem: bad digit\n", 1)
+        c("verilog-a", "diagnostic_silent", "//! exit any\n//! diagnostic\n//! stdout mem 11", "mem 11\n\n", 0)
+        for name, text in {"diagnostic_stderr.v": "//! exit any\n//! diagnostic\nmodule d; endmodule\n",
+                           "diagnostic_stderr.err": "warning: x unused\n", "diagnostic_stderr.exit": "1\n"}.items():
+            write(f"{s}/verilog/{name}", text)
         c("verilog-a", "stdout_line", "//! stdout t=20 reached", "p: t=20 reached\n", 0)
         c("verilog-a", "timeout", "//! bias V(p) = 1", "", "hang")
         c("verilog-a", "xfail", "//! bias V(p) = 1", "ok=0\n", 0)
@@ -147,6 +173,32 @@ class Verdicts(unittest.TestCase):
             "keys.v": "//@ protect-keys k.json\nmodule k; endmodule\n", "k.json": "{}\n", "keys.expected.txt": "keys=k.json\n",
         }.items():
             write(f"{v}/{name}", text)
+        # `//@ negative-timing` reaches the tool as CONFORM_NEGATIVE_TIMING=1; it takes no argument.
+        write(f"{v}/negative_timing.v", "//@ negative-timing\nmodule nt; endmodule\n")
+        write(f"{v}/negative_timing.expected.txt", "negative-timing=1\n")
+        write(f"{v}/negative_timing_argument.v", "//@ negative-timing on\nmodule nt; endmodule\n")
+        write(f"{v}/negative_timing_argument.expected.txt", "negative-timing=1\n")
+        # `//! expect vcd`: a dump that differs from the gold only where IEEE
+        # 1364 18.2 leaves the writer a choice (codes, $var and change order,
+        # `1 ns`, value case, an aliased code, a writer's $comment, an
+        # integer's range, a repeated $scope, empty sections and times)
+        # passes; one value, one time or one scope name changed fails.
+        gold = ("$date today $end $version A 1.0 $end $timescale 1 ns $end\n"
+                "$scope module top $end $var wire 1 ! a $end $var wire 1 ! b $end\n"
+                "$var reg 4 \" v [3:0] $end $var integer 32 # i $end $upscope $end\n"
+                "$enddefinitions $end\n#0 $dumpvars 0! b1x \" b101 # $end\n#5 1! bz \"\n")
+        write(f"{v}/vcd.gold.vcd", gold)
+        write(f"{v}/vcd_canonical.file",
+              "$version B 2.0 $end $timescale 1ns $end\n"
+              "$scope module top $end $var integer 32 % i [31:0] $end $var reg 4 & v [3:0] $end\n"
+              "$var wire 1 ' b $end $var wire 1 ( a $end $upscope $end $scope module top $end $upscope $end\n"
+              "$enddefinitions $end $comment from the writer $end $dumpall $end\n"
+              "#0 $dumpvars B1X & b101 % 0( 0' $end\n#5 1' BZ & 1(\n#9\n")
+        write(f"{v}/vcd_value.file", gold.replace("#5 1!", "#5 0!"))
+        write(f"{v}/vcd_time.file", gold.replace("#5", "#6"))
+        write(f"{v}/vcd_scope.file", gold.replace("module top", "module tip"))
+        for name in ("vcd_canonical", "vcd_value", "vcd_time", "vcd_scope"):
+            write(f"{v}/{name}.v", f"//! expect vcd out.txt == vcd.gold.vcd\nmodule {name}; endmodule\n")
         # A SPICE deck is `netlist` wherever it is filed (no command here: SKIP).
         write(f"{s}/verilog-a/deck.sp", "* deck\n.end\n")
         write(f"{s}/verilog-a/deck.expected.json", "{}\n")
@@ -267,23 +319,44 @@ class Decks(unittest.TestCase):
 
 
 class Caps(unittest.TestCase):
-    """A stage past the memory cap is a FAIL that says so, and the harness lives on."""
+    """A stage past the memory cap is a FAIL that says so, and the harness
+    lives on; memory reserved and never touched does not count. Both ways of
+    holding the cap: a systemd scope where this machine has one, and the
+    resident-set sampler."""
 
-    def test_memory_cap(self):
+    # mem R T MS: reserve R MiB, touch T of them, hold them MS ms, print "held".
+    MEM = ("python3 -c 'import mmap, sys, time; r, t, ms = map(int, sys.argv[1:]); "
+           "m = mmap.mmap(-1, r << 20, flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS | mmap.MAP_NORESERVE); "
+           "[m.__setitem__(k, 1) for k in range(0, t << 20, 4096)]; time.sleep(ms / 1000); print(\"held\")'")
+
+    def run_caps(self, mode):
         with tempfile.TemporaryDirectory() as t:
             write(f"{t}/s/include/.keep", "")
-            write(f"{t}/s/verilog-a/hog.va", "//! bias V(p) = 1\nmodule hog; endmodule\n")
-            write(f"{t}/s/verilog-a/fine.va", "//! bias V(p) = 1\nmodule fine; endmodule\n")
-            # 256 MiB written page by page, far past a 64 MiB cap.
-            write(f"{t}/tool.conf", 'run.verilog-a = [ "$CONFORM_STEM" = fine ] || python3 -c "b = b\'x\' * (256 << 20)"; echo ok=1\n')
-            r = conform("-t", f"{t}/tool.conf", "-M", "64M", "-o", f"{t}/got.tsv", f"{t}/s")
+            for name in ("hog", "reserve", "fine"):
+                write(f"{t}/s/verilog-a/{name}.va", f"//! stdout held\nmodule {name}; endmodule\n")
+            write(f"{t}/s/verilog-a/reject_hog.va", "//! reject E0001\nmodule reject_hog; endmodule\n")
+            # -M 128: touching 512 MiB fails, even a reject test the kill would
+            # otherwise "reject"; reserving 2048 MiB and touching 16 passes.
+            write(f"{t}/tool.conf", f'run.verilog-a = case $CONFORM_STEM in *hog) exec {self.MEM} 512 512 30000;; '
+                                    f'reserve) exec {self.MEM} 2048 16 300;; *) echo held;; esac\n')
+            r = subprocess.run([sys.executable, "-m", "harness", "-t", f"{t}/tool.conf", "-M", "128", "-T", "20", "-o", f"{t}/got.tsv",
+                                f"{t}/s"], cwd=SUITE, capture_output=True, text=True, env=dict(os.environ, CONFORM_CAP=mode))
             self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
             rows = {line.split("\t")[1]: line.split("\t") for line in read(f"{t}/got.tsv").splitlines()}
-            self.assertEqual(rows["verilog-a/fine.va"][0], "PASS")
-            self.assertEqual(rows["verilog-a/hog.va"][0], "FAIL")
-            from harness import conform as c
-            want = "run killed at the memory cap 64 MiB" if c.capper(64 << 20)[0] != "rlimit" else "MemoryError"
-            self.assertIn(want, rows["verilog-a/hog.va"][3])
+            self.assertEqual({k: v[0] for k, v in rows.items()}, {
+                "verilog-a/hog.va": "FAIL", "verilog-a/reject_hog.va": "FAIL", "verilog-a/reserve.va": "PASS", "verilog-a/fine.va": "PASS"})
+            for name in ("hog", "reject_hog"):
+                self.assertEqual(rows[f"verilog-a/{name}.va"][3], "run exceeded 128 MiB resident")
+                self.assertLess(int(rows[f"verilog-a/{name}.va"][2]), 10000)  # killed, not timed out
+
+    def test_sampler(self):
+        self.run_caps("rss")
+
+    def test_scope(self):
+        from harness import conform as c
+        if c.capper(128 << 20)[0] != "systemd-run":
+            self.fail("no systemd user scope here: run test_sampler alone (unsupported fails, never skips)")
+        self.run_caps("")
 
 
 if __name__ == "__main__":

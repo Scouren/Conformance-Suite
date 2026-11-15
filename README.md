@@ -38,12 +38,15 @@ verdict with its wall time in milliseconds; `-x tools/<tool>.xfail` turns
 known failures into XFAIL, so a CI gate fails only when something changes.
 Output and the results file are in test-name order, whatever `-j` is (default
 min(4, CPUs)). Each stage has a timeout (`-T`, default 120 s) and a memory cap
-(`-M`, default 4G; `0` for none): it runs in a systemd user scope with
-`MemoryMax`, no swap and `OOMPolicy=kill`, so the kernel kills the stage's
-whole process tree past the cap, or, without a systemd user session, under an
-address-space limit (`RLIMIT_AS`). A stage killed at either limit is a FAIL
-that says so ("run killed at the memory cap 4 GiB"), never a crash of the
-harness. `-d DIR` keeps every test's full output (Dumps, below).
+(`-M`, in MiB or with a K/M/G suffix, default 4096; `0` for none): it runs
+in a systemd user scope with `MemoryMax`, no swap and `OOMPolicy=kill`, so
+the kernel kills the stage's whole process tree past the cap, or, without a
+systemd user session, the harness samples the process group's resident set
+every 100 ms and kills it past the cap. Either way only touched memory
+counts, not address space reserved and never used (Zig, LLVM and openvaf-r
+reserve far more than they touch, so an rlimit would fail them). A stage
+past either limit is killed and fails its test ("compile exceeded 4096 MiB
+resident"), never a skip, a pass or a crash of the harness. `-d DIR` keeps every test's full output (Dumps, below).
 `python3 -m unittest discover -s harness -t .` feeds the harness scripted
 fake tools and checks every verdict, the memory cap and the dump format
 (`nix flake check` runs it, with `tools/rawcheck.py --selftest`).
@@ -107,22 +110,25 @@ Two kinds of directive:
 | `//! lrm 4.5.7`, `//! inherited IEEE 1364-2005 3.8` | nobody | the clause, or `clause:sentence`, the test checks |
 | `//! reject <note>` | harness | the tool must refuse the source with a diagnostic (exit 1–125, not a crash or timeout). The note names the expected error, often as VerA's code; the harness does not match it. |
 | `//! reject-run <note>` | harness | compiles, and the run must fail |
-| `//! exit N` | harness | the run's exit status |
+| `//! exit N` | harness | the run's exit status, 0–125 |
+| `//! exit any` | harness | the run may exit with any status 0–125, for a clause that leaves it open (a crash, timeout or exit ≥ 126 still fails); the output checks below still apply |
 | `//! checks N` | harness | exactly N `ok=` lines |
 | `//! stdout TEXT` | harness | stdout contains TEXT |
+| `//! diagnostic` | harness | stdout or stderr has a line that is not blank and holds no `//! stdout` TEXT: a message the tool printed, for a clause that requires one in no set words or stream (IEEE 1364 17.2.9's "an error message is issued") |
 | `//! expect stdout GOLD` | harness | stdout equals GOLD (beside the test) instead of `<stem>.expected.txt`; a GOLD that is not there fails the test |
-| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD, `$date`/`$version` bodies aside |
+| `//! expect vcd OUT == GOLD` | harness | the VCD the run writes equals GOLD up to what IEEE 1364 18.2 leaves the writer: identifier codes (compared as the names they stand for), the order of `$scope`/`$var` lines and of the changes within one time or section, `1 ns` vs `1ns`, the case of `x`/`z`/`b`/`r`, an event's value, an integer's or time's range, and `$date`, `$version` and `$comment` text; a repeated `$scope`, an empty section or a time with no change counts for nothing. Values, times, sections, the scope tree, var types, sizes and declared ranges must match |
 | `//! neighbour FILE` | nobody | the legal twin of a `_rejected` test |
 | `//@ files A.v B.v` | tool | more sources (exported absolute as `CONFORM_FILES`) |
 | `//@ libmap X.map`, `//@ liblist LIB`, `//@ std 1364-2001` | tool | IEEE 1364 clause 13 configuration and the `begin_keywords` set |
 | `//@ protect-keys K.json` | tool | the key file that decrypts an IEEE 1364 clause 28 envelope |
+| `//@ negative-timing` | tool | IEEE 1364 15.5.4's invocation option that enables negative `$setuphold` and `$recrem` limits (exported as `CONFORM_NEGATIVE_TIMING=1`); it takes no argument |
 
 ### The verdict
 
 1. A test with only metadata (`lrm`, `reject`, ...) is an accept or reject
    test: the compile stage decides it.
 2. Any other `//!` line, a `CHECK` macro, or an `.expected.txt` makes it a run
-   test. The run must exit 0 (or `//! exit N`), and then:
+   test. The run must exit 0 (or `//! exit N`, or 0–125 under `//! exit any`), and then:
    - stdout must equal `<stem>.expected.txt` byte for byte;
    - stderr must contain `<stem>.expected.stderr.txt` (stderr also carries the
      tool's own diagnostics, so containment, not equality);
@@ -166,7 +172,7 @@ run.verilog     = vvp -n "$CONFORM_WORK/sim.vvp"
 | `CONFORM_WORK` | the scratch directory, also the working directory |
 | `CONFORM_INCLUDE` | `tests/include` (for a manifest test, the suite's root) |
 | `CONFORM_TOOLDIR` | the config's directory, for adapters beside it |
-| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS` | from `//@` lines |
+| `CONFORM_FILES`, `CONFORM_LIBMAP`, `CONFORM_LIBLIST`, `CONFORM_STD`, `CONFORM_PROTECT_KEYS`, `CONFORM_NEGATIVE_TIMING` | from `//@` lines |
 | `CONFORM_COMPILE_ONLY` | `1` when only compiling is judged (see Stages) |
 | `CONFORM_<KEY>` | from a manifest row's `KEY=VALUE` columns (a row sets these, not `//@` lines: `STD`, `INCDIR`, `DIRS` the directories its runner makes in the cwd, `DEFINES`, `SHIM` an include directory under `external/`). The harness reads `FILTER`, `RTOL`, `ATOL` and `DIFF=OUT:GOLD` (the file the run writes must equal GOLD, compared as `//! expect vcd`) |
 
