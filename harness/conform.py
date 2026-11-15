@@ -34,7 +34,7 @@ PASS, FAIL, SKIP, ACCEPT = range(4)  # ACCEPT: compiled, run stage absent
 NAMES = ["PASS", "FAIL", "SKIP", "PASS"]
 META = {"lrm", "inherited", "lrm-reject", "inherited-reject", "neighbour", "reject", "reject-only", "warn", "nowarn"}
 WORD = re.compile(r"[A-Za-z0-9_.+-]+")
-MSG = 511  # conform.c's detail buffer, less its NUL
+MSG = 511  # a verdict's detail, at most this many characters
 
 
 class Die(Exception):
@@ -144,7 +144,7 @@ def run(argv):
         if os.path.isdir(p):
             for d, dirs, files in os.walk(p):
                 dirs.sort()
-                for f in files:  # a symlink in a walk is no test (conform.c's FTW_PHYS)
+                for f in files:  # a symlink in a walk is no test
                     if not os.path.islink(os.path.join(d, f)):
                         collect(os.path.join(d, f), tests)
         else:
@@ -209,8 +209,8 @@ def timed(ctx, t, index):
     record = []
     try:
         v, why = run_test(ctx, t, index, record)
-    except Exception as e:  # conform.c: "harness child died"
-        v, why = FAIL, f"harness child died: {e!r}"
+    except Exception as e:  # a harness bug or a full disk: the test fails, the run goes on
+        v, why = FAIL, f"harness error: {e!r}"
     return v, int((time.monotonic() - t0) * 1000), why[:MSG], record
 
 
@@ -312,7 +312,7 @@ def limit_file_size():
     """A runaway tool (iverilog on an instance array whose width overflows)
     writes until the disk is full and takes the CI runner down with it; past
     256 MiB it gets SIGXFSZ and its stage fails. Children inherit the limit,
-    SIGXFSZ's default action and SIGPIPE ignored, as conform.c's did."""
+    SIGXFSZ's default action and SIGPIPE ignored."""
     signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
     _, hard = resource.getrlimit(resource.RLIMIT_FSIZE)
     cap = 256 << 20 if hard == resource.RLIM_INFINITY else min(256 << 20, hard)
