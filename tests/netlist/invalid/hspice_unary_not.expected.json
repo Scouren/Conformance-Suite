@@ -2,15 +2,31 @@
  "schema_version": 1,
  "analysis": "op",
  "tokenizer": "hspice",
- "purpose": "#203: a unary `!` in an HSPICE expression is refused by name, as HSPICE documents none.",
+ "purpose": "#203: a unary `!` in an HSPICE expression is read as logical not, as HSPICE reads it (measured), so `1k*(!0)` is 1k.",
  "oracle": {
-  "kind": "diagnostic",
-  "derivation": "#203: the HSPICE manual's operator table (UG08 pp. 279-283) has `!=` but no unary `!`; ESPice refuses the card (UnsupportedCard)."
+  "kind": "analytic",
+  "derivation": "`!0` is 1 (HSPICE Y-2026.03-SP2-1, measured 2026-11-15 with a SPRack-written deck; the manual's operator table lists no unary `!`): r1 = 1k, i(v1) = -1/1k = -1e-3 A."
  },
  "origin": "tests/fixtures/invalid/hspice_unary_not.sp",
  "expect": {
-  "status": "error",
-  "category": "unsupported_input"
+  "status": "success",
+  "plots": [
+   {
+    "name": "Operating Point",
+    "match": "exact",
+    "columns": {
+     "i(v1)": {
+      "unit": "A",
+      "rtol": 2e-05,
+      "atol": 1e-15,
+      "values": [
+       -0.001
+      ]
+     }
+    },
+    "row_count": 1
+   }
+  ]
  },
- "netlist_sha256": "d2b833f9ccd6f7a12be9289ab98f25d6eb5549c598fee59c53043e8a240ed6f5"
+ "netlist_sha256": "44db21faf406b120972fd86e01c0c4a1f13b541dd5f87a9042b8c800bd49748e"
 }
