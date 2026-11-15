@@ -311,11 +311,15 @@ Measured 2026-11-15 by `.github/workflows/conformance.yml`, each tool at its lat
 
 | Language | Tool | Version | Passed | Failed | Not supported | Conformance | Time on common tests |
 |---|---|---|---:|---:|---:|---:|---:|
-| Verilog (IEEE 1364-2005) | VerA | vera 0.23.0 | 3611 | 0 | 0 | 100.0% | 76.4 s (3611) |
-| Verilog-A | VerA | vera 0.23.0 | 2452 | 0 | 0 | 100.0% | 1354.1 s (2452) |
-| Verilog-AMS | VerA | vera 0.23.0 | 755 | 0 | 0 | 100.0% | 1122.6 s (755) |
-| SPICE | ESPice | espice espice 0.20.0 (VerA 0.23.0 0bc0092b345e7b87977e7240660ce6767ea78367; backends: cpu) | 1016 | 238 | 2 | 80.9% | 456.0 s (608) |
-| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 740 | 514 | 2 | 58.9% | 369.3 s (608) |
+| Verilog (IEEE 1364-2005) | VerA | vera 0.23.0 | 3585 | 0 | 0 | 100.0% | 54.7 s (2234) |
+| Verilog (IEEE 1364-2005) | Icarus Verilog | unpacking 'github:NixOS/nixpkgs/e126e9e73c335158ff8279ac14d5f4afec153716' into the tarball cache... | 2990 | 553 | 42 | 83.4% | 88.1 s (2234) |
+| Verilog (IEEE 1364-2005) | Verilator | Verilator 5.052 2026-09-05 rev v5.052 | 2422 | 1121 | 42 | 67.6% | 14162.7 s (2234) |
+| Verilog-A | VerA | vera 0.23.0 | 2402 | 1 | 0 | 100.0% | 655.3 s (1322) |
+| Verilog-A | OpenVAF-Reloaded | openvaf-r v24.0.2mob | 1323 | 815 | 265 | 55.1% | 1127.5 s (1322) |
+| Verilog-AMS | VerA | vera 0.23.0 | 753 | 0 | 0 | 100.0% | 7.4 s (20) |
+| Verilog-AMS | OpenVAF-Reloaded | openvaf-r v24.0.2mob | 20 | 64 | 669 | 2.7% | 2.4 s (20) |
+| SPICE | ESPice | espice espice 0.20.0 (VerA 0.23.0 0bc0092b345e7b87977e7240660ce6767ea78367; backends: cpu) | 970 | 246 | 2 | 79.6% | 279.8 s (581) |
+| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 714 | 502 | 2 | 58.6% | 298.8 s (581) |
 
 </details>
 <!-- conformance:end -->
