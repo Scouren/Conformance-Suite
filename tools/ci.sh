@@ -47,9 +47,14 @@ vacask)
   in_shell=(nix shell "$unstable#python3" "$PWD/result-tool")
   source="this flake's vacask ($(nix eval --raw .#vacask.src.rev))"
   ;;
-iverilog | verilator | ngspice | xyce)
+iverilog | ngspice | xyce)
   in_shell=(nix shell "$unstable#python3" "$unstable#$tool")
   source="$unstable#$tool"
+  ;;
+verilator)
+  # verilator --binary runs make and a C++ compiler on what it writes.
+  in_shell=(nix shell "$unstable#python3" "$unstable#verilator" "$unstable#gcc" "$unstable#gnumake")
+  source="$unstable#verilator (with $unstable#gcc, #gnumake)"
   ;;
 *)
   echo "unknown tool $tool" >&2
