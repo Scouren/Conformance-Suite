@@ -37,8 +37,8 @@
                 0
               ],
               [
-                1,
-                0
+                0,
+                -1
               ],
               [
                 0,
@@ -53,5 +53,5 @@
     "all_requested_analyses_must_complete": true
   },
   "twin_of": "hspice/fft_rect.sp",
-  "netlist_sha256": "69479470c68f2c7042d46f2100ebb1ba192e471602292051a992238167864013"
+  "netlist_sha256": "7202bbd1a0af6faca14984289e7c18d40545cf7247bbf5f29763548b4efa3805"
 }
