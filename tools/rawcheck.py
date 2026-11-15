@@ -8,7 +8,13 @@ deck's `.expected.json` oracle, one `ok=` line per check.
 The command runs under `sh` in the deck's directory (so relative `.include`
 paths keep their meaning) with DECK (the deck's file name), RAW (where the
 raw file goes) and TOKENIZER (the oracle's input dialect, default ngspice)
-set. Without an `.expected.json`, RAW is unset and the command's stdout
+set. With SPRACK_TO (the dialect the tool reads; SPRACK_READS, others it
+reads as they are), a deck in any other dialect is first translated, with
+everything it includes, by `sprack project --from TOKENIZER --to SPRACK_TO`
+(SPRACK names the executable) and the command runs on the copy; sprack's
+refusal (a construct the target cannot say) is the run's exit status.
+Every simulator run is logged to $CONFORM_WORK/sim.json for a dump.
+Without an `.expected.json`, RAW is unset and the command's stdout
 passes through, for decks judged by a gold file instead (external manifests).
 The optional second command runs once more, RAW unset, for an oracle with
 `measure` checks or a Fourier plot, which read its stdout instead: ngspice
@@ -32,7 +38,7 @@ A port of ESPice's tests/test_correctness.zig judge, tool-neutral:
   on the plots the tool writes. Any other kind is an `ok=0` line,
   "unported check kind X": unsupported fails, never skips.
 """
-import json, math, os, re, struct, subprocess, sys
+import json, math, os, re, struct, subprocess, sys, time
 
 
 def parse_raw(data):
@@ -511,19 +517,37 @@ def main():
     src, work = os.environ["CONFORM_SRC"], os.environ["CONFORM_WORK"]
     env = dict(os.environ, DECK=os.path.basename(src))
     expected = os.path.splitext(src)[0] + ".expected.json"
-    oracle = None
+    oracle, cwd, runs = None, os.path.dirname(src), []
     if os.path.exists(expected):
         oracle = json.load(open(expected))
         env.update(RAW=os.path.join(work, "result.raw"), TOKENIZER=oracle.get("tokenizer") or "ngspice")
 
-    def run(command, env):
-        r = subprocess.run(["sh", "-c", command], cwd=os.path.dirname(src), env=env, capture_output=True, text=True, errors="replace")
+    def run(command, env, name):
+        t0 = time.monotonic()
+        r = subprocess.run(["sh", "-c", command], cwd=cwd, env=env, capture_output=True, text=True, errors="replace")
         sys.stderr.write(r.stderr)
+        runs.append({"run": name, "command": command, "exit": r.returncode, "ms": int((time.monotonic() - t0) * 1000),
+                     "stdout": r.stdout, "stderr": r.stderr})
+        with open(os.path.join(work, "sim.json"), "w") as f:  # what the simulator did, for a dump
+            json.dump(runs, f)
         return r
 
     def read(path):
         return open(path, "rb").read() if os.path.exists(path) else b""
-    p = run(cmd, env)
+    target, dialect = os.environ.get("SPRACK_TO"), env.get("TOKENIZER")
+    if oracle and target and dialect != target and dialect not in os.environ.get("SPRACK_READS", "").split():
+        # A deck in another dialect, translated with its includes into the
+        # dialect the tool reads; sprack's exit 1 is a construct the target
+        # cannot say, so the pipeline refused the deck.
+        kit = os.path.join(work, "kit")
+        t = run(f'"${{SPRACK:-sprack}}" project --from {dialect} --to {target} --out "{kit}" "$DECK"', env, "translate")
+        if t.returncode != 0:
+            for label, ok, detail in judge(oracle, t.returncode, "", b"", b"", t.stderr):
+                print(f"{label} {detail} ok={int(ok)}")
+            return
+        cwd = kit
+        env["TOKENIZER"] = target
+    p = run(cmd, env, "sim")
     if oracle is None:
         sys.stdout.write(p.stdout)
         sys.exit(p.returncode)
@@ -534,11 +558,11 @@ def main():
         second = os.path.join(work, "again.raw")
         if os.path.exists(second):
             os.remove(second)
-        run(cmd, dict(env, RAW=second))
+        run(cmd, dict(env, RAW=second), "again")
         again = read(second)
     if measure_cmd and reads_stdout(oracle["expect"]):
         del env["RAW"]
-        stdout = run(measure_cmd, env).stdout
+        stdout = run(measure_cmd, env, "measure").stdout
     for label, ok, detail in judge(oracle, p.returncode, stdout, raw, again, p.stderr):
         print(f"{label} {detail} ok={int(ok)}")
 
