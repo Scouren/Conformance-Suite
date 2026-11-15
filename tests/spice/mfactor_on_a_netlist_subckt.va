@@ -43,9 +43,13 @@
 // the hierarchical nets — a flow probe, i.e. a short across the biased a/b pair —
 // and not x1's resistor, so its digits were the harness's, not E.4.1's. The
 // current x1 draws is read two ways that the LRM defines:
-//   - `I(<x1.a>)`: §5.4.3's port access on a hierarchical port (A.8.9
-//     analog_port_reference; §6.7.1 "flow access for ... port branches can be
-//     done hierarchically"): the flow into instance x1 through its port a.
+//   - `I(x1.branch(<a>))`: §5.5.5's hierarchical_unnamed_branch_reference to
+//     x1's unnamed port branch for its port a (the clause's own example is
+//     `I(top.drv.branch(<p>))`; §5.4.3 "accesses the flow into a port of a
+//     module"; §6.7.1 "flow access for ... port branches can be done
+//     hierarchically"): the flow into instance x1 through its port a. Not
+//     `I(<x1.a>)`: §5.5.1 says a port probe's "port reference many not use
+//     hierarchical specifications".
 //   - `I(<a>)`: the flow into THIS module through its port a. Nothing but x1
 //     touches a, so Kirchhoff at a gives the same 4.0e-3 A, read in a module
 //     whose own $mfactor is 1 (§6.3.6's divide-on-probe rule is for probes in
@@ -69,6 +73,8 @@
 //! lrm E.2
 //! lrm 6.3.6
 //! lrm 9.18
+//! lrm 5.5.5
+//! lrm 5.4.3
 //! lrm 6.7.1
 //! lrm 6.7.1:1
 //! lrm E.4.1:1000
@@ -89,12 +95,12 @@ module h04_subckt_mfactor(a, b, c);
   rUnit x2(c, b);
   analog begin
     `CHECKR("one unscaled copy is Table E.1's I = V/r = 1.0/1000 (flow into x2.a)",
-            I(<x2.a>), 1.0e-3, 1e-12);
+            I(x2.branch(<a>)), 1.0e-3, 1e-12);
     `CHECKR("and the same current enters this module at c, which only x2 touches",
             I(<c>), 1.0e-3, 1e-12);
     // E.4.1's "a specified number of copies in parallel": four of them.
     `CHECKR("6.3.6 scales the subcircuit's flow by $mfactor: 4 * 1.0/1000 (flow into x1.a)",
-            I(<x1.a>), 4.0e-3, 1e-12);
+            I(x1.branch(<a>)), 4.0e-3, 1e-12);
     `CHECKR("and the same current enters this module at a, which only x1 touches",
             I(<a>), 4.0e-3, 1e-12);
   end

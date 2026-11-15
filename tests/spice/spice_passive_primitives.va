@@ -23,9 +23,12 @@
 //
 // HOW THE PRIMITIVE IS OBSERVED. §6.7.1: "Potential and flow access for named
 // and unnamed branches (including port branches) can be done hierarchically",
-// and "access of parameters can be done hierarchically". So `I(<r1.p>)`, §5.4.3's
-// port access on the hierarchical port r1.p (A.8.9 analog_port_reference), is
-// the flow into the primitive through its port p — the current the behaviour
+// and "access of parameters can be done hierarchically". So `I(r1.branch(<p>))`,
+// §5.5.5's hierarchical_unnamed_branch_reference to r1's unnamed port branch
+// for p (the clause's example is `I(top.drv.branch(<p>))`; §5.4.3 "accesses
+// the flow into a port of a module"), is the flow into the primitive through
+// its port p (not `I(<r1.p>)`: §5.5.1 says a port probe's "port reference many
+// not use hierarchical specifications") — the current the behaviour
 // column fixes, entering at p and leaving at n — and `r1.r` is the parameter
 // the `.r(1k)` override landed on.
 //
@@ -47,6 +50,8 @@
 //! lrm E.2
 //! lrm E.2:1
 //! lrm E.2.2.3
+//! lrm 5.5.5
+//! lrm 5.4.3
 //! lrm 6.7.1
 //! lrm 6.2.2
 //! lrm 6.2.2:2
@@ -70,6 +75,6 @@ module annex_e_spice_passive_primitives(p, n);
     // V = I*r*(1 + 0*T + 0*T^2)  =>  I = 1.0/1000. 1e-12 relative leaves a
     // tool room to evaluate the polynomial factor, stamp a conductance rather
     // than divide, and solve the port-flow row.
-    `CHECKR("Table E.1: I = V/r = 1.0/1000, into r1 at p", I(<r1.p>), 1.0e-3, 1e-12);
+    `CHECKR("Table E.1: I = V/r = 1.0/1000, into r1 at p", I(r1.branch(<p>)), 1.0e-3, 1e-12);
   end
 endmodule
