@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    # SPRack translates the decks written in another dialect (an oracle's
+    # `tokenizer`) into the one each simulator reads (tools/rawcheck.py).
+    sprack.url = "github:Scouren/SPRack";
+    sprack.inputs.nixpkgs.follows = "nixpkgs";
+    sprack.inputs.flake-utils.follows = "flake-utils";
   };
 
   outputs =
@@ -11,19 +16,35 @@
       self,
       nixpkgs,
       flake-utils,
+      sprack,
     }:
     let
       lib = nixpkgs.lib;
 
+      # The harness is stdlib Python; `conform` runs it from the suite it
+      # ships in (tools/rawcheck.py beside it).
       conform =
-        { stdenv }:
-        stdenv.mkDerivation {
-          pname = "conform";
-          version = "0.1.0";
-          src = ./harness;
-          buildPhase = "$CC -std=c99 -O2 -Wall -Wextra -o conform conform.c -lm";
-          installPhase = "install -Dm755 conform $out/bin/conform";
-          meta.mainProgram = "conform";
+        { writeShellScriptBin, python3 }:
+        writeShellScriptBin "conform" ''
+          PYTHONPATH=${self}''${PYTHONPATH:+:$PYTHONPATH} exec ${python3}/bin/python3 -m harness "$@"
+        '';
+
+      # The sprack CLI at the locked SPRack commit, built with the Zig its
+      # own flake pins (nixpkgs' is older than its minimum).
+      sprackCli =
+        { stdenvNoCC, zig }:
+        stdenvNoCC.mkDerivation {
+          pname = "sprack";
+          version = sprack.shortRev or "dirty";
+          src = sprack;
+          nativeBuildInputs = [ zig ];
+          dontConfigure = true;
+          buildPhase = ''
+            export ZIG_GLOBAL_CACHE_DIR=$TMPDIR/zig-global ZIG_LOCAL_CACHE_DIR=$TMPDIR/zig-local
+            zig build -Doptimize=ReleaseSafe --prefix $out
+          '';
+          dontInstall = true;
+          meta.mainProgram = "sprack";
         };
 
       # OpenVAF-Reloaded: a Verilog-A compiler to OSDI, not in nixpkgs. The
@@ -134,6 +155,7 @@
         in
         {
           conform = pkgs.callPackage conform { };
+          sprack = pkgs.callPackage sprackCli { zig = sprack.inputs.zig-overlay.packages.${pkgs.stdenv.hostPlatform.system}.master; };
           openvaf-r = openvaf-r';
           vacask = pkgs.callPackage vacask { openvaf-r = openvaf-r'; };
         };
@@ -156,17 +178,21 @@
         devShells.default = pkgs.mkShell {
           packages = available [
             built.conform
+            built.sprack
             built.openvaf-r
             built.vacask
             pkgs.ngspice
+            pkgs.xyce
             pkgs.iverilog
             pkgs.verilator
             pkgs.python3
           ];
         };
 
-        checks.selftest = pkgs.runCommand "conform-selftest" { nativeBuildInputs = [ built.conform ]; } ''
-          sh ${./harness/selftest.sh} conform
+        checks.selftest = pkgs.runCommand "conform-selftest" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+          cp -r ${self}/. suite && chmod -R u+w suite && cd suite
+          python3 tools/rawcheck.py --selftest
+          python3 -m unittest discover -s harness -t .
           touch $out
         '';
 
