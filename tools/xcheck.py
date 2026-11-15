@@ -396,13 +396,14 @@ def write(path):
         text = open(dst).read()
         d = json.loads(text)
         d["oracle"]["confirmed"] = {"tool": "xyce", "version": version, "command": "python3 tools/xcheck.py " + r["oracle"],
-                                    "max_rel_err": float(f"{r['max_rel_err']:.3g}"),
+                                    # null: an expected value is exactly 0, so the relative error has no bound
+                                    "max_rel_err": float(f"{r['max_rel_err']:.3g}") if math.isfinite(r["max_rel_err"]) else None,
                                     "max_tolerance_ratio": float(f"{r['max_ratio']:.3g}")}
         if r["unconfirmed"]:
             d["oracle"]["confirmed"]["unconfirmed"] = r["unconfirmed"]
         indent = len(re.match(r"\{\n( *)", text).group(1)) or 1
         with open(dst, "w") as fh:
-            json.dump(d, fh, indent=indent)
+            json.dump(d, fh, indent=indent, allow_nan=False)  # strict JSON: every consumer's parser reads it
             fh.write("\n")
 
 

@@ -1,0 +1,23 @@
+# Every JSON file parses as strict JSON (no NaN or Infinity), the form
+# every consumer's parser reads: Zig's std.json rejects Python's extensions.
+name: json
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  strict:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git ls-files '*.json' | python3 -I -c '
+          import json, sys
+          def bad(x): raise ValueError(x)
+          fails = 0
+          for p in sys.stdin.read().split():
+              try: json.load(open(p), parse_constant=bad)
+              except ValueError as e: print(f"{p}: {e}"); fails += 1
+          sys.exit(fails > 0)'
