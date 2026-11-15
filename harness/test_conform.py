@@ -5,8 +5,10 @@ README.md, one hand-built case per rule.
 
     python3 -m unittest discover -s harness -t .
 """
+import hashlib
 import json
 import os
+import struct
 import subprocess
 import sys
 import tempfile
@@ -20,10 +22,17 @@ run.verilog = [ -z "$CONFORM_COMPILE_ONLY" ] || exit 0; cp "$CONFORM_DIR/$CONFOR
 run.vpi = echo "$CONFORM_LANG $(basename "$CONFORM_SRC")"
 '''
 
-# A fake simulator: copies <stem>.raw beside the deck to $RAW and prints <stem>.out.
+# A fake simulator behind rawcheck.py: copies <stem>.raw beside the deck to
+# $RAW, prints <stem>.out, exits <stem>.exit; a deck in another dialect goes
+# through a fake sprack that copies it and says so.
 SIM = r'''
-sim.netlist = [ -f "${DECK%.*}.exit" ] && exit $(cat "${DECK%.*}.exit"); [ -n "$RAW" ] && cp "${DECK%.*}.raw" "$RAW"; cat "${DECK%.*}.out" 2>/dev/null; true
+run.netlist = export SPRACK_TO=ngspice SPRACK="$CONFORM_TOOLDIR/sprack"; python3 "$SUITE/tools/rawcheck.py" '[ -f "${DECK%.*}.exit" ] && exit $(cat "${DECK%.*}.exit"); [ -n "$RAW" ] && cp "${DECK%.*}.raw" "$RAW"; cat "${DECK%.*}.out" 2>/dev/null; true'
 version = echo fake 1.0
+'''
+SPRACK = r'''#!/bin/sh
+# sprack project --from D --to T --out DIR DECK
+[ "$3" = refuse ] && { echo "error[unsupported]: refused" >&2; exit 1; }
+mkdir -p "$7"; for f in "${8%.*}".*; do cp "$f" "$7/"; done; echo "translated $3 to $5" >&2
 '''
 
 WANT = """
@@ -67,7 +76,8 @@ SKIP	verilog-a/deck.sp
 
 
 def conform(*args):
-    return subprocess.run([sys.executable, "-m", "harness", *args], cwd=SUITE, capture_output=True, text=True)
+    return subprocess.run([sys.executable, "-m", "harness", *args], cwd=SUITE, capture_output=True, text=True,
+                          env=dict(os.environ, SUITE=SUITE))
 
 
 def write(path, text):
@@ -86,6 +96,7 @@ def verdicts(tsv):
 
 
 class Verdicts(unittest.TestCase):
+    maxDiff = None
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.t = self.tmp.name
@@ -189,19 +200,21 @@ class Verdicts(unittest.TestCase):
 
 
 def raw(names, rows):
-    head = (f"Title: t\nPlotname: Transient Analysis\nFlags: real\nNo. Variables: {len(names)}\nNo. Points: {len(rows)}\n"
+    head = (f"Title: t\nDate: today\nPlotname: Transient Analysis\nFlags: real\nNo. Variables: {len(names)}\nNo. Points: {len(rows)}\n"
             "Variables:\n" + "".join(f"\t{i}\t{n}\tvoltage\n" for i, n in enumerate(names)) + "Binary:\n").encode()
-    import struct
     return head + struct.pack(f"<{len(names) * len(rows)}d", *[x for r in rows for x in r])
 
 
 class Decks(unittest.TestCase):
-    """A deck judged natively against its .expected.json, its result dumped."""
+    maxDiff = None
+    """Decks judged by rawcheck.py against their .expected.json, translated
+    when foreign, their results dumped."""
 
     def test_decks_and_dump(self):
-        import hashlib
         with tempfile.TemporaryDirectory() as t:
             write(f"{t}/sim.conf", SIM)
+            write(f"{t}/sprack", SPRACK)
+            os.chmod(f"{t}/sprack", 0o755)
             n = f"{t}/s/netlist"
             os.makedirs(f"{t}/s/include")
 
@@ -219,31 +232,58 @@ class Decks(unittest.TestCase):
             good = raw(["time", "v(out)"], [(0, 0), (1, 2), (2, 4)])
             tol = {"rtol": 1e-6, "atol": 1e-12}
             plot = {"name": "Transient Analysis", "match": "exact", "row_count": 3, "columns": {"v(out)": dict(values=[0, 2, 4], **tol)}}
-            deck("good", {"expect": {"status": "success", "plots": [plot]}}, good)
+            ok = {"expect": {"status": "success", "plots": [plot]}}
+            deck("good", ok, good, out="sim says hi\n")
             deck("wrong", {"expect": {"status": "success", "plots": [dict(plot, columns={"v(out)": dict(values=[0, 2, 5], **tol)})]}}, good)
             deck("refused", {"expect": {"status": "error", "category": "unsupported_input"}}, status=1)
             deck("crashed", {"expect": {"status": "error", "category": "unsupported_input"}}, status=139)
-            deck("cannot", {"expect": {"status": "success", "plots": [plot]}}, status=77)
-            deck("measured", {"expect": {"status": "success", "checks": [dict(kind="measure", name="vmax", value=4, **tol)]}}, good,
-                 out="vmax = 4.00000e+00\n")
-            deck("nan", {"expect": {"status": "success", "plots": [plot]}}, raw(["time", "v(out)", "v(x)"], [(0, 0, 0), (1, 2, float("nan")), (2, 4, 0)]))
-            deck("stale", {"expect": {"status": "success", "plots": [plot]}}, good)
-            write(f"{n}/stale.sp", "* edited after its oracle\n.end\n")
+            deck("cannot", ok, status=77)
+            deck("foreign", dict(ok, tokenizer="hspice"), good)
+            deck("untranslatable", dict(ok, tokenizer="refuse"), good)
             r = conform("-t", f"{t}/sim.conf", "-o", f"{t}/got.tsv", "-d", f"{t}/dump/sim", f"{t}/s")
             self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
             self.assertEqual(verdicts(f"{t}/got.tsv"), sorted([
                 ("PASS", "netlist/good.sp"), ("FAIL", "netlist/wrong.sp"), ("PASS", "netlist/refused.sp"),
-                ("FAIL", "netlist/crashed.sp"), ("SKIP", "netlist/cannot.sp"), ("PASS", "netlist/measured.sp"),
-                ("FAIL", "netlist/nan.sp"), ("FAIL", "netlist/stale.sp")]))
-            # The dump: one record per deck in name order, the canonical raw beside it, hashed.
-            records = [json.loads(l) for l in read(f"{t}/dump/sim/records.jsonl").splitlines()]
-            self.assertEqual([x["test"] for x in records], sorted(x["test"] for x in records))
-            good_rec = next(x for x in records if x["test"] == "netlist/good.sp")
-            data = read(f"{t}/dump/sim/{good_rec['raw']}", "rb")
-            self.assertEqual(good_rec["raw_sha256"], hashlib.sha256(data).hexdigest())
-            from harness import netlist
-            self.assertEqual(netlist.parse_raw(data)[0][4], netlist.parse_raw(good)[0][4])
+                ("FAIL", "netlist/crashed.sp"), ("FAIL", "netlist/cannot.sp"), ("PASS", "netlist/foreign.sp"),
+                ("FAIL", "netlist/untranslatable.sp")]))
+            # The dump: one record per deck in name order, the simulator's own
+            # output in it, the canonical raw beside it, hashed.
+            records = {x["test"]: x for x in map(json.loads, read(f"{t}/dump/sim/records.jsonl").splitlines())}
+            self.assertEqual(list(records), sorted(records))
+            g = records["netlist/good.sp"]
+            self.assertEqual([(x["run"], x["exit"], x["stdout"]) for x in g["simulator"]], [("sim", 0, "sim says hi\n")])
+            data = read(f"{t}/dump/sim/{g['raw']}", "rb")
+            self.assertEqual(g["raw_sha256"], hashlib.sha256(data).hexdigest())
+            self.assertNotIn(b"Date:", data)  # canonical: nothing tool- or run-specific
+            self.assertEqual(data[data.index(b"Binary:\n") + 8:], good[good.index(b"Binary:\n") + 8:])
+            f = records["netlist/foreign.sp"]
+            self.assertEqual([x["run"] for x in f["simulator"]], ["translate", "sim"])
+            self.assertIn("translated hspice to ngspice", f["simulator"][0]["stderr"])
             self.assertEqual(json.loads(read(f"{t}/dump/sim/tool.json"))["version"], "fake 1.0")
+            from harness import dump
+            m = dump.manifest(f"{t}/dump", {"hspice": "unavailable: licensed"})
+            self.assertEqual(m["dumps"]["sim"]["netlist/good.sp"]["raw_sha256"], g["raw_sha256"])
+            self.assertEqual(m["tools"]["hspice"], {"tool": "hspice", "available": False, "why": "unavailable: licensed"})
+
+
+class Caps(unittest.TestCase):
+    """A stage past the memory cap is a FAIL that says so, and the harness lives on."""
+
+    def test_memory_cap(self):
+        with tempfile.TemporaryDirectory() as t:
+            write(f"{t}/s/include/.keep", "")
+            write(f"{t}/s/verilog-a/hog.va", "//! bias V(p) = 1\nmodule hog; endmodule\n")
+            write(f"{t}/s/verilog-a/fine.va", "//! bias V(p) = 1\nmodule fine; endmodule\n")
+            # 256 MiB written page by page, far past a 64 MiB cap.
+            write(f"{t}/tool.conf", 'run.verilog-a = [ "$CONFORM_STEM" = fine ] || python3 -c "b = b\'x\' * (256 << 20)"; echo ok=1\n')
+            r = conform("-t", f"{t}/tool.conf", "-M", "64M", "-o", f"{t}/got.tsv", f"{t}/s")
+            self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+            rows = {line.split("\t")[1]: line.split("\t") for line in read(f"{t}/got.tsv").splitlines()}
+            self.assertEqual(rows["verilog-a/fine.va"][0], "PASS")
+            self.assertEqual(rows["verilog-a/hog.va"][0], "FAIL")
+            from harness import conform as c
+            want = "run killed at the memory cap 64 MiB" if c.capper(64 << 20)[0] != "rlimit" else "MemoryError"
+            self.assertIn(want, rows["verilog-a/hog.va"][3])
 
 
 if __name__ == "__main__":

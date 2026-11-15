@@ -1,16 +1,16 @@
 """conform: run the suite's tests against one tool and judge each one.
 
-    python3 -m harness -t TOOL.conf [-j N] [-x XFAIL] [-T SECONDS] [-o RESULTS.tsv]
-                       [-d DUMPDIR] [-k] [-v] PATH...
+    python3 -m harness -t TOOL.conf [-j N] [-x XFAIL] [-T SECONDS] [-M BYTES]
+                       [-o RESULTS.tsv] [-d DUMPDIR] [-k] [-v] PATH...
 
 The tool is a config file of shell commands, one per stage and language
 (README.md, "Tool configs"). The harness never interprets the testbench
 directives a tool reads (`//! bias`, `//! analysis`, ...); it decides the
-verdict from exit statuses, `ok=` lines and expected outputs. A SPICE deck
-with an `.expected.json` is judged natively (harness/netlist.py) when the
-tool has a `sim.netlist` command. With `-d` every test's full output is kept
-(harness/dump.py). Output and the results file follow test-name order,
-whatever -j is.
+verdict from exit statuses, `ok=` lines and expected outputs (a SPICE
+deck's `.expected.json` is judged by the tool's run stage, tools/rawcheck.py,
+which prints one `ok=` line per check). Every stage runs under a memory cap.
+With `-d` every test's full output is kept (harness/dump.py). Output and the
+results file follow test-name order, whatever -j is.
 
 Contents:
     main(argv) -> int
@@ -28,7 +28,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
-from harness import dump, netlist
+from harness import dump
 
 PASS, FAIL, SKIP, ACCEPT = range(4)  # ACCEPT: compiled, run stage absent
 NAMES = ["PASS", "FAIL", "SKIP", "PASS"]
@@ -92,7 +92,7 @@ class Spec:
 
 @dataclass
 class Stage:
-    status: int  # exit code, -1 signal, -2 timeout
+    status: int  # exit code, -1 signal, -2 timeout, -3 killed at the memory cap
     out: str
     err: str
     ms: int = 0
@@ -109,11 +109,12 @@ def main(argv):
 def run(argv):
     sys.stdout.reconfigure(errors="surrogateescape")
     try:
-        opts, paths = getopt.gnu_getopt(argv, "t:j:x:T:o:d:kv")
+        opts, paths = getopt.gnu_getopt(argv, "t:j:x:T:M:o:d:kv")
     except getopt.GetoptError:
         usage()
     tool_path = results = dump_dir = None
-    jobs, timeout, keep, verbose, xfails = 1, 120, False, False, set()
+    jobs, timeout, keep, verbose, xfails = min(4, os.cpu_count() or 1), 120, False, False, set()
+    cap = 4 << 30
     for o, a in opts:
         if o == "-t":
             tool_path = a
@@ -123,6 +124,8 @@ def run(argv):
             xfails |= load_xfails(a)
         elif o == "-T":
             timeout = atoi(a) if atoi(a) > 0 else 1
+        elif o == "-M":
+            cap = parse_bytes(a)
         elif o == "-o":
             results = a
         elif o == "-d":
@@ -154,7 +157,7 @@ def run(argv):
     tsv = open(results, "w", encoding="utf-8", errors="surrogateescape") if results else None
     dumps = dump.Writer(dump_dir, tool_path, tool) if dump_dir else None
     tally = dict.fromkeys(["PASS", "FAIL", "SKIP", "XFAIL", "XPASS", "compile-only"], 0)
-    ctx = Context(tool, work_root, timeout, keep, dumps)
+    ctx = Context(tool, work_root, timeout, keep, dumps, cap, capper(cap))
     with ThreadPoolExecutor(jobs) as pool:
         futures = [pool.submit(timed, ctx, t, i) for i, t in enumerate(tests)]
         for t, fut in zip(tests, futures):
@@ -196,6 +199,8 @@ class Context:
     timeout: int
     keep: bool
     dumps: object
+    cap: int  # bytes; 0: none
+    wrap: list  # the argv prefix that enforces it
 
 
 def timed(ctx, t, index):
@@ -216,9 +221,10 @@ def usage():
         "usage: conform -t TOOL.conf [-j N] [-x XFAIL] [-T SECONDS] [-o RESULTS.tsv] [-d DUMPDIR] [-k] [-v] PATH...\n"
         "  PATH      test files, directories under a suite root (tests/), or .manifest files\n"
         "  -t        the tool config: `stage.language = shell command` lines\n"
-        "  -j        tests run in parallel (default 1)\n"
+        "  -j        tests run in parallel (default min(4, CPUs))\n"
         "  -x        expected failures: one test name (as printed) per line\n"
         "  -T        per-stage timeout (default 120)\n"
+        "  -M        per-stage memory cap, bytes or 512M/4G (default 4G; 0: none)\n"
         "  -o        write every verdict as `STATUS<TAB>name<TAB>milliseconds<TAB>detail`\n"
         "  -d        keep every test's full output in DUMPDIR (README.md, Dumps)\n"
         "  -k        keep every work directory (failures always keep theirs)\n"
@@ -267,6 +273,39 @@ def load_xfails(path):
         if line and not line.startswith("#"):
             names.add(re.split(r"[ \t]", line, 1)[0])
     return names
+
+
+def parse_bytes(s):
+    m = re.fullmatch(r"(\d+)([KMG]?)i?B?", s.strip(), re.I)
+    if not m:
+        raise Die(f"-M {s}: not a size (4G, 512M, bytes)")
+    return int(m.group(1)) << {"": 0, "k": 10, "m": 20, "g": 30}[m.group(2).lower()]
+
+
+def human(n):
+    for unit, shift in (("GiB", 30), ("MiB", 20), ("KiB", 10)):
+        if n >= 1 << shift and n % (1 << shift) == 0:
+            return f"{n >> shift} {unit}"
+    return f"{n} bytes"
+
+
+def capper(cap):
+    """The argv prefix that holds a stage to `cap` bytes: a systemd user scope
+    (MemoryMax, no swap, OOMPolicy=kill: past the cap the kernel kills the
+    whole tree, the shell too, so the stage ends on SIGKILL), else
+    ("rlimit", cap), an address-space limit on the shell and what it starts.
+    Probed once; () for no cap. `--expand-environment=no`: systemd-run
+    would otherwise expand `$VAR` in the command before the shell sees it."""
+    if not cap:
+        return ()
+    scope = ("systemd-run", "--user", "--scope", "-q", "--expand-environment=no", "-p", f"MemoryMax={cap}", "-p", "MemorySwapMax=0", "-p", "OOMPolicy=kill",
+             "--")
+    try:
+        if subprocess.run([*scope, "true"], capture_output=True, timeout=30).returncode == 0:
+            return scope
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return ("rlimit", cap)
 
 
 def limit_file_size():
@@ -517,8 +556,6 @@ def run_test(ctx, t, index, record):
     d = os.path.dirname(src)
     tool = ctx.tool
     cc, rc = tool.command("compile", lang), tool.command("run", lang)
-    sim = tool.command("sim", lang) if lang == "netlist" else None
-    rc = sim or rc  # a deck the harness runs and judges itself
     if not cc and not rc:
         return SKIP, f"tool has no command for {lang}"
     if sp.reject_run and not rc:
@@ -546,45 +583,44 @@ def run_test(ctx, t, index, record):
         link_inputs(src, d, work)
 
     def stage(cmd, name):
-        s = run_stage(cmd, work, name, env, ctx.timeout)
+        s = run_stage(cmd, work, name, env, ctx.timeout, ctx.wrap)
         record.append((name, s))
         return s
 
-    verdict, why = judge_stages(ctx, sp, cc, rc, sim, stage, src, d, work, env, record)
+    verdict, why = judge_stages(ctx, sp, cc, rc, stage, d, work, env)
+    if ctx.dumps:
+        record += dump.collect(work)
     if verdict != FAIL and not ctx.keep:
         shutil.rmtree(work, ignore_errors=True)
     return verdict, why
 
 
-def judge_stages(ctx, sp, cc, rc, sim, stage, src, d, work, env, record):
+def judge_stages(ctx, sp, cc, rc, stage, d, work, env):
     if cc:
         c = stage(cc, "compile")
         if c.status != 0:
-            return (PASS, "") if sp.reject and diagnosed(c) else (FAIL, describe(c, "compile", ctx.timeout))
+            return (PASS, "") if sp.reject and diagnosed(c) else (FAIL, describe(c, "compile", ctx))
     if not rc:
         if sp.reject:
             return FAIL, "compiled cleanly; expected a rejection"
         return (ACCEPT if sp.needs_run else PASS), ""
-    if sim:
-        r = netlist.run_deck(ctx.tool, src, work, env, ctx.timeout, record, run_stage)
-    else:
-        r = stage(rc, "run")
+    r = stage(rc, "run")
     if r.status == 77:  # the tool cannot express this testbench
         e = r.err or "run stage skipped (exit 77)"
         return SKIP, e.split("\n", 1)[0]
     if sp.reject or sp.reject_run:
         ok = r.status == sp.exit_want if sp.exit_want > 0 else diagnosed(r)
         if not ok:
-            return FAIL, "ran cleanly; expected a rejection" if r.status == 0 else describe(r, "run", ctx.timeout)
-        why = judge_output(d, work, sp, r, env, ctx.timeout)
+            return FAIL, "ran cleanly; expected a rejection" if r.status == 0 else describe(r, "run", ctx)
+        why = judge_output(d, work, sp, r, env, ctx)
         return (FAIL, why) if why else (PASS, "")
     if r.status != sp.exit_want:
-        why = describe(r, "run", ctx.timeout)
+        why = describe(r, "run", ctx)
         if 0 <= r.status < 126:
             e = r.err or r.out
             why += ": " + e.split("\n", 1)[0][:200]
         return FAIL, why
-    why = judge_output(d, work, sp, r, env, ctx.timeout)
+    why = judge_output(d, work, sp, r, env, ctx)
     return (FAIL, why) if why else (PASS, "")
 
 
@@ -613,20 +649,24 @@ def link_inputs(src, d, work):
                 pass
 
 
-def run_stage(cmd, work, name, env, timeout, cwd=None):
+def run_stage(cmd, work, name, env, timeout, wrap=(), cwd=None):
     """`cmd` under /bin/sh in `cwd` (default `work`), stdout and stderr to
-    `work/<name>.stdout|.stderr`, killed with its process group at `timeout`."""
+    `work/<name>.stdout|.stderr`, killed with its process group at `timeout`.
+    `wrap` (capper) caps its memory; a SIGKILL nobody here sent is the cap."""
     out, err = f"{work}/{name}.stdout", f"{work}/{name}.stderr"
     t0 = time.monotonic()
+    rlimit = wrap[1] if wrap and wrap[0] == "rlimit" else None
+    argv = (list(wrap) if not rlimit else []) + ["/bin/sh", "-c", cmd]
     try:
         with open(out, "wb") as o, open(err, "wb") as e:
-            p = subprocess.Popen(["/bin/sh", "-c", cmd], cwd=cwd or work, env=env, stdin=subprocess.DEVNULL, stdout=o,
-                                 stderr=e, process_group=0, restore_signals=False)
+            p = subprocess.Popen(argv, cwd=cwd or work, env=env, stdin=subprocess.DEVNULL, stdout=o, stderr=e,
+                                 process_group=0, restore_signals=False,
+                                 preexec_fn=(lambda: resource.setrlimit(resource.RLIMIT_AS, (rlimit, rlimit))) if rlimit else None)
     except OSError:
         return Stage(126, slurp(out) or "", slurp(err) or "")
     try:
         p.wait(timeout=timeout)
-        status = p.returncode if p.returncode >= 0 else -1
+        status = p.returncode if p.returncode >= 0 else -3 if p.returncode == -signal.SIGKILL and wrap and not rlimit else -1
     except subprocess.TimeoutExpired:
         status = -2
     try:
@@ -637,11 +677,13 @@ def run_stage(cmd, work, name, env, timeout, cwd=None):
     return Stage(status, slurp(out) or "", slurp(err) or "", int((time.monotonic() - t0) * 1000))
 
 
-def describe(s, name, timeout):
+def describe(s, name, ctx):
     if s.status == -2:
-        return f"{name} timed out after {timeout}s"
+        return f"{name} timed out after {ctx.timeout}s"
+    if s.status == -3:
+        return f"{name} killed at the memory cap {human(ctx.cap)}"
     if s.status == -1:
-        return f"{name} crashed (signal)"
+        return f"{name} crashed (signal)" + (f" under the address-space cap {human(ctx.cap)}" if ctx.wrap[:1] == ("rlimit",) else "")
     if s.status >= 126:
         return f"{name} could not run the command (exit {s.status})"
     return f"{name} exited {s.status}"
@@ -652,12 +694,12 @@ def diagnosed(s):
     return 1 <= s.status <= 125
 
 
-def judge_output(d, work, sp, s, env, timeout):
+def judge_output(d, work, sp, s, env, ctx):
     """Why the stage's transcript fails the Spec; "" when it passes."""
     if sp.gold:
         if sp.filter:
-            got = run_stage(f"({sp.filter}) < '{work}/run.stdout'", work, "filtered-run", env, timeout).out
-            want = run_stage(f"({sp.filter}) < '{sp.gold}'", work, "filtered-gold", env, timeout).out
+            got = run_stage(f"({sp.filter}) < '{work}/run.stdout'", work, "filtered-run", env, ctx.timeout, ctx.wrap).out
+            want = run_stage(f"({sp.filter}) < '{sp.gold}'", work, "filtered-gold", env, ctx.timeout, ctx.wrap).out
         else:
             got, want = s.out, slurp(sp.gold)
         same = want is not None and (same_within(want, got, sp.rtol, sp.atol) if sp.rtol > 0 or sp.atol > 0 else want == got)
