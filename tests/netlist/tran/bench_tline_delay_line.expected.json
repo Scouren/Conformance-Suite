@@ -9,7 +9,7 @@
       "tool": "xyce",
       "version": "Xyce Release 7.10.0-opensource",
       "command": "python3 tools/xcheck.py tests/netlist/tran/bench_tline_delay_line.expected.json",
-      "max_rel_err": Infinity,
+      "max_rel_err": null,
       "max_tolerance_ratio": 4.41e-05
     },
     "tolerance_basis": "Samples: of 234 rows, 0 dropped on fast edges (within one TSTEP, 2e-11 s, either way the waveform moves more than a tenth of its swing, a default-options run misses by more than the tolerance, and a time shift within that TSTEP meets this value) and 1 where a default-options run is off by more than 1% of the column's swing (not settled for it); 233 kept. Each atol is 2x the largest deviation beyond rtol*|value| of ngspice-44.2 at the deck's options, Xyce 7.10.0 at its defaults from this reference on the rows kept, or the previous atol where larger. tdel: atol 1e-13 s, see the derivation."
