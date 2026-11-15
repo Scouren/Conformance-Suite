@@ -6,7 +6,9 @@
   "kind": "ngspice-45",
   "derivation": "Independent ngspice-45 run of this deck at its reltol=1e-7 abstol=1e-15 vntol=1e-12, ASCII raw doubles by column name. i(va) is within 9.5e-08 of ngspice-45's reltol=1e-9 run; at the default reltol=1e-3 it sat up to 783 times its tolerance from that run. ngspice-44.2 reads D3's breakdown differently (1.34e-7 against 1.14e-7 A at -5.95 V), so the oracle is 45.",
   "command": "SPICE_ASCIIRAWFILE=1 ngspice -n -b -r reference.raw diode_area_sidewall.sp",
-  "source_sha256": "5216b6dd4318335d1727506c758c6d57c2665ee01d7c0244b73402d0ff0b9391"
+  "source_sha256": "5216b6dd4318335d1727506c758c6d57c2665ee01d7c0244b73402d0ff0b9391",
+  "confirmed": null,
+  "confirmed_reason": "The geometric diode (ngspice level 3): Xyce 7.10.0 has no model with the same equations; VACASK's OSDI builds of SPICE models are compiled from ngspice's own C sources, so they are no independent check."
  },
  "origin": "tests/fixtures/dc/diode_area_sidewall.sp",
  "expect": {
