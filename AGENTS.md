@@ -10,7 +10,7 @@ config file of shell commands. `README.md` is the contract: the `//!` and
 
 Load each with the Skill tool (other agents: read
 `~/.claude/skills/<name>/SKILL.md` and the companion files it names). Source:
-https://github.com/OmarSiwy/NixOSConfig/tree/main/skills
+https://github.com/OpenFAT/NixOSConfig/tree/main/skills
 
 | Skill | Use it for here |
 |---|---|
@@ -114,9 +114,8 @@ Binding on every change, in every project.
 ### Maintaining
 
 - `main` is green by machine: work lands through a pull request whose merge
-  result passed the required checks. Work collects on the `development`
-  branch and lands on `main` through that pull request; other topic branches
-  are deleted after the merge.
+  result passed the required checks. No `development` branch: work happens
+  on topic branches (`dev/<topic>`), deleted after the merge.
 - Bots never push to `main`. Generated output ships as a release asset or
   through a gated pull request.
 - Every dependency is pinned by commit and content hash, the toolchain by
