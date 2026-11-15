@@ -18,9 +18,9 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOLS = ["vera", "openvaf", "iverilog", "verilator", "ngspice", "espice"]
+TOOLS = ["vera", "openvaf", "iverilog", "verilator", "ngspice", "espice", "xyce", "vacask"]
 NAMES = {"vera": "VerA", "openvaf": "OpenVAF-Reloaded", "iverilog": "Icarus Verilog", "verilator": "Verilator",
-         "ngspice": "ngspice", "espice": "ESPice"}
+         "ngspice": "ngspice", "espice": "ESPice", "xyce": "Xyce", "vacask": "VACASK"}
 CATEGORIES = [("verilog", "Verilog (IEEE 1364-2005)"), ("verilog-a", "Verilog-A"), ("verilog-ams", "Verilog-AMS"),
               ("spice", "SPICE")]
 # language -> category. Annex E (tests/spice/) is Verilog-AMS's SPICE
