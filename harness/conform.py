@@ -377,7 +377,7 @@ def collect_manifest(path, tests):
         if not line:
             continue
         if line.startswith("#root "):
-            probe = f"{mdir}/{line[6:].strip(' \t\r\n')}"
+            probe = mdir + "/" + line[6:].strip(" \t\r\n")
             if not os.path.exists(probe):
                 raise Die(f"{path}: root {probe} does not exist (git submodule update --init?)")
             root = os.path.realpath(probe)
