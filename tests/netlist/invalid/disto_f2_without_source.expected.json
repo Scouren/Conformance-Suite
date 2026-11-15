@@ -4,7 +4,12 @@
   "purpose": "A two-tone .disto needs a DISTOF2 source, as ngspice E_NOF2SRC.",
   "oracle": {
     "kind": "input_contract",
-    "derivation": "A two-tone .disto needs a DISTOF2 source, as ngspice E_NOF2SRC."
+    "derivation": "A two-tone .disto needs a DISTOF2 source, as ngspice E_NOF2SRC.",
+    "confirmed": {
+      "tool": "ngspice",
+      "version": "44.2",
+      "result": "ngspice implements .disto and aborts the run (E_NOF2SRC: an f2overf1 given with no DISTOF2 source). Xyce has no .disto."
+    }
   },
   "expect": {
     "status": "error",

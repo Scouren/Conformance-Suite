@@ -4,7 +4,13 @@
   "purpose": "#197: a Verilog-A module that uses the value of an unregistered $systf is refused by name (UnregisteredSystf).",
   "oracle": {
     "kind": "input_contract",
-    "derivation": "LRM 12.32 leaves a $name no standard defines to a VPI application and fixes no value for one nobody registered; ESPice loads no application, so any value it used would be invented. AGENTS.md 2.7.6: refuse by name."
+    "derivation": "Verilog-AMS LRM 12.32 leaves a $name that no standard defines to a VPI application and fixes no value for one nobody registered, so a host with no such application has no value to give and refuses the call by name.",
+    "confirmed": {
+      "tool": "openvaf-r",
+      "version": "VACASK unstable-2026 bundle",
+      "command": "openvaf-r va_systf_value.va",
+      "result": "The Verilog-A compiler refuses the module: \"'$espice_sample' was not found in the current scope\"."
+    }
   },
   "expect": {
     "status": "error",

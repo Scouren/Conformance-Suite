@@ -4,7 +4,12 @@
   "purpose": "A node only an expression reads has no equation; the deck is refused before any analysis runs.",
   "oracle": {
     "kind": "ngspice-45",
-    "derivation": "ngspice 45 stops with 'singular matrix: check node a'. Nothing stamps node a's KCL row, so v(a) is free and every analysis is singular."
+    "derivation": "ngspice 45 stops with 'singular matrix: check node a'. Nothing stamps node a's KCL row, so v(a) is free and every analysis is singular.",
+    "confirmed": {
+      "tool": "ngspice and xyce",
+      "version": "44.2 / 7.10.0-opensource",
+      "result": "ngspice exit 1: DC solution failed - / Warning: singular matrix:  check node a; Xyce exit 1: Netlist error: Device B1 refers to unknown solution node A / Simulation aborted due to error.  There are 0 MSG_FATAL errors and 1 MSG_ERROR"
+    }
   },
   "expect": {
     "status": "error",

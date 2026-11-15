@@ -4,7 +4,12 @@
   "purpose": "A node only an expression reads has no equation; the deck is refused before any analysis runs.",
   "oracle": {
     "kind": "ngspice-45",
-    "derivation": "ngspice 45 stops with 'singular matrix: check node a'. Nothing stamps node a's KCL row, so v(a) is free and every analysis is singular."
+    "derivation": "ngspice 45 stops with 'singular matrix: check node a'. Nothing stamps node a's KCL row, so v(a) is free and every analysis is singular.",
+    "confirmed": {
+      "tool": "xyce",
+      "version": "7.10.0-opensource",
+      "result": "Xyce implements .hb and exits 1: \"Device B1 refers to unknown solution node A\". ngspice has no .hb."
+    }
   },
   "expect": {
     "status": "error",

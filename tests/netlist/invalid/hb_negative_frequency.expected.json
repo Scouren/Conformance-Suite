@@ -4,7 +4,12 @@
   "purpose": "Harmonic balance fundamental must be positive.",
   "oracle": {
     "kind": "input_contract",
-    "derivation": "Harmonic balance fundamental must be positive."
+    "derivation": "Harmonic balance fundamental must be positive.",
+    "confirmed": {
+      "tool": "xyce",
+      "version": "7.10.0-opensource",
+      "result": "Xyce implements .hb and exits 1: \"Frequency of oscillation -1000 is less than or equal to zero\". ngspice has no .hb."
+    }
   },
   "expect": {
     "status": "error",

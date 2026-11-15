@@ -4,7 +4,13 @@
   "purpose": "An .hdl instance with more nodes than the module's ports is an error (WrongNodeCount). Fewer nodes float the trailing ports (veriloga_trailing_port_floats).",
   "oracle": {
     "kind": "input_contract",
-    "derivation": "An .hdl instance with more nodes than the module's ports is an error (WrongNodeCount). Fewer nodes float the trailing ports (veriloga_trailing_port_floats)."
+    "derivation": "An .hdl instance with more nodes than the module's ports is an error (WrongNodeCount). Fewer nodes float the trailing ports (veriloga_trailing_port_floats).",
+    "confirmed": {
+      "tool": "ngspice",
+      "version": "44.2",
+      "command": "openvaf-r va_rh.va; ngspice -b with pre_osdi va_rh.osdi and N1 out 0 in vm",
+      "result": "ngspice, which implements Verilog-A instances through OSDI, exits 1: \"too many nodes connected to instance\"."
+    }
   },
   "expect": {
     "status": "error",

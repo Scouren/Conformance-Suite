@@ -1,10 +1,16 @@
 {
   "schema_version": 1,
   "analysis": "op",
-  "purpose": "pre_osdi is an error (OsdiUnsupported): espice compiles Verilog-A through VerA and loads no OSDI, not even a .va beside the .osdi.",
+  "purpose": "pre_osdi names an .osdi library that does not exist beside the deck (only the .va source is there).",
   "oracle": {
     "kind": "input_contract",
-    "derivation": "pre_osdi is an error (OsdiUnsupported): espice compiles Verilog-A through VerA and loads no OSDI."
+    "derivation": "pre_osdi names an .osdi library that does not exist beside the deck (only the .va source is there), so nothing defines va_rh and the deck fails.",
+    "source": "pre_osdi names veriloga_hdl_errors.assets/va_rh.osdi, which does not exist beside the deck (only va_rh.va does), so the library cannot load and N1 names no model.",
+    "confirmed": {
+      "tool": "ngspice",
+      "version": "44.2",
+      "result": "ngspice implements pre_osdi and exits 1: it cannot open veriloga_hdl_errors.assets/va_rh.osdi."
+    }
   },
   "expect": {
     "status": "error",
