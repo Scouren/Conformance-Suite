@@ -4,9 +4,9 @@
 <text class="h" x="16" y="26">Verilog-AMS: wall time, shorter is faster</text>
 <text class="m" x="16" y="44">the 20 tests all 2 tools pass</text>
 <text x="16" y="65">OpenVAF-Reloaded</text>
-<rect class="p" x="150" y="52" width="140.7" height="18" rx="4"><title>2.4 s total, median 58 ms per test</title></rect>
-<text x="300.7" y="65"><tspan font-weight="600">2.4 s</tspan><tspan class="m"> median 58 ms/test</tspan></text>
+<rect class="p" x="150" y="52" width="98.6" height="18" rx="4"><title>2.4 s total, median 57 ms per test</title></rect>
+<text x="258.6" y="65"><tspan font-weight="600">2.4 s</tspan><tspan class="m"> median 57 ms/test</tspan></text>
 <text x="16" y="99">VerA</text>
-<rect class="p" x="150" y="86" width="430.0" height="18" rx="4"><title>7.4 s total, median 53 ms per test</title></rect>
-<text x="590.0" y="99"><tspan font-weight="600">7.4 s</tspan><tspan class="m"> median 53 ms/test</tspan></text>
+<rect class="p" x="150" y="86" width="430.0" height="18" rx="4"><title>10.3 s total, median 85 ms per test</title></rect>
+<text x="590.0" y="99"><tspan font-weight="600">10.3 s</tspan><tspan class="m"> median 85 ms/test</tspan></text>
 </svg>

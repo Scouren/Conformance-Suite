@@ -12,7 +12,7 @@
 <text x="592" y="77"><tspan font-weight="600">79.6%</tspan><tspan class="m"> 970 / 1218</tspan></text>
 <text x="16" y="111">ngspice</text>
 <rect class="trk" x="150" y="98" width="430" height="18" rx="4"><title>2 not supported</title></rect>
-<rect class="p" x="150.0" y="98" width="250.1" height="18" rx="4"><title>714 passed (58.6%)</title></rect>
-<rect class="f" x="402.1" y="98" width="175.2" height="18" rx="4"><title>502 failed (41.2%)</title></rect>
-<text x="592" y="111"><tspan font-weight="600">58.6%</tspan><tspan class="m"> 714 / 1218</tspan></text>
+<rect class="p" x="150.0" y="98" width="250.4" height="18" rx="4"><title>715 passed (58.7%)</title></rect>
+<rect class="f" x="402.4" y="98" width="174.9" height="18" rx="4"><title>501 failed (41.1%)</title></rect>
+<text x="592" y="111"><tspan font-weight="600">58.7%</tspan><tspan class="m"> 715 / 1218</tspan></text>
 </svg>

@@ -292,7 +292,7 @@ same class, with as many tests in parallel as it has CPUs; treat differences
 under about 20% as noise.
 
 <!-- conformance:start -->
-Measured 2026-11-15 by `.github/workflows/conformance.yml`, each tool at its latest version (`tools/ci.sh` says which).
+Measured 2026-11-16 by `.github/workflows/conformance.yml`, each tool at its latest version (`tools/ci.sh` says which).
 
 ![Verilog (IEEE 1364-2005) conformance](docs/conformance/verilog.svg)
 ![Verilog (IEEE 1364-2005) speed](docs/conformance/verilog-time.svg)
@@ -311,15 +311,15 @@ Measured 2026-11-15 by `.github/workflows/conformance.yml`, each tool at its lat
 
 | Language | Tool | Version | Passed | Failed | Not supported | Conformance | Time on common tests |
 |---|---|---|---:|---:|---:|---:|---:|
-| Verilog (IEEE 1364-2005) | VerA | vera 0.23.0 | 3585 | 0 | 0 | 100.0% | 54.7 s (2234) |
-| Verilog (IEEE 1364-2005) | Icarus Verilog | unpacking 'github:NixOS/nixpkgs/e126e9e73c335158ff8279ac14d5f4afec153716' into the tarball cache... | 2990 | 553 | 42 | 83.4% | 88.1 s (2234) |
-| Verilog (IEEE 1364-2005) | Verilator | Verilator 5.052 2026-09-05 rev v5.052 | 2422 | 1121 | 42 | 67.6% | 14162.7 s (2234) |
-| Verilog-A | VerA | vera 0.23.0 | 2402 | 1 | 0 | 100.0% | 655.3 s (1322) |
-| Verilog-A | OpenVAF-Reloaded | openvaf-r v24.0.2mob | 1323 | 815 | 265 | 55.1% | 1127.5 s (1322) |
-| Verilog-AMS | VerA | vera 0.23.0 | 753 | 0 | 0 | 100.0% | 7.4 s (20) |
+| Verilog (IEEE 1364-2005) | VerA | vera 0.23.0 | 3585 | 0 | 0 | 100.0% | 63.4 s (2234) |
+| Verilog (IEEE 1364-2005) | Icarus Verilog | unpacking 'github:NixOS/nixpkgs/5d2b81a7a3be3e2f832879028e4d60abbf58e9a0' into the tarball cache... | 2990 | 553 | 42 | 83.4% | 60.6 s (2234) |
+| Verilog (IEEE 1364-2005) | Verilator | Verilator 5.052 2026-09-05 rev v5.052 | 2422 | 1121 | 42 | 67.6% | 13233.8 s (2234) |
+| Verilog-A | VerA | vera 0.23.0 | 2402 | 1 | 0 | 100.0% | 908.8 s (1322) |
+| Verilog-A | OpenVAF-Reloaded | openvaf-r v24.0.2mob | 1323 | 815 | 265 | 55.1% | 1121.3 s (1322) |
+| Verilog-AMS | VerA | vera 0.23.0 | 753 | 0 | 0 | 100.0% | 10.3 s (20) |
 | Verilog-AMS | OpenVAF-Reloaded | openvaf-r v24.0.2mob | 20 | 64 | 669 | 2.7% | 2.4 s (20) |
-| SPICE | ESPice | espice espice 0.20.0 (VerA 0.23.0 0bc0092b345e7b87977e7240660ce6767ea78367; backends: cpu) | 970 | 246 | 2 | 79.6% | 279.8 s (581) |
-| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 714 | 502 | 2 | 58.6% | 298.8 s (581) |
+| SPICE | ESPice | espice espice 0.20.0 (VerA 0.23.0 0bc0092b345e7b87977e7240660ce6767ea78367; backends: cpu) | 970 | 246 | 2 | 79.6% | 474.9 s (582) |
+| SPICE | ngspice | ** ngspice-45 : Circuit level simulation program | 715 | 501 | 2 | 58.7% | 351.1 s (582) |
 
 </details>
 <!-- conformance:end -->
